@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showEmailAlert, setShowEmailAlert] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +27,7 @@ const Auth = () => {
       } else {
         await register(email, password);
         setIsLogin(true);
+        setShowEmailAlert(true);
       }
     } catch (error) {
       console.error(error);
@@ -43,6 +47,15 @@ const Auth = () => {
               : "Enter your details to create your account"}
           </p>
         </div>
+
+        {showEmailAlert && (
+          <Alert variant="default" className="border-blue-500 bg-blue-500/10">
+            <AlertCircle className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-500">
+              Please check your email to verify your account before logging in.
+            </AlertDescription>
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
@@ -69,7 +82,10 @@ const Auth = () => {
 
         <div className="text-center">
           <button
-            onClick={() => setIsLogin(!isLogin)}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setShowEmailAlert(false);
+            }}
             className="text-primary hover:underline"
           >
             {isLogin ? "Need an account? Sign up" : "Already have an account? Sign in"}
