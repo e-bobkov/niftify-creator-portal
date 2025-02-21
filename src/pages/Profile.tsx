@@ -1,8 +1,8 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  User, UserRound, Users, PersonStanding, UserCircle,
+  User,
   MessageCircle, Hash, Instagram, Twitter,
   Settings, Grid, User as UserIcon
 } from "lucide-react";
@@ -11,40 +11,79 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "@/hooks/useAuth";
 import { UserProfile } from "@/types/user";
 
-const AVATAR_OPTIONS = [
-  { icon: User, id: 0 },
-  { icon: UserRound, id: 1 },
-  { icon: Users, id: 2 },
-  { icon: PersonStanding, id: 3 },
-  { icon: UserCircle, id: 4 },
-];
-
-const mockUserProfile: UserProfile = {
-  id: "1",
-  email: "user@example.com",
-  name: "John Doe",
-  bio: "Digital art enthusiast and collector",
-  avatar: 0,
-  social: {
-    telegram: "https://t.me/username",
-    discord: "username#1234",
-    twitter: "https://twitter.com/username",
-    instagram: "https://instagram.com/username"
-  }
-};
+interface ApiProfile {
+  profile: {
+    id: string;
+    bio: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  socialLinks: {
+    social: string;
+    link: string;
+  }[];
+}
 
 const Profile = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
-  const [profile] = useState<UserProfile>(mockUserProfile);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await fetch('https://test.ftsoa.art/profile/', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch profile');
+        }
+
+        const data: ApiProfile = await response.json();
+        
+        // Преобразуем данные в формат UserProfile
+        setProfile({
+          id: data.profile.id,
+          email: data.profile.email,
+          name: `${data.profile.first_name} ${data.profile.last_name}`,
+          bio: data.profile.bio || "No bio provided",
+          avatar: 0,
+          social: data.socialLinks.reduce((acc, link) => ({
+            ...acc,
+            [link.social]: link.link
+          }), {})
+        });
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (isAuthenticated && token) {
+      fetchProfile();
+    }
+  }, [isAuthenticated, token]);
 
   if (!isAuthenticated) {
     navigate("/auth");
     return null;
   }
 
-  const AvatarIcon = AVATAR_OPTIONS[profile.avatar].icon;
+  if (isLoading || !profile) {
+    return (
+      <div className="container mx-auto px-4 py-24 max-w-4xl flex items-center justify-center">
+        <div className="text-center">Loading profile...</div>
+      </div>
+    );
+  }
 
   const socialIcons = [
     { icon: MessageCircle, link: profile.social?.telegram, color: "text-blue-500" },
@@ -77,21 +116,7 @@ const Profile = () => {
           <div className="glass-card rounded-lg p-6">
             <div className="flex flex-col items-center space-y-4">
               <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
-                <AvatarIcon className="w-20 h-20 text-primary" />
-              </div>
-              
-              <div className="flex gap-2">
-                {AVATAR_OPTIONS.map((avatar) => (
-                  <Button
-                    key={avatar.id}
-                    variant={profile.avatar === avatar.id ? "default" : "outline"}
-                    size="icon"
-                    className="rounded-full"
-                    // onClick={() => handleAvatarChange(avatar.id)}
-                  >
-                    <avatar.icon className="w-5 h-5" />
-                  </Button>
-                ))}
+                <User className="w-20 h-20 text-primary" />
               </div>
 
               <div className="text-center">
@@ -125,7 +150,6 @@ const Profile = () => {
           <div className="glass-card rounded-lg p-6">
             <h3 className="font-semibold mb-4">My Collections</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {/* Collection items will go here */}
               <div className="text-muted-foreground text-center p-8">
                 No collections yet
               </div>
@@ -137,7 +161,6 @@ const Profile = () => {
           <div className="glass-card rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">My Collections</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Full collections list will go here */}
               <div className="text-muted-foreground text-center p-8">
                 No collections yet
               </div>
@@ -148,7 +171,6 @@ const Profile = () => {
         <TabsContent value="settings">
           <div className="glass-card rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">Settings</h2>
-            {/* Settings form will go here */}
             <div className="text-muted-foreground text-center p-8">
               Settings page is under construction
             </div>
