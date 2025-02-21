@@ -1,7 +1,6 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { toast } from 'sonner';
 
 interface AuthState {
   user: any | null;
@@ -59,11 +58,8 @@ export const useAuth = create<AuthState>()(
             token: data.session.access_token,
             isAuthenticated: true,
           });
-
-          toast.success('Successfully logged in!');
         } catch (error) {
           console.error('Login error:', error);
-          toast.error(error instanceof Error ? error.message : 'Failed to login');
           throw error;
         }
       },
@@ -102,18 +98,14 @@ export const useAuth = create<AuthState>()(
             console.error('Registration failed with status:', response.status);
             throw new Error(data.error || 'Failed to register');
           }
-
-          toast.success(data.message);
         } catch (error) {
           console.error('Registration error:', error);
-          toast.error(error instanceof Error ? error.message : 'Failed to register');
           throw error;
         }
       },
 
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false });
-        toast.success('Successfully logged out!');
       },
     }),
     {

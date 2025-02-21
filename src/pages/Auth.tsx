@@ -49,9 +49,9 @@ const Auth = () => {
         </div>
 
         {showEmailAlert && (
-          <Alert variant="default" className="border-blue-500 bg-blue-500/10">
-            <AlertCircle className="h-4 w-4 text-blue-500" />
-            <AlertDescription className="text-blue-500">
+          <Alert variant="default" className="border-primary bg-primary/10">
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <AlertDescription className="text-primary">
               Please check your email to verify your account before logging in.
             </AlertDescription>
           </Alert>
