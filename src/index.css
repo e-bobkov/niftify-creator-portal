@@ -49,18 +49,22 @@
 
   /* Стили для выделения текста */
   ::selection {
-    @apply bg-primary text-primary-foreground;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
   }
   ::-moz-selection {
-    @apply bg-primary text-primary-foreground;
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
   }
 
   /* Для текста, который уже зеленый (primary) */
   .text-primary ::selection {
-    @apply bg-foreground text-primary;
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--primary));
   }
   .text-primary ::-moz-selection {
-    @apply bg-foreground text-primary;
+    background-color: hsl(var(--foreground));
+    color: hsl(var(--primary));
   }
 
   /* Стили для курсора */
