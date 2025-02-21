@@ -33,6 +33,10 @@ export const Navbar = () => {
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-muted-foreground">{user?.email}</span>
+                <Button variant="outline" onClick={() => navigate("/profile")} className="flex items-center space-x-2">
+                  <User size={18} />
+                  <span>Profile</span>
+                </Button>
                 <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
                   <LogOut size={18} />
                   <span>Logout</span>
@@ -72,6 +76,17 @@ export const Navbar = () => {
             {isAuthenticated ? (
               <>
                 <div className="text-sm text-muted-foreground">{user?.email}</div>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    navigate("/profile");
+                    setIsOpen(false);
+                  }}
+                  className="w-full flex items-center justify-center space-x-2"
+                >
+                  <User size={18} />
+                  <span>Profile</span>
+                </Button>
                 <Button
                   variant="outline"
                   onClick={handleLogout}
