@@ -1,11 +1,19 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { Menu, Wallet, X } from "lucide-react";
+import { Menu, LogOut, User, X } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/auth");
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
@@ -22,10 +30,20 @@ export const Navbar = () => {
             <Link to="/create" className="text-foreground/80 hover:text-primary transition-colors">
               Create
             </Link>
-            <Button variant="outline" className="flex items-center space-x-2">
-              <Wallet size={18} />
-              <span>Connect Wallet</span>
-            </Button>
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                <span className="text-sm text-muted-foreground">{user?.email}</span>
+                <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
+                  <LogOut size={18} />
+                  <span>Logout</span>
+                </Button>
+              </div>
+            ) : (
+              <Button variant="outline" onClick={() => navigate("/auth")} className="flex items-center space-x-2">
+                <User size={18} />
+                <span>Sign In</span>
+              </Button>
+            )}
           </div>
 
           <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
@@ -51,10 +69,31 @@ export const Navbar = () => {
             >
               Create
             </Link>
-            <Button variant="outline" className="w-full flex items-center justify-center space-x-2">
-              <Wallet size={18} />
-              <span>Connect Wallet</span>
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <div className="text-sm text-muted-foreground">{user?.email}</div>
+                <Button
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center space-x-2"
+                >
+                  <LogOut size={18} />
+                  <span>Logout</span>
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  navigate("/auth");
+                  setIsOpen(false);
+                }}
+                className="w-full flex items-center justify-center space-x-2"
+              >
+                <User size={18} />
+                <span>Sign In</span>
+              </Button>
+            )}
           </div>
         </div>
       )}
