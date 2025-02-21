@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   User, UserRound, Users, PersonStanding, UserCircle,
-  Telegram, Discord, Instagram, Twitter,
+  MessageCircle, Hash, Instagram, Twitter,
   Settings, Grid, User as UserIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -47,8 +46,8 @@ const Profile = () => {
   const AvatarIcon = AVATAR_OPTIONS[profile.avatar].icon;
 
   const socialIcons = [
-    { icon: Telegram, link: profile.social?.telegram, color: "text-blue-500" },
-    { icon: Discord, link: profile.social?.discord, color: "text-indigo-500" },
+    { icon: MessageCircle, link: profile.social?.telegram, color: "text-blue-500" },
+    { icon: Hash, link: profile.social?.discord, color: "text-indigo-500" },
     { icon: Twitter, link: profile.social?.twitter, color: "text-blue-400" },
     { icon: Instagram, link: profile.social?.instagram, color: "text-pink-500" }
   ];
