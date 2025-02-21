@@ -38,8 +38,9 @@ export const PixelBackground = () => {
       const pixel = new THREE.Mesh(geometry, material);
       
       // Располагаем пиксели по спирали для создания эффекта туннеля
+      // Теперь используем больше пикселей по краям
       const angle = Math.random() * Math.PI * 2;
-      const radius = Math.random() * tunnelRadius;
+      const radius = (Math.random() * 0.5 + 0.5) * tunnelRadius; // Больше пикселей по краям
       pixel.position.x = Math.cos(angle) * radius;
       pixel.position.y = Math.sin(angle) * radius;
       pixel.position.z = Math.random() * tunnelLength - tunnelLength/2;
@@ -67,9 +68,9 @@ export const PixelBackground = () => {
         // Если пиксель улетел слишком далеко, возвращаем его в начало туннеля
         if (pixel.position.z > tunnelLength/2) {
           pixel.position.z = -tunnelLength/2;
-          // Новая случайная позиция в пределах радиуса туннеля
+          // Новая случайная позиция в пределах радиуса туннеля, больше по краям
           const angle = Math.random() * Math.PI * 2;
-          const radius = Math.random() * tunnelRadius;
+          const radius = (Math.random() * 0.5 + 0.5) * tunnelRadius;
           pixel.position.x = Math.cos(angle) * radius;
           pixel.position.y = Math.sin(angle) * radius;
         }
