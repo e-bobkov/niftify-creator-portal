@@ -46,6 +46,32 @@
   body {
     @apply bg-background text-foreground font-inter antialiased;
   }
+
+  /* Стили для выделения текста */
+  ::selection {
+    @apply bg-primary text-primary-foreground;
+  }
+  ::-moz-selection {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  /* Для текста, который уже зеленый (primary) */
+  .text-primary ::selection {
+    @apply bg-foreground text-primary;
+  }
+  .text-primary ::-moz-selection {
+    @apply bg-foreground text-primary;
+  }
+
+  /* Стили для курсора */
+  * {
+    cursor: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='10' stroke='%23B4E66E' stroke-width='2' fill='%238E9196'/%3E%3C/svg%3E") 12 12, auto;
+  }
+
+  /* Стиль для кликабельных элементов */
+  a, button, [role='button'], input[type='submit'], input[type='button'], input[type='reset'] {
+    cursor: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='12' cy='12' r='10' stroke='%23B4E66E' stroke-width='2' fill='%238E9196'/%3E%3Ccircle cx='12' cy='12' r='6' fill='%23B4E66E'/%3E%3C/svg%3E") 12 12, pointer;
+  }
 }
 
 @layer utilities {
