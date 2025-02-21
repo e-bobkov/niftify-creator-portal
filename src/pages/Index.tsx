@@ -36,14 +36,13 @@ const Index = () => {
   const { data: featuredNFTs = FEATURED_NFTS, isLoading } = useQuery({
     queryKey: ['featured-nfts'],
     queryFn: async () => {
-      // В будущем здесь может быть API запрос
       return FEATURED_NFTS;
     },
-    staleTime: 1000 * 60 * 5, // Кеш на 5 минут
+    staleTime: 1000 * 60 * 5,
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <main className="container mx-auto px-4 pt-24 pb-12">
         <section className="space-y-8 animate-fadeIn">
           <div className="text-center space-y-4 animate-slide-up">
