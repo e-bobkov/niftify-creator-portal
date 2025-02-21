@@ -49,21 +49,21 @@
 
   /* Стили для выделения текста */
   ::selection {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background-color: rgba(180, 230, 110, 0.3);
+    color: hsl(var(--foreground));
   }
   ::-moz-selection {
-    background-color: hsl(var(--primary));
-    color: hsl(var(--primary-foreground));
+    background-color: rgba(180, 230, 110, 0.3);
+    color: hsl(var(--foreground));
   }
 
   /* Для текста, который уже зеленый (primary) */
   .text-primary ::selection {
-    background-color: hsl(var(--foreground));
+    background-color: rgba(210, 240, 98, 0.2);
     color: hsl(var(--primary));
   }
   .text-primary ::-moz-selection {
-    background-color: hsl(var(--foreground));
+    background-color: rgba(210, 240, 98, 0.2);
     color: hsl(var(--primary));
   }
 }
