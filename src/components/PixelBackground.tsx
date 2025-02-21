@@ -14,11 +14,11 @@ export const PixelBackground = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     containerRef.current.appendChild(renderer.domElement);
 
-    // Создаем пиксели
+    // Создаем больше пикселей для эффекта полета
     const pixels: THREE.Mesh[] = [];
     const geometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
     const material = new THREE.MeshPhongMaterial({
-      color: 0xb4e66e, // Зеленый цвет в соответствии с темой
+      color: 0xb4e66e,
       transparent: true,
       opacity: 0.6,
     });
@@ -31,12 +31,24 @@ export const PixelBackground = () => {
     directionalLight.position.set(1, 1, 1);
     scene.add(directionalLight);
 
-    // Создаем 50 пикселей
-    for (let i = 0; i < 50; i++) {
+    // Создаем 200 пикселей в форме туннеля
+    const tunnelRadius = 10;
+    const tunnelLength = 100;
+    for (let i = 0; i < 200; i++) {
       const pixel = new THREE.Mesh(geometry, material);
-      pixel.position.x = Math.random() * 40 - 20;
-      pixel.position.y = Math.random() * 40 - 20;
-      pixel.position.z = Math.random() * 40 - 20;
+      
+      // Располагаем пиксели по спирали для создания эффекта туннеля
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * tunnelRadius;
+      pixel.position.x = Math.cos(angle) * radius;
+      pixel.position.y = Math.sin(angle) * radius;
+      pixel.position.z = Math.random() * tunnelLength - tunnelLength/2;
+      
+      // Случайное начальное вращение
+      pixel.rotation.x = Math.random() * Math.PI;
+      pixel.rotation.y = Math.random() * Math.PI;
+      pixel.rotation.z = Math.random() * Math.PI;
+      
       pixels.push(pixel);
       scene.add(pixel);
     }
@@ -47,10 +59,24 @@ export const PixelBackground = () => {
     const animate = () => {
       requestAnimationFrame(animate);
 
+      // Движение и вращение пикселей
       pixels.forEach(pixel => {
+        // Движение вперед (эффект полета)
+        pixel.position.z += 0.1;
+        
+        // Если пиксель улетел слишком далеко, возвращаем его в начало туннеля
+        if (pixel.position.z > tunnelLength/2) {
+          pixel.position.z = -tunnelLength/2;
+          // Новая случайная позиция в пределах радиуса туннеля
+          const angle = Math.random() * Math.PI * 2;
+          const radius = Math.random() * tunnelRadius;
+          pixel.position.x = Math.cos(angle) * radius;
+          pixel.position.y = Math.sin(angle) * radius;
+        }
+
+        // Плавное вращение
         pixel.rotation.x += 0.01;
         pixel.rotation.y += 0.01;
-        pixel.position.y += Math.sin(Date.now() * 0.001 + pixel.position.x) * 0.01;
       });
 
       renderer.render(scene, camera);
