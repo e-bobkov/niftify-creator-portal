@@ -48,11 +48,63 @@
   }
 }
 
-.glass-card {
-  @apply bg-secondary/30 backdrop-blur-md border border-white/10 shadow-xl;
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+    will-change: opacity, transform;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+    will-change: transform, opacity;
+  }
+
+  .animate-scale {
+    animation: scale 0.2s ease-out;
+    will-change: transform;
+  }
+
+  .glass-card {
+    @apply bg-secondary/30 backdrop-blur-md border border-white/10 shadow-xl;
+    transition: transform 0.2s ease-out;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+  }
 }
 
-.page-transition {
-  @apply transition-all duration-300 ease-in-out;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes scale {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
