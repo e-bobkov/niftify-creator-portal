@@ -4,6 +4,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Menu, LogOut, User, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { Logo } from "./Logo";
 
 const NavLink = memo(({ to, children, onClick }: { to: string; children: React.ReactNode; onClick?: () => void }) => (
   <Link
@@ -48,9 +49,7 @@ export const Navbar = memo(() => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border animate-fade-in">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105">
-            <span className="text-2xl font-bold text-primary">NFTify</span>
-          </Link>
+          <Logo />
 
           <div className="hidden md:flex items-center space-x-8 animate-fade-in">
             <NavLink to="/explore">Explore</NavLink>
