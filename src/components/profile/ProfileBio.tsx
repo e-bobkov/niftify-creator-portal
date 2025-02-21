@@ -15,7 +15,7 @@ export const ProfileBio = ({ profile }: ProfileBioProps) => {
   ];
 
   return (
-    <>
+    <div className="space-y-6 animate-fade-in">
       <div className="flex gap-4 justify-center">
         {socialIcons.map((social, index) => 
           social.link ? (
@@ -24,7 +24,7 @@ export const ProfileBio = ({ profile }: ProfileBioProps) => {
               href={social.link}
               target="_blank"
               rel="noopener noreferrer"
-              className={`${social.color} hover:opacity-80 transition-opacity`}
+              className={`${social.color} hover:opacity-80 transition-all duration-300 hover:scale-110`}
             >
               <social.icon className="w-6 h-6" />
             </a>
@@ -32,10 +32,10 @@ export const ProfileBio = ({ profile }: ProfileBioProps) => {
         )}
       </div>
 
-      <div className="w-full text-center">
+      <div className="w-full text-center animate-slide-in">
         <h3 className="font-semibold mb-2">Bio</h3>
         <p className="text-muted-foreground">{profile.bio}</p>
       </div>
-    </>
+    </div>
   );
 };
