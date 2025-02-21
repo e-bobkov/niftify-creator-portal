@@ -74,7 +74,7 @@ const Profile = () => {
         </div>
 
         <TabsContent value="profile" className="space-y-8">
-          <div className="bg-card rounded-lg p-6 shadow-lg">
+          <div className="glass-card rounded-lg p-6">
             <div className="flex flex-col items-center space-y-4">
               <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
                 <AvatarIcon className="w-20 h-20 text-primary" />
@@ -115,14 +115,14 @@ const Profile = () => {
                 )}
               </div>
 
-              <div className="w-full">
+              <div className="w-full text-center">
                 <h3 className="font-semibold mb-2">Bio</h3>
                 <p className="text-muted-foreground">{profile.bio}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-card rounded-lg p-6 shadow-lg">
+          <div className="glass-card rounded-lg p-6">
             <h3 className="font-semibold mb-4">My Collections</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Collection items will go here */}
@@ -134,7 +134,7 @@ const Profile = () => {
         </TabsContent>
 
         <TabsContent value="collections">
-          <div className="bg-card rounded-lg p-6 shadow-lg">
+          <div className="glass-card rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">My Collections</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Full collections list will go here */}
@@ -146,7 +146,7 @@ const Profile = () => {
         </TabsContent>
 
         <TabsContent value="settings">
-          <div className="bg-card rounded-lg p-6 shadow-lg">
+          <div className="glass-card rounded-lg p-6">
             <h2 className="text-2xl font-bold mb-6">Settings</h2>
             {/* Settings form will go here */}
             <div className="text-muted-foreground text-center p-8">
