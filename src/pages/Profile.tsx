@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -53,19 +54,19 @@ const Profile = () => {
   ];
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-24 max-w-4xl">
       <Tabs defaultValue="profile" className="space-y-8">
         <div className="flex items-center justify-between">
-          <TabsList>
-            <TabsTrigger value="profile" onClick={() => setActiveTab("profile")}>
+          <TabsList className="w-full">
+            <TabsTrigger value="profile" onClick={() => setActiveTab("profile")} className="flex-1">
               <UserIcon className="w-4 h-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="collections" onClick={() => setActiveTab("collections")}>
+            <TabsTrigger value="collections" onClick={() => setActiveTab("collections")} className="flex-1">
               <Grid className="w-4 h-4 mr-2" />
               My Collections
             </TabsTrigger>
-            <TabsTrigger value="settings" onClick={() => setActiveTab("settings")}>
+            <TabsTrigger value="settings" onClick={() => setActiveTab("settings")} className="flex-1">
               <Settings className="w-4 h-4 mr-2" />
               Settings
             </TabsTrigger>
