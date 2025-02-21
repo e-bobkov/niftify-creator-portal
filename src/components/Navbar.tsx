@@ -1,11 +1,40 @@
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
 import { Menu, LogOut, User, X } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
-export const Navbar = () => {
+const NavLink = memo(({ to, children, onClick }: { to: string; children: React.ReactNode; onClick?: () => void }) => (
+  <Link
+    to={to}
+    className="text-foreground/80 hover:text-primary transition-colors duration-200 transform hover:scale-105"
+    onClick={onClick}
+  >
+    {children}
+  </Link>
+));
+
+NavLink.displayName = 'NavLink';
+
+const NavButton = memo(({ onClick, icon: Icon, children }: { 
+  onClick: () => void; 
+  icon: typeof User; 
+  children: React.ReactNode 
+}) => (
+  <Button
+    variant="outline"
+    onClick={onClick}
+    className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105"
+  >
+    <Icon size={18} />
+    <span>{children}</span>
+  </Button>
+));
+
+NavButton.displayName = 'NavButton';
+
+export const Navbar = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
   const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
@@ -16,102 +45,76 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border animate-fade-in">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105">
             <span className="text-2xl font-bold text-primary">NFTify</span>
           </Link>
 
-          <div className="hidden md:flex items-center space-x-8">
-            <Link to="/explore" className="text-foreground/80 hover:text-primary transition-colors">
-              Explore
-            </Link>
-            <Link to="/create" className="text-foreground/80 hover:text-primary transition-colors">
-              Create
-            </Link>
+          <div className="hidden md:flex items-center space-x-8 animate-fade-in">
+            <NavLink to="/explore">Explore</NavLink>
+            <NavLink to="/create">Create</NavLink>
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-4 animate-fade-in">
                 <span className="text-sm text-muted-foreground">{user?.email}</span>
-                <Button variant="outline" onClick={() => navigate("/profile")} className="flex items-center space-x-2">
-                  <User size={18} />
-                  <span>Profile</span>
-                </Button>
-                <Button variant="outline" onClick={handleLogout} className="flex items-center space-x-2">
-                  <LogOut size={18} />
-                  <span>Logout</span>
-                </Button>
+                <NavButton onClick={() => navigate("/profile")} icon={User}>Profile</NavButton>
+                <NavButton onClick={handleLogout} icon={LogOut}>Logout</NavButton>
               </div>
             ) : (
-              <Button variant="outline" onClick={() => navigate("/auth")} className="flex items-center space-x-2">
-                <User size={18} />
-                <span>Sign In</span>
-              </Button>
+              <NavButton onClick={() => navigate("/auth")} icon={User}>Sign In</NavButton>
             )}
           </div>
 
-          <button className="md:hidden" onClick={() => setIsOpen(!isOpen)}>
+          <button 
+            className="md:hidden transition-transform duration-200 hover:scale-110" 
+            onClick={() => setIsOpen(!isOpen)}
+          >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
       {isOpen && (
-        <div className="md:hidden bg-background border-b border-border animate-fadeIn">
+        <div className="md:hidden bg-background border-b border-border animate-slideUp">
           <div className="container mx-auto px-4 py-4 space-y-4">
-            <Link
-              to="/explore"
-              className="block text-foreground/80 hover:text-primary transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              Explore
-            </Link>
-            <Link
-              to="/create"
-              className="block text-foreground/80 hover:text-primary transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              Create
-            </Link>
+            <NavLink to="/explore" onClick={() => setIsOpen(false)}>Explore</NavLink>
+            <NavLink to="/create" onClick={() => setIsOpen(false)}>Create</NavLink>
             {isAuthenticated ? (
               <>
                 <div className="text-sm text-muted-foreground">{user?.email}</div>
-                <Button
-                  variant="outline"
+                <NavButton
                   onClick={() => {
                     navigate("/profile");
                     setIsOpen(false);
                   }}
-                  className="w-full flex items-center justify-center space-x-2"
+                  icon={User}
                 >
-                  <User size={18} />
-                  <span>Profile</span>
-                </Button>
-                <Button
-                  variant="outline"
+                  Profile
+                </NavButton>
+                <NavButton
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center space-x-2"
+                  icon={LogOut}
                 >
-                  <LogOut size={18} />
-                  <span>Logout</span>
-                </Button>
+                  Logout
+                </NavButton>
               </>
             ) : (
-              <Button
-                variant="outline"
+              <NavButton
                 onClick={() => {
                   navigate("/auth");
                   setIsOpen(false);
                 }}
-                className="w-full flex items-center justify-center space-x-2"
+                icon={User}
               >
-                <User size={18} />
-                <span>Sign In</span>
-              </Button>
+                Sign In
+              </NavButton>
             )}
           </div>
         </div>
       )}
     </nav>
   );
-};
+});
+
+Navbar.displayName = 'Navbar';
