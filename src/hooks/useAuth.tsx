@@ -27,7 +27,7 @@ export const useAuth = create<AuthState>()(
               'Content-Type': 'application/json',
               'Accept': 'application/json',
             },
-            body: JSON.stringify({ email, password }),
+            body: `{"email":"${email}","password":"${password}"}`,
           });
 
           const data = await response.json();
@@ -57,7 +57,7 @@ export const useAuth = create<AuthState>()(
               'Content-Type': 'application/json',
               'Accept': 'application/json',
             },
-            body: JSON.stringify({ email, password }),
+            body: `{"email":"${email}","password":"${password}"}`,
           });
 
           const data = await response.json();
