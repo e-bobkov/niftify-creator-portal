@@ -26,9 +26,7 @@ export const useAuth = create<AuthState>()(
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
-              'Access-Control-Allow-Origin': '*',
             },
-            credentials: 'include',
             body: JSON.stringify({ email, password }),
           });
 
@@ -58,9 +56,7 @@ export const useAuth = create<AuthState>()(
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
-              'Access-Control-Allow-Origin': '*',
             },
-            credentials: 'include',
             body: JSON.stringify({ email, password }),
           });
 
