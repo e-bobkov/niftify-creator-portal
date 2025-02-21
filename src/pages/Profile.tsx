@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings, Grid, User as UserIcon } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -10,6 +10,7 @@ import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileBio } from "@/components/profile/ProfileBio";
 import { ProfileSettings } from "@/components/profile/ProfileSettings";
 import { ProfileCollections } from "@/components/profile/ProfileCollections";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface ApiProfile {
   profile: {
@@ -30,9 +31,7 @@ const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("profile");
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -46,58 +45,87 @@ const Profile = () => {
     }
   });
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch('https://test.ftsoa.art/profile/', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/json',
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch profile');
+  // Запрос профиля с использованием React Query
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const response = await fetch('https://test.ftsoa.art/profile/', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json',
         }
+      });
 
-        const data: ApiProfile = await response.json();
-        
-        const userProfile = {
-          id: data.profile.id,
-          email: data.profile.email,
-          name: `${data.profile.first_name} ${data.profile.last_name}`,
-          bio: data.profile.bio || "No bio provided",
-          avatar: 0,
-          social: data.socialLinks.reduce((acc, link) => ({
-            ...acc,
-            [link.social]: link.link
-          }), {})
-        };
-
-        setProfile(userProfile);
-        
-        setFormData({
-          first_name: data.profile.first_name,
-          last_name: data.profile.last_name,
-          bio: data.profile.bio || "",
-          socialLinks: {
-            telegram: data.socialLinks.find(l => l.social === "telegram")?.link || "",
-            discord: data.socialLinks.find(l => l.social === "discord")?.link || "",
-            instagram: data.socialLinks.find(l => l.social === "instagram")?.link || "",
-            twitter: data.socialLinks.find(l => l.social === "twitter")?.link || ""
-          }
-        });
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      } finally {
-        setIsLoading(false);
+      if (!response.ok) {
+        throw new Error('Failed to fetch profile');
       }
-    };
 
-    if (isAuthenticated && token) {
-      fetchProfile();
+      const data: ApiProfile = await response.json();
+      
+      // Инициализируем formData при получении данных
+      setFormData({
+        first_name: data.profile.first_name,
+        last_name: data.profile.last_name,
+        bio: data.profile.bio || "",
+        socialLinks: {
+          telegram: data.socialLinks.find(l => l.social === "telegram")?.link || "",
+          discord: data.socialLinks.find(l => l.social === "discord")?.link || "",
+          instagram: data.socialLinks.find(l => l.social === "instagram")?.link || "",
+          twitter: data.socialLinks.find(l => l.social === "twitter")?.link || ""
+        }
+      });
+      
+      return {
+        id: data.profile.id,
+        email: data.profile.email,
+        name: `${data.profile.first_name} ${data.profile.last_name}`,
+        bio: data.profile.bio || "No bio provided",
+        avatar: 0,
+        social: data.socialLinks.reduce((acc, link) => ({
+          ...acc,
+          [link.social]: link.link
+        }), {})
+      } as UserProfile;
+    },
+    enabled: isAuthenticated && !!token,
+    staleTime: 1000 * 60 * 5, // Кеш действителен 5 минут
+    refetchOnWindowFocus: false // Отключаем автоматическое обновление при фокусе окна
+  });
+
+  // Мутация для обновления профиля
+  const updateProfileMutation = useMutation({
+    mutationFn: async (updateData: any) => {
+      const response = await fetch('https://test.ftsoa.art/profile/', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update profile');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+      // Инвалидируем кеш после успешного обновления
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update profile",
+        variant: "destructive",
+      });
     }
-  }, [isAuthenticated, token]);
+  });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -120,7 +148,6 @@ const Profile = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
 
     const socialLinks = Object.entries(formData.socialLinks)
       .filter(([, link]) => link)
@@ -136,43 +163,7 @@ const Profile = () => {
       socialLinks
     };
 
-    try {
-      const response = await fetch('https://test.ftsoa.art/profile/', {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updateData)
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update profile');
-      }
-
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-
-      if (profile) {
-        setProfile({
-          ...profile,
-          name: `${formData.first_name} ${formData.last_name}`,
-          bio: formData.bio,
-          social: formData.socialLinks
-        });
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update profile",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
+    updateProfileMutation.mutate(updateData);
   };
 
   if (!isAuthenticated) {
@@ -183,13 +174,16 @@ const Profile = () => {
   if (isLoading || !profile) {
     return (
       <div className="container mx-auto px-4 py-24 max-w-4xl flex items-center justify-center">
-        <div className="text-center">Loading profile...</div>
+        <div className="animate-pulse text-center">
+          <div className="w-32 h-32 bg-primary/10 rounded-full mx-auto mb-4"></div>
+          <div className="h-4 w-48 bg-primary/10 rounded mx-auto"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-24 max-w-4xl">
+    <div className="container mx-auto px-4 py-24 max-w-4xl animate-fade-in">
       <Tabs defaultValue="profile" className="space-y-8">
         <div className="flex items-center justify-between">
           <TabsList className="w-full">
@@ -209,7 +203,7 @@ const Profile = () => {
         </div>
 
         <TabsContent value="profile" className="space-y-8">
-          <div className="glass-card rounded-lg p-6">
+          <div className="glass-card rounded-lg p-6 animate-fade-in">
             <ProfileHeader profile={profile} />
             <ProfileBio profile={profile} />
           </div>
@@ -217,18 +211,18 @@ const Profile = () => {
         </TabsContent>
 
         <TabsContent value="collections">
-          <div className="glass-card rounded-lg p-6">
+          <div className="glass-card rounded-lg p-6 animate-fade-in">
             <h2 className="text-2xl font-bold mb-6">My Collections</h2>
             <ProfileCollections />
           </div>
         </TabsContent>
 
         <TabsContent value="settings">
-          <div className="glass-card rounded-lg p-6">
+          <div className="glass-card rounded-lg p-6 animate-fade-in">
             <h2 className="text-2xl font-bold mb-6">Edit Profile</h2>
             <ProfileSettings 
               formData={formData}
-              isSaving={isSaving}
+              isSaving={updateProfileMutation.isPending}
               onSubmit={handleSubmit}
               onChange={handleInputChange}
             />
