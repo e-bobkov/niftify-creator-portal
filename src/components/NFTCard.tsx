@@ -43,9 +43,11 @@ export const NFTCard = memo(({ id, collectionId, title, image, price }: NFTCardP
           </div>
         </div>
         <div className="p-4">
-          <h3 className="font-semibold truncate">{title}</h3>
-          <div className="text-sm text-primary font-medium">
-            ${price.toFixed(2)}
+          <div className="flex justify-between items-start gap-2">
+            <h3 className="font-semibold leading-tight break-words flex-1">{title}</h3>
+            <div className="text-sm text-primary font-medium whitespace-nowrap">
+              ${price.toFixed(2)}
+            </div>
           </div>
         </div>
       </div>
