@@ -1,4 +1,3 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
@@ -208,11 +207,10 @@ const Collection = () => {
               <NFTCard
                 key={token.id}
                 id={token.id.toString()}
+                collectionId={id || ''}
                 title={token.metadata.name}
                 image={token.metadata.image}
                 price={token.price || 0}
-                creator=""
-                likes={0}
               />
             ))}
           </div>

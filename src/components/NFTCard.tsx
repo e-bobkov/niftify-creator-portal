@@ -1,47 +1,55 @@
 
 import { memo } from "react";
-import { Link } from "react-router-dom";
-import { Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Eye } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface NFTCardProps {
   id: string;
+  collectionId: string;
   title: string;
   image: string;
   price: number;
-  creator: string;
-  likes: number;
 }
 
-export const NFTCard = memo(({ id, title, image, price, creator, likes }: NFTCardProps) => {
+export const NFTCard = memo(({ id, collectionId, title, image, price }: NFTCardProps) => {
+  const navigate = useNavigate();
+
+  const handleExplore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`/my-collection/${collectionId}/${id}`);
+  };
+
   return (
-    <Link to={`/nft/${id}`} className="group">
-      <div className="glass-card rounded-lg overflow-hidden transition-transform duration-300 group-hover:scale-[1.02] animate-fade-in">
+    <div className="group relative">
+      <div className="glass-card rounded-lg overflow-hidden">
         <div className="relative aspect-square">
           <img
             src={image}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-full h-full object-cover"
             loading="lazy"
           />
-          <button 
-            className="absolute top-3 right-3 p-2 rounded-full bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-colors transform hover:scale-110 duration-200"
-            onClick={(e) => e.preventDefault()}
-          >
-            <Heart size={20} className="transform transition-transform hover:scale-110" />
-          </button>
-        </div>
-        <div className="p-4 space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold truncate">{title}</h3>
-            <span className="text-primary font-medium">{price} ETH</span>
+          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+            <Button 
+              variant="secondary" 
+              size="lg" 
+              className="opacity-0 group-hover:opacity-100 transform group-hover:scale-100 scale-75 transition-all duration-300"
+              onClick={handleExplore}
+            >
+              <Eye className="mr-2" />
+              Explore
+            </Button>
           </div>
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>by {creator}</span>
-            <span>{likes} likes</span>
+        </div>
+        <div className="p-4">
+          <h3 className="font-semibold truncate">{title}</h3>
+          <div className="text-sm text-primary font-medium">
+            ${price.toFixed(2)}
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 });
 

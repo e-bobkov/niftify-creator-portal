@@ -28,6 +28,7 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
           <Route path="/my-collection/:id" element={<PrivateRoute><Collection /></PrivateRoute>} />
+          <Route path="/my-collection/:collectionId/:tokenId" element={<PrivateRoute><TokenDetails /></PrivateRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
