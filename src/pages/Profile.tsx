@@ -12,11 +12,22 @@ import { ProfileCollections } from "@/components/profile/ProfileCollections";
 import { LoadingState } from "@/components/collection/LoadingState";
 
 const Profile = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("profile");
 
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile, isLoading, error } = useProfile();
+
+  // Обработка ошибки авторизации
+  if (error?.message === "Unauthorized. Неверный токен.") {
+    // Устанавливаем флаг ошибки авторизации в localStorage
+    localStorage.setItem('auth_error', 'true');
+    // Выполняем выход
+    logout();
+    // Перенаправляем на страницу авторизации
+    navigate("/auth");
+    return null;
+  }
 
   if (!isAuthenticated) {
     navigate("/auth");

@@ -31,7 +31,8 @@ export const useProfile = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch profile');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch profile');
       }
 
       const data: ApiProfile = await response.json();
