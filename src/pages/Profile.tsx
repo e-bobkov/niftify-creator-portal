@@ -207,7 +207,10 @@ const Profile = () => {
             <ProfileHeader profile={profile} />
             <ProfileBio profile={profile} />
           </div>
-          <ProfileCollections />
+          <div className="glass-card rounded-lg p-6 animate-fade-in">
+            <h3 className="text-xl font-semibold mb-6">Recent Collections</h3>
+            <ProfileCollections limit={3} />
+          </div>
         </TabsContent>
 
         <TabsContent value="collections">

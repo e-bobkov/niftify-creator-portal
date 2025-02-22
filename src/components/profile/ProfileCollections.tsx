@@ -7,7 +7,7 @@ import { AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export const ProfileCollections = () => {
+export const ProfileCollections = ({ limit }: { limit?: number }) => {
   const { token, user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -21,7 +21,7 @@ export const ProfileCollections = () => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          partner_id: user?.id // Используем ID пользователя
+          partner_id: user?.id
         })
       });
 
@@ -42,10 +42,16 @@ export const ProfileCollections = () => {
     enabled: !!token && !!user?.id
   });
 
+  const displayedCollections = limit && collections 
+    ? collections
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, limit)
+    : collections;
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => (
+        {[...Array(limit || 3)].map((_, i) => (
           <div key={i} className="animate-pulse">
             <div className="bg-primary/10 rounded-lg aspect-square mb-2"></div>
             <div className="h-4 bg-primary/10 rounded w-2/3 mb-2"></div>
@@ -75,8 +81,12 @@ export const ProfileCollections = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {collections.map((collection) => (
-        <div key={collection.id} className="group">
+      {displayedCollections.map((collection) => (
+        <div 
+          key={collection.id} 
+          className="group cursor-pointer" 
+          onClick={() => navigate(`/collection/${collection.id}`)}
+        >
           <div className="glass-card rounded-lg overflow-hidden">
             <div className="relative aspect-square">
               <img
