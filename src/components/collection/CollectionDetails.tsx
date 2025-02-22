@@ -1,10 +1,9 @@
-import { Calendar, Database, ExternalLink, Link as LinkIcon, Share2, Maximize2 } from "lucide-react";
+
+import { Calendar, Database, ExternalLink, Link as LinkIcon, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
 import { Collection } from "@/types/user";
-import { useState } from "react";
-import { ImageViewer } from "@/components/ui/image-viewer";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,8 +19,6 @@ interface CollectionDetailsProps extends BaseComponentProps {
 }
 
 export const CollectionDetails = ({ collection, tokensCount, onShare }: CollectionDetailsProps) => {
-  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
-
   return (
     <div className="glass-card rounded-lg p-6 mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -31,14 +28,6 @@ export const CollectionDetails = ({ collection, tokensCount, onShare }: Collecti
             alt={collection.name}
             className="w-full h-full object-cover"
           />
-          <Button
-            variant="secondary"
-            size="sm"
-            className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm"
-            onClick={() => setIsImageViewerOpen(true)}
-          >
-            <Maximize2 className="w-4 h-4" />
-          </Button>
         </div>
         <div className="space-y-6">
           <div>
@@ -97,12 +86,6 @@ export const CollectionDetails = ({ collection, tokensCount, onShare }: Collecti
           </div>
         </div>
       </div>
-      <ImageViewer
-        src={collection.image_url}
-        alt={collection.name}
-        isOpen={isImageViewerOpen}
-        onClose={() => setIsImageViewerOpen(false)}
-      />
     </div>
   );
 };
