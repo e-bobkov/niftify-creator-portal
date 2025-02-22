@@ -22,7 +22,6 @@ const Profile = () => {
   const { data: sales = [], isLoading: salesLoading } = useSalesData();
   const { data: purchases = [], isLoading: purchasesLoading } = usePurchasesData();
 
-  // Обработка ошибки авторизации
   if (error?.message === "Unauthorized. Неверный токен.") {
     localStorage.setItem('auth_error', 'true');
     logout();
@@ -101,13 +100,15 @@ const Profile = () => {
                   {sales.map((sale) => (
                     <div key={sale.id} className="flex items-center justify-between p-4 bg-primary/5 rounded-lg">
                       <div>
-                        <p className="font-medium">{sale.metadata.name}</p>
+                        <p className="font-medium">
+                          {sale.metadata?.name || 'Unnamed Token'}
+                        </p>
                         <p className="text-sm text-muted-foreground">
-                          Sold on {format(new Date(sale.sold_at!), 'PP')}
+                          Sold on {sale.sold_at ? format(new Date(sale.sold_at), 'PP') : 'Unknown date'}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="font-bold">${sale.price}</p>
+                        <p className="font-bold">${sale.price || 0}</p>
                         <p className="text-sm text-muted-foreground">{sale.chain}</p>
                       </div>
                     </div>
@@ -128,13 +129,15 @@ const Profile = () => {
                 {purchases.map((purchase) => (
                   <div key={purchase.id} className="flex items-center justify-between p-4 bg-primary/5 rounded-lg">
                     <div>
-                      <p className="font-medium">{purchase.metadata.name}</p>
+                      <p className="font-medium">
+                        {purchase.metadata?.name || 'Unnamed Token'}
+                      </p>
                       <p className="text-sm text-muted-foreground">
-                        Purchased on {format(new Date(purchase.purchased_at!), 'PP')}
+                        Purchased on {purchase.purchased_at ? format(new Date(purchase.purchased_at), 'PP') : 'Unknown date'}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">${purchase.price}</p>
+                      <p className="font-bold">${purchase.price || 0}</p>
                       <p className="text-sm text-muted-foreground">{purchase.chain}</p>
                     </div>
                   </div>

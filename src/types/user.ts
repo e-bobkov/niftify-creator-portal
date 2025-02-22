@@ -39,4 +39,5 @@ export interface Token {
     description: string;
     image: string;
   };
+  metadata_url?: string;
 }

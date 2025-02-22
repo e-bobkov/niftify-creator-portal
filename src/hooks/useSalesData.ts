@@ -8,6 +8,14 @@ interface SaleData extends Token {
   buyer_id: string | null;
 }
 
+const fetchMetadata = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error('Failed to fetch metadata');
+  }
+  return response.json();
+};
+
 export const useSalesData = () => {
   const { token, user } = useAuth();
 
@@ -31,7 +39,32 @@ export const useSalesData = () => {
       }
 
       const data = await response.json();
-      return data.sales as SaleData[];
+      const sales = data.sales as SaleData[];
+
+      // Загрузка metadata для каждой продажи, если есть metadata_url
+      const salesWithMetadata = await Promise.all(
+        sales.map(async (sale) => {
+          if (sale.metadata_url && !sale.metadata) {
+            try {
+              const metadata = await fetchMetadata(sale.metadata_url);
+              return { ...sale, metadata };
+            } catch (error) {
+              console.error('Failed to fetch metadata:', error);
+              return {
+                ...sale,
+                metadata: {
+                  name: 'Unknown Token',
+                  description: 'Metadata unavailable',
+                  image: '/placeholder.svg'
+                }
+              };
+            }
+          }
+          return sale;
+        })
+      );
+
+      return salesWithMetadata;
     },
     enabled: !!token && !!user?.id,
   });
@@ -60,7 +93,32 @@ export const usePurchasesData = () => {
       }
 
       const data = await response.json();
-      return data.purchases as SaleData[];
+      const purchases = data.purchases as SaleData[];
+
+      // Загрузка metadata для каждой покупки, если есть metadata_url
+      const purchasesWithMetadata = await Promise.all(
+        purchases.map(async (purchase) => {
+          if (purchase.metadata_url && !purchase.metadata) {
+            try {
+              const metadata = await fetchMetadata(purchase.metadata_url);
+              return { ...purchase, metadata };
+            } catch (error) {
+              console.error('Failed to fetch metadata:', error);
+              return {
+                ...purchase,
+                metadata: {
+                  name: 'Unknown Token',
+                  description: 'Metadata unavailable',
+                  image: '/placeholder.svg'
+                }
+              };
+            }
+          }
+          return purchase;
+        })
+      );
+
+      return purchasesWithMetadata;
     },
     enabled: !!token && !!user?.id,
   });
