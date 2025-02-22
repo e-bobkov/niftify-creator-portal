@@ -2,15 +2,17 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { format } from "date-fns";
+import { Token } from "@/types/user";
 
 const TokenDetails = () => {
   const { collectionId, tokenId } = useParams();
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const { data: tokenDetails, isLoading } = useQuery({
+  const { data: tokenData, isLoading } = useQuery<{ token: Token }>({
     queryKey: ['token', collectionId, tokenId],
     queryFn: async () => {
       const response = await fetch('https://test.ftsoa.art/profile/token', {
@@ -48,6 +50,12 @@ const TokenDetails = () => {
     );
   }
 
+  const tokenDetails = tokenData?.token;
+
+  if (!tokenDetails) {
+    return null;
+  }
+
   return (
     <div className="container mx-auto px-4 py-24 max-w-4xl">
       <div className="mb-8">
@@ -57,15 +65,40 @@ const TokenDetails = () => {
           className="flex items-center gap-2"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back
+          Back to Collection
         </Button>
       </div>
 
       <div className="glass-card rounded-lg p-6">
-        <h1 className="text-3xl font-bold mb-6">Token Details</h1>
-        <pre className="bg-muted p-4 rounded-lg overflow-auto">
-          {JSON.stringify(tokenDetails, null, 2)}
-        </pre>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="aspect-square relative rounded-lg overflow-hidden">
+            <img 
+              src={tokenDetails.metadata.image} 
+              alt={tokenDetails.metadata.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-4">{tokenDetails.metadata.name}</h1>
+              <p className="text-muted-foreground">{tokenDetails.metadata.description}</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-primary" />
+                <span className="text-sm">
+                  Minted: {format(new Date(tokenDetails.minted_at), 'PP')}
+                </span>
+              </div>
+              {tokenDetails.price && (
+                <div className="text-lg font-semibold">
+                  Price: ${tokenDetails.price.toFixed(2)}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

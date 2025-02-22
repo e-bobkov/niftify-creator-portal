@@ -11,6 +11,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Collection from "@/pages/Collection";
+import TokenDetails from "@/pages/TokenDetails";
 import { PrivateRoute } from "@/components/PrivateRoute";
 
 const queryClient = new QueryClient();
