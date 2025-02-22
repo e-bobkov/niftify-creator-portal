@@ -2,15 +2,29 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Share2, DollarSign } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Share2, 
+  DollarSign, 
+  Info, 
+  FileText, 
+  Hash, 
+  Package, 
+  Link as LinkIcon,
+  Calendar,
+  ChevronDown,
+  ChevronUp
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Token } from "@/types/user";
+import { useState } from "react";
 
 const TokenDetails = () => {
   const { collectionId, tokenId } = useParams();
   const { token } = useAuth();
   const navigate = useNavigate();
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const { data: tokensData, isLoading } = useQuery({
     queryKey: ['collection-tokens', collectionId],
@@ -64,6 +78,17 @@ const TokenDetails = () => {
     }).catch(console.error);
   };
 
+  const handleContractClick = () => {
+    if (tokenDetails.address) {
+      window.open(`https://polygonscan.com/address/${tokenDetails.address}`, '_blank');
+    }
+  };
+
+  const truncateAddress = (address: string) => {
+    if (!address) return 'N/A';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
+
   return (
     <div className="container mx-auto px-4 py-24 max-w-5xl">
       <div className="flex justify-between items-center mb-8">
@@ -75,16 +100,15 @@ const TokenDetails = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Collection
         </Button>
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={handleShare}
-            className="flex items-center gap-2"
-          >
-            <Share2 className="w-4 h-4" />
-          </Button>
-        </div>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={handleShare}
+          className="flex items-center gap-2"
+        >
+          <Share2 className="w-4 h-4" />
+          Share
+        </Button>
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden">
@@ -103,37 +127,82 @@ const TokenDetails = () => {
 
         <div className="p-6 space-y-6">
           <div>
-            <h1 className="text-2xl font-bold mb-2">{tokenDetails.metadata.name}</h1>
-            <div className="text-sm text-muted-foreground">
-              {tokenDetails.metadata.description}
+            <h1 className="text-2xl font-bold mb-4">{tokenDetails.metadata.name}</h1>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2">
+                <Info className="w-4 h-4 text-primary mt-1 shrink-0" />
+                <div>
+                  <h2 className="text-sm font-medium mb-2">Description</h2>
+                  <div className={`text-sm text-muted-foreground relative ${!isDescriptionExpanded ? 'max-h-20 overflow-hidden' : ''}`}>
+                    {tokenDetails.metadata.description}
+                    {tokenDetails.metadata.description.length > 100 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                      >
+                        {isDescriptionExpanded ? (
+                          <ChevronUp className="w-4 h-4" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4" />
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h2 className="font-medium text-lg">Details</h2>
+            <h2 className="font-medium text-lg flex items-center gap-2">
+              <FileText className="w-4 h-4 text-primary" />
+              Details
+            </h2>
             <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
               <div>
-                <div className="text-muted-foreground mb-1">Contract Address</div>
-                <div className="font-medium font-mono">{tokenDetails.address || 'N/A'}</div>
+                <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Contract Address
+                </div>
+                <button 
+                  onClick={handleContractClick}
+                  className="font-medium font-mono text-primary hover:underline cursor-pointer"
+                >
+                  {tokenDetails.address ? truncateAddress(tokenDetails.address) : 'N/A'}
+                </button>
               </div>
               
               <div>
-                <div className="text-muted-foreground mb-1">Token ID</div>
+                <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                  <Hash className="w-4 h-4" />
+                  Token ID
+                </div>
                 <div className="font-medium">#{tokenDetails.token_id}</div>
               </div>
               
               <div>
-                <div className="text-muted-foreground mb-1">Token Standard</div>
+                <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                  <Package className="w-4 h-4" />
+                  Token Standard
+                </div>
                 <div className="font-medium">{tokenDetails.standart || 'N/A'}</div>
               </div>
               
               <div>
-                <div className="text-muted-foreground mb-1">Chain</div>
+                <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                  <LinkIcon className="w-4 h-4" />
+                  Chain
+                </div>
                 <div className="font-medium">{tokenDetails.chain}</div>
               </div>
               
               <div>
-                <div className="text-muted-foreground mb-1">Last Updated</div>
+                <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Last Updated
+                </div>
                 <div className="font-medium">
                   {tokenDetails.updated_at 
                     ? format(new Date(tokenDetails.updated_at), 'PP')
@@ -142,7 +211,10 @@ const TokenDetails = () => {
               </div>
               
               <div>
-                <div className="text-muted-foreground mb-1">Minted</div>
+                <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Minted
+                </div>
                 <div className="font-medium">
                   {format(new Date(tokenDetails.minted_at), 'PP')}
                 </div>
@@ -152,12 +224,13 @@ const TokenDetails = () => {
 
           <div className="pt-4 border-t">
             {tokenDetails.sold_at ? (
-              <div className="text-sm text-muted-foreground">
+              <div className="text-sm text-red-500 font-medium flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
                 Sold on {format(new Date(tokenDetails.sold_at), 'PP')}
               </div>
             ) : tokenDetails.price ? (
               <div className="flex items-center gap-2 text-lg font-semibold">
-                <DollarSign className="w-5 h-5" />
+                <DollarSign className="w-5 h-5 text-primary" />
                 <span>${tokenDetails.price.toFixed(2)}</span>
               </div>
             ) : null}
