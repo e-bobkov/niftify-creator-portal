@@ -2,7 +2,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Calendar, Share2, DollarSign } from "lucide-react";
+import { ArrowLeft, Share2, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Token } from "@/types/user";
@@ -65,7 +65,7 @@ const TokenDetails = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-24 max-w-4xl">
+    <div className="container mx-auto px-4 py-24 max-w-5xl">
       <div className="flex justify-between items-center mb-8">
         <Button 
           variant="ghost" 
@@ -76,70 +76,84 @@ const TokenDetails = () => {
           Back to Collection
         </Button>
         <div className="flex items-center gap-4">
-          <span className="text-sm font-medium text-[#9b87f5]">NeonOracle</span>
           <Button 
-            variant="outline" 
+            variant="ghost" 
             size="sm"
             onClick={handleShare}
             className="flex items-center gap-2"
           >
             <Share2 className="w-4 h-4" />
-            Share
           </Button>
         </div>
       </div>
 
-      <div className="glass-card rounded-lg p-6 grid grid-cols-1 md:grid-cols-[1fr,1.5fr] gap-8">
-        <div className="aspect-square relative rounded-lg overflow-hidden">
+      <div className="glass-card rounded-xl overflow-hidden">
+        <div className="aspect-[16/9] relative">
           <img 
             src={tokenDetails.metadata.image} 
             alt={tokenDetails.metadata.name}
             className="w-full h-full object-cover"
           />
+          <div className="absolute top-4 left-4">
+            <span className="text-sm font-medium text-primary bg-background/80 px-3 py-1 rounded-full backdrop-blur-sm">
+              NeonOracle
+            </span>
+          </div>
         </div>
 
-        <div className="space-y-8">
+        <div className="p-6 space-y-6">
           <div>
-            <h1 className="text-2xl font-bold mb-6">{tokenDetails.metadata.name}</h1>
-            <div className="prose prose-sm max-w-none text-muted-foreground">
+            <h1 className="text-2xl font-bold mb-2">{tokenDetails.metadata.name}</h1>
+            <div className="text-sm text-muted-foreground">
               {tokenDetails.metadata.description}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold mb-4">Details</h2>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div className="text-muted-foreground">Contract Address</div>
-              <div className="font-medium">{tokenDetails.address || 'N/A'}</div>
-              
-              <div className="text-muted-foreground">Token ID</div>
-              <div className="font-medium">#{tokenDetails.token_id}</div>
-              
-              <div className="text-muted-foreground">Token Standard</div>
-              <div className="font-medium">{tokenDetails.standart || 'N/A'}</div>
-              
-              <div className="text-muted-foreground">Chain</div>
-              <div className="font-medium">{tokenDetails.chain}</div>
-              
-              <div className="text-muted-foreground">Last Updated</div>
-              <div className="font-medium">
-                {tokenDetails.updated_at 
-                  ? format(new Date(tokenDetails.updated_at), 'PP') 
-                  : 'N/A'}
+          <div className="space-y-4">
+            <h2 className="font-medium text-lg">Details</h2>
+            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
+              <div>
+                <div className="text-muted-foreground mb-1">Contract Address</div>
+                <div className="font-medium font-mono">{tokenDetails.address || 'N/A'}</div>
               </div>
               
-              <div className="text-muted-foreground">Minted</div>
-              <div className="font-medium">
-                {format(new Date(tokenDetails.minted_at), 'PP')}
+              <div>
+                <div className="text-muted-foreground mb-1">Token ID</div>
+                <div className="font-medium">#{tokenDetails.token_id}</div>
+              </div>
+              
+              <div>
+                <div className="text-muted-foreground mb-1">Token Standard</div>
+                <div className="font-medium">{tokenDetails.standart || 'N/A'}</div>
+              </div>
+              
+              <div>
+                <div className="text-muted-foreground mb-1">Chain</div>
+                <div className="font-medium">{tokenDetails.chain}</div>
+              </div>
+              
+              <div>
+                <div className="text-muted-foreground mb-1">Last Updated</div>
+                <div className="font-medium">
+                  {tokenDetails.updated_at 
+                    ? format(new Date(tokenDetails.updated_at), 'PP')
+                    : 'N/A'}
+                </div>
+              </div>
+              
+              <div>
+                <div className="text-muted-foreground mb-1">Minted</div>
+                <div className="font-medium">
+                  {format(new Date(tokenDetails.minted_at), 'PP')}
+                </div>
               </div>
             </div>
           </div>
 
           <div className="pt-4 border-t">
             {tokenDetails.sold_at ? (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Calendar className="w-4 h-4" />
-                <span>Sold on {format(new Date(tokenDetails.sold_at), 'PP')}</span>
+              <div className="text-sm text-muted-foreground">
+                Sold on {format(new Date(tokenDetails.sold_at), 'PP')}
               </div>
             ) : tokenDetails.price ? (
               <div className="flex items-center gap-2 text-lg font-semibold">
