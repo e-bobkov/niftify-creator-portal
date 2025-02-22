@@ -12,28 +12,28 @@ const TokenDetails = () => {
   const { token } = useAuth();
   const navigate = useNavigate();
 
-  const { data: tokenData, isLoading } = useQuery<{ token: Token }>({
-    queryKey: ['token', collectionId, tokenId],
-    queryFn: async () => {
-      const response = await fetch('https://test.ftsoa.art/profile/token', {
+  const { data: tokensData, isLoading } = useQuery({
+    queryKey: ['collection-tokens', collectionId],
+    queryFn: async (): Promise<Token[]> => {
+      const response = await fetch('https://test.ftsoa.art/profile/tokens', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          collection_id: collectionId,
-          token_id: tokenId
+          collection_id: collectionId
         })
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch token details');
+        throw new Error('Failed to fetch tokens');
       }
 
-      return response.json();
+      const data = await response.json();
+      return data.tokens;
     },
-    enabled: !!token && !!collectionId && !!tokenId
+    enabled: !!token && !!collectionId
   });
 
   if (isLoading) {
@@ -50,7 +50,7 @@ const TokenDetails = () => {
     );
   }
 
-  const tokenDetails = tokenData?.token;
+  const tokenDetails = tokensData?.find(t => t.id.toString() === tokenId);
 
   if (!tokenDetails) {
     return null;
