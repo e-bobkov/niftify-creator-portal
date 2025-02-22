@@ -17,11 +17,11 @@ import {
 
 const Collection = () => {
   const { id } = useParams();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
 
-  const { data: tokens, isLoading, error } = useQuery({
-    queryKey: ['collection', id],
+  const { data: tokens, isLoading: tokensLoading, error: tokensError } = useQuery({
+    queryKey: ['collection-tokens', id],
     queryFn: async (): Promise<Token[]> => {
       const response = await fetch('https://test.ftsoa.art/profile/tokens', {
         method: 'POST',
@@ -44,9 +44,9 @@ const Collection = () => {
     enabled: !!token && !!id
   });
 
-  const { data: collection } = useQuery({
-    queryKey: ['collection-info', id],
-    queryFn: async (): Promise<CollectionType> => {
+  const { data: collections, isLoading: collectionLoading } = useQuery({
+    queryKey: ['collections', user?.id],
+    queryFn: async (): Promise<{ collections: CollectionType[] }> => {
       const response = await fetch('https://test.ftsoa.art/profile/collections', {
         method: 'POST',
         headers: {
@@ -54,7 +54,7 @@ const Collection = () => {
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
-          collection_id: id
+          partner_id: user?.id
         })
       });
 
@@ -62,11 +62,13 @@ const Collection = () => {
         throw new Error('Failed to fetch collection');
       }
 
-      const data = await response.json();
-      return data.collection;
+      return response.json();
     },
-    enabled: !!token && !!id
+    enabled: !!token && !!user?.id
   });
+
+  const collection = collections?.collections.find(c => c.id === id);
+  const isLoading = tokensLoading || collectionLoading;
 
   const handleShare = (platform: 'twitter' | 'telegram' | 'facebook') => {
     const url = window.location.href;
@@ -100,7 +102,7 @@ const Collection = () => {
     );
   }
 
-  if (error) {
+  if (tokensError) {
     return (
       <div className="container mx-auto px-4 py-24 max-w-4xl">
         <div className="flex items-center gap-2 text-destructive">
