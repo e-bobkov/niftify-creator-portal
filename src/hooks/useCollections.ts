@@ -11,7 +11,7 @@ export const useCollections = () => {
     queryFn: () => fetchUserCollections(user?.id!, token!),
     enabled: !!token && !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 30, // 30 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 };
 
@@ -23,6 +23,6 @@ export const useCollectionTokens = (collectionId?: string) => {
     queryFn: () => fetchCollectionTokens(collectionId!, token!),
     enabled: !!token && !!collectionId,
     staleTime: 1000 * 60 * 5, // 5 minutes
-    cacheTime: 1000 * 60 * 30, // 30 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
   });
 };
