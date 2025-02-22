@@ -1,46 +1,13 @@
 
-import { useAuth } from "@/hooks/useAuth";
 import { Collection } from "@/types/user";
-import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useCollections } from "@/hooks/useCollections";
 
 export const ProfileCollections = ({ limit }: { limit?: number }) => {
-  const { token, user, logout } = useAuth();
   const navigate = useNavigate();
-
-  const { data: collections, isLoading, error } = useQuery({
-    queryKey: ['collections'],
-    queryFn: async (): Promise<Collection[]> => {
-      const response = await fetch('https://test.ftsoa.art/profile/collections', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          partner_id: user?.id
-        })
-      });
-
-      if (response.status === 401) {
-        logout();
-        localStorage.setItem('auth_error', 'true');
-        navigate('/auth');
-        throw new Error('Unauthorized');
-      }
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch collections');
-      }
-
-      const data = await response.json();
-      return data.collections;
-    },
-    enabled: !!token && !!user?.id
-  });
+  const { data: collections, isLoading, error } = useCollections();
 
   const displayedCollections = limit && collections 
     ? collections

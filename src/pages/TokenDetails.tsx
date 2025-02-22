@@ -1,47 +1,20 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
 import { ArrowLeft, Share2, DollarSign, Info, FileText, Hash, Package, Link as LinkIcon, Calendar, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { Token } from "@/types/user";
 import { useState } from "react";
+import { useCollectionTokens } from "@/hooks/useCollections";
+
 const TokenDetails = () => {
-  const {
-    collectionId,
-    tokenId
-  } = useParams();
-  const {
-    token
-  } = useAuth();
+  const { collectionId, tokenId } = useParams();
   const navigate = useNavigate();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
-  const {
-    data: tokensData,
-    isLoading
-  } = useQuery({
-    queryKey: ['collection-tokens', collectionId],
-    queryFn: async (): Promise<Token[]> => {
-      const response = await fetch('https://test.ftsoa.art/profile/tokens', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          collection_id: collectionId
-        })
-      });
-      if (!response.ok) {
-        throw new Error('Failed to fetch tokens');
-      }
-      const data = await response.json();
-      return data.tokens;
-    },
-    enabled: !!token && !!collectionId
-  });
+
+  const { data: tokensData, isLoading } = useCollectionTokens(collectionId);
+
   if (isLoading) {
-    return <div className="container mx-auto px-4 py-24 max-w-4xl">
+    return (
+      <div className="container mx-auto px-4 py-24 max-w-4xl">
         <div className="animate-pulse space-y-8">
           <div className="h-64 bg-primary/10 rounded-lg"></div>
           <div className="space-y-4">
@@ -49,12 +22,16 @@ const TokenDetails = () => {
             <div className="h-4 bg-primary/10 rounded w-2/3"></div>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
+
   const tokenDetails = tokensData?.find(t => t.id.toString() === tokenId);
+
   if (!tokenDetails) {
     return null;
   }
+
   const handleShare = () => {
     navigator.share?.({
       title: tokenDetails.metadata.name,
@@ -62,16 +39,20 @@ const TokenDetails = () => {
       url: window.location.href
     }).catch(console.error);
   };
+
   const handleContractClick = () => {
     if (tokenDetails.address) {
       window.open(`https://polygonscan.com/address/${tokenDetails.address}`, '_blank');
     }
   };
+
   const truncateAddress = (address: string) => {
     if (!address) return 'N/A';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
-  return <div className="container mx-auto px-4 py-24 max-w-5xl">
+
+  return (
+    <div className="container mx-auto px-4 py-24 max-w-5xl">
       <div className="flex justify-between items-center mb-8">
         <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
@@ -183,6 +164,8 @@ const TokenDetails = () => {
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default TokenDetails;

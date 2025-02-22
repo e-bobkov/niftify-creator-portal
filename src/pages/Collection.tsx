@@ -1,12 +1,11 @@
+
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/hooks/useAuth";
-import { Collection as CollectionType, Token } from "@/types/user";
-import { NFTCard } from "@/components/NFTCard";
 import { AlertCircle, ArrowLeft, Calendar, Database, ExternalLink, Link as LinkIcon, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Separator } from "@/components/ui/separator";
+import { NFTCard } from "@/components/NFTCard";
+import { useCollections, useCollectionTokens } from "@/hooks/useCollections";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,57 +15,12 @@ import {
 
 const Collection = () => {
   const { id } = useParams();
-  const { token, user } = useAuth();
   const navigate = useNavigate();
 
-  const { data: tokens, isLoading: tokensLoading, error: tokensError } = useQuery({
-    queryKey: ['collection-tokens', id],
-    queryFn: async (): Promise<Token[]> => {
-      const response = await fetch('https://test.ftsoa.art/profile/tokens', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          collection_id: id
-        })
-      });
+  const { data: tokens, isLoading: tokensLoading, error: tokensError } = useCollectionTokens(id);
+  const { data: collections, isLoading: collectionLoading } = useCollections();
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch tokens');
-      }
-
-      const data = await response.json();
-      return data.tokens;
-    },
-    enabled: !!token && !!id
-  });
-
-  const { data: collections, isLoading: collectionLoading } = useQuery({
-    queryKey: ['collections', user?.id],
-    queryFn: async (): Promise<{ collections: CollectionType[] }> => {
-      const response = await fetch('https://test.ftsoa.art/profile/collections', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          partner_id: user?.id
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch collection');
-      }
-
-      return response.json();
-    },
-    enabled: !!token && !!user?.id
-  });
-
-  const collection = collections?.collections.find(c => c.id === id);
+  const collection = collections?.find(c => c.id === id);
   const isLoading = tokensLoading || collectionLoading;
 
   const handleShare = (platform: 'twitter' | 'telegram' | 'facebook') => {
