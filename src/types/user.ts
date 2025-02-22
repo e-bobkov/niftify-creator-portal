@@ -17,5 +17,8 @@ export interface Collection {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  contract_address: string;
+  image_url: string;
+  created_at: string;
 }
+
