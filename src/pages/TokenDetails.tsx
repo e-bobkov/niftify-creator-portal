@@ -1,14 +1,16 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, DollarSign, Info, FileText, Hash, Package, Link as LinkIcon, Calendar, ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowLeft, Share2, DollarSign, Info, FileText, Hash, Package, Link as LinkIcon, Calendar, ChevronDown, ChevronUp, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useState } from "react";
 import { useCollectionTokens } from "@/hooks/useCollections";
+import { ImageViewer } from "@/components/ui/image-viewer";
 
 const TokenDetails = () => {
   const { collectionId, tokenId } = useParams();
   const navigate = useNavigate();
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false);
 
   const { data: tokensData, isLoading } = useCollectionTokens(collectionId);
 
@@ -66,12 +68,19 @@ const TokenDetails = () => {
 
       <div className="glass-card rounded-xl overflow-hidden">
         <div className="aspect-[16/9] relative">
-          <img src={tokenDetails.metadata.image} alt={tokenDetails.metadata.name} className="w-full h-full object-cover" />
-          <div className="absolute top-4 left-4">
-            <span className="text-sm font-medium text-primary bg-background/80 px-3 py-1 rounded-full backdrop-blur-sm cursor-pointer">
-              NeonOracle
-            </span>
-          </div>
+          <img 
+            src={tokenDetails.metadata.image} 
+            alt={tokenDetails.metadata.name} 
+            className="w-full h-full object-cover"
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            className="absolute bottom-4 left-4 bg-background/80 backdrop-blur-sm"
+            onClick={() => setIsImageViewerOpen(true)}
+          >
+            <Maximize2 className="w-4 h-4" />
+          </Button>
         </div>
 
         <div className="p-6 space-y-6">
