@@ -1,3 +1,4 @@
+
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Share2, DollarSign, Info, FileText, Hash, Package, Link as LinkIcon, Calendar, ChevronDown, ChevronUp, Maximize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -88,7 +89,6 @@ const TokenDetails = () => {
             <h1 className="text-2xl font-bold mb-4">{tokenDetails.metadata.name}</h1>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
-                
                 <div>
                   <h2 className="text-sm font-medium mb-2">Description</h2>
                   <div className={`text-sm text-muted-foreground relative ${!isDescriptionExpanded ? 'max-h-20 overflow-hidden' : ''}`}>
@@ -101,10 +101,7 @@ const TokenDetails = () => {
           </div>
 
           <div className="space-y-4">
-            <h2 className="font-medium text-lg flex items-center gap-2">
-              
-              Details
-            </h2>
+            <h2 className="font-medium text-lg flex items-center gap-2">Details</h2>
             <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
               <div>
                 <div className="text-muted-foreground mb-1 flex items-center gap-2">
@@ -163,16 +160,26 @@ const TokenDetails = () => {
           </div>
 
           <div className="pt-4 border-t">
-            {tokenDetails.sold_at ? <div className="text-sm text-red-500 font-medium flex items-center gap-2">
+            {tokenDetails.sold_at ? (
+              <div className="text-sm text-red-500 font-medium flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
                 Sold on {format(new Date(tokenDetails.sold_at), 'PP')}
-              </div> : tokenDetails.price ? <div className="flex items-center gap-2 text-lg font-semibold">
-                
+              </div>
+            ) : tokenDetails.price ? (
+              <div className="flex items-center gap-2 text-lg font-semibold">
                 <span>${tokenDetails.price.toFixed(2)}</span>
-              </div> : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
+
+      <ImageViewer
+        src={tokenDetails.metadata.image}
+        alt={tokenDetails.metadata.name}
+        isOpen={isImageViewerOpen}
+        onClose={() => setIsImageViewerOpen(false)}
+      />
     </div>
   );
 };

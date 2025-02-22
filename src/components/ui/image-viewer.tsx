@@ -15,7 +15,7 @@ export const ImageViewer = ({ src, alt, isOpen, onClose }: ImageViewerProps) => 
       <img 
         src={src} 
         alt={alt} 
-        className="w-full h-full object-contain"
+        className="w-full h-full object-scale-down"
         onClick={(e) => e.stopPropagation()}
       />
     </DialogContent>
