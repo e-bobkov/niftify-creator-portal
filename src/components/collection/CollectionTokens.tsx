@@ -72,4 +72,4 @@ export const CollectionTokens = ({ tokens, collectionId }: CollectionTokensProps
       )}
     </div>
   );
-});
+};
