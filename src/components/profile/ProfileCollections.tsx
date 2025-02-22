@@ -6,12 +6,10 @@ import { format } from "date-fns";
 import { AlertCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useToast } from "@/hooks/use-toast";
 
 export const ProfileCollections = () => {
   const { token, user, logout } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const { data: collections, isLoading, error } = useQuery({
     queryKey: ['collections'],
@@ -29,17 +27,8 @@ export const ProfileCollections = () => {
 
       if (response.status === 401) {
         logout();
+        localStorage.setItem('auth_error', 'true');
         navigate('/auth');
-        toast({
-          description: (
-            <Alert variant="default" className="border-primary bg-primary/10">
-              <AlertCircle className="h-4 w-4 text-primary" />
-              <AlertDescription className="text-primary">
-                Please sign in again to continue.
-              </AlertDescription>
-            </Alert>
-          )
-        });
         throw new Error('Unauthorized');
       }
 

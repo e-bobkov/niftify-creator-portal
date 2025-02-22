@@ -1,5 +1,5 @@
 
-import { useState, memo } from "react";
+import { useState, memo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -64,6 +64,15 @@ const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showEmailAlert, setShowEmailAlert] = useState(false);
+  const [showAuthError, setShowAuthError] = useState(false);
+
+  useEffect(() => {
+    const hasAuthError = localStorage.getItem('auth_error');
+    if (hasAuthError) {
+      setShowAuthError(true);
+      localStorage.removeItem('auth_error');
+    }
+  }, []);
 
   const authMutation = useMutation({
     mutationFn: async () => {
@@ -80,6 +89,7 @@ const Auth = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setShowAuthError(false);
     authMutation.mutate();
   };
 
@@ -107,6 +117,18 @@ const Auth = () => {
           </Alert>
         )}
 
+        {showAuthError && (
+          <Alert 
+            variant="default" 
+            className="border-primary bg-primary/10 animate-fade-in"
+          >
+            <AlertCircle className="h-4 w-4 text-primary" />
+            <AlertDescription className="text-primary">
+              Please sign in again to continue.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <AuthForm 
           isLogin={isLogin}
           email={email}
@@ -122,6 +144,7 @@ const Auth = () => {
             onClick={() => {
               setIsLogin(!isLogin);
               setShowEmailAlert(false);
+              setShowAuthError(false);
             }}
             className="text-primary hover:underline transition-all duration-300"
           >
