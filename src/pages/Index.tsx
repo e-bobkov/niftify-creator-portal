@@ -25,7 +25,14 @@ const FEATURED_NFTS = [
 const NFTGrid = memo(({ nfts }: { nfts: typeof FEATURED_NFTS }) => (
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-fade-in">
     {nfts.map((nft) => (
-      <NFTCard key={nft.id} {...nft} />
+      <NFTCard 
+        key={nft.id} 
+        id={nft.id} 
+        collectionId="featured"
+        title={nft.title} 
+        image={nft.image} 
+        price={nft.price} 
+      />
     ))}
   </div>
 ));
