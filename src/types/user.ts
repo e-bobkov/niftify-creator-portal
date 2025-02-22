@@ -31,6 +31,9 @@ export interface Token {
   sold_at: string | null;
   address: string | null;
   price: number | null;
+  standart: string | null;
+  chain: string;
+  updated_at: string | null;
   metadata: {
     name: string;
     description: string;

@@ -2,7 +2,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
-import { ArrowLeft, Calendar } from "lucide-react";
+import { ArrowLeft, Calendar, Share2, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Token } from "@/types/user";
@@ -56,9 +56,17 @@ const TokenDetails = () => {
     return null;
   }
 
+  const handleShare = () => {
+    navigator.share?.({
+      title: tokenDetails.metadata.name,
+      text: tokenDetails.metadata.description,
+      url: window.location.href
+    }).catch(console.error);
+  };
+
   return (
     <div className="container mx-auto px-4 py-24 max-w-4xl">
-      <div className="mb-8">
+      <div className="flex justify-between items-center mb-8">
         <Button 
           variant="ghost" 
           onClick={() => navigate(-1)}
@@ -67,36 +75,78 @@ const TokenDetails = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Collection
         </Button>
+        <div className="flex items-center gap-4">
+          <span className="text-sm font-medium text-[#9b87f5]">NeonOracle</span>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={handleShare}
+            className="flex items-center gap-2"
+          >
+            <Share2 className="w-4 h-4" />
+            Share
+          </Button>
+        </div>
       </div>
 
-      <div className="glass-card rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="aspect-square relative rounded-lg overflow-hidden">
-            <img 
-              src={tokenDetails.metadata.image} 
-              alt={tokenDetails.metadata.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-3xl font-bold mb-4">{tokenDetails.metadata.name}</h1>
-              <p className="text-muted-foreground">{tokenDetails.metadata.description}</p>
-            </div>
+      <div className="glass-card rounded-lg p-6 grid grid-cols-1 md:grid-cols-[1fr,1.5fr] gap-8">
+        <div className="aspect-square relative rounded-lg overflow-hidden">
+          <img 
+            src={tokenDetails.metadata.image} 
+            alt={tokenDetails.metadata.name}
+            className="w-full h-full object-cover"
+          />
+        </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span className="text-sm">
-                  Minted: {format(new Date(tokenDetails.minted_at), 'PP')}
-                </span>
-              </div>
-              {tokenDetails.price && (
-                <div className="text-lg font-semibold">
-                  Price: ${tokenDetails.price.toFixed(2)}
-                </div>
-              )}
+        <div className="space-y-8">
+          <div>
+            <h1 className="text-2xl font-bold mb-6">{tokenDetails.metadata.name}</h1>
+            <div className="prose prose-sm max-w-none text-muted-foreground">
+              {tokenDetails.metadata.description}
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold mb-4">Details</h2>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="text-muted-foreground">Contract Address</div>
+              <div className="font-medium">{tokenDetails.address || 'N/A'}</div>
+              
+              <div className="text-muted-foreground">Token ID</div>
+              <div className="font-medium">#{tokenDetails.token_id}</div>
+              
+              <div className="text-muted-foreground">Token Standard</div>
+              <div className="font-medium">{tokenDetails.standart || 'N/A'}</div>
+              
+              <div className="text-muted-foreground">Chain</div>
+              <div className="font-medium">{tokenDetails.chain}</div>
+              
+              <div className="text-muted-foreground">Last Updated</div>
+              <div className="font-medium">
+                {tokenDetails.updated_at 
+                  ? format(new Date(tokenDetails.updated_at), 'PP') 
+                  : 'N/A'}
+              </div>
+              
+              <div className="text-muted-foreground">Minted</div>
+              <div className="font-medium">
+                {format(new Date(tokenDetails.minted_at), 'PP')}
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t">
+            {tokenDetails.sold_at ? (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="w-4 h-4" />
+                <span>Sold on {format(new Date(tokenDetails.sold_at), 'PP')}</span>
+              </div>
+            ) : tokenDetails.price ? (
+              <div className="flex items-center gap-2 text-lg font-semibold">
+                <DollarSign className="w-5 h-5" />
+                <span>${tokenDetails.price.toFixed(2)}</span>
+              </div>
+            ) : null}
           </div>
         </div>
       </div>
