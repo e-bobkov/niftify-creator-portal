@@ -53,6 +53,7 @@ const Collection = () => {
             collection={collection} 
             tokensCount={tokens?.length || 0}
             onShare={handleShare}
+            tokens={tokens || []}
           />
           <CollectionTokens 
             tokens={tokens || []} 

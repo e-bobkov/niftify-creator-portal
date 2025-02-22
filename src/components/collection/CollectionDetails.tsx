@@ -1,9 +1,9 @@
 
-import { Calendar, Database, ExternalLink, Link as LinkIcon, Share2 } from "lucide-react";
+import { Calendar, Database, ExternalLink, Link as LinkIcon, Share2, Tag, ShoppingBag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
-import { Collection } from "@/types/user";
+import { Collection, Token } from "@/types/user";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,9 +16,13 @@ interface CollectionDetailsProps extends BaseComponentProps {
   collection: Collection;
   tokensCount: number;
   onShare: (platform: 'twitter' | 'telegram' | 'facebook') => void;
+  tokens?: Token[];
 }
 
-export const CollectionDetails = ({ collection, tokensCount, onShare }: CollectionDetailsProps) => {
+export const CollectionDetails = ({ collection, tokensCount, onShare, tokens = [] }: CollectionDetailsProps) => {
+  const availableTokens = tokens.filter(token => !token.sold_at).length;
+  const soldTokens = tokens.filter(token => token.sold_at).length;
+
   return (
     <div className="glass-card rounded-lg p-6 mb-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -42,6 +46,18 @@ export const CollectionDetails = ({ collection, tokensCount, onShare }: Collecti
               <Database className="w-4 h-4 text-primary" />
               <span className="text-sm">
                 {tokensCount} tokens minted
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Tag className="w-4 h-4 text-primary" />
+              <span className="text-sm">
+                {availableTokens} available
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <ShoppingBag className="w-4 h-4 text-primary" />
+              <span className="text-sm">
+                {soldTokens} sold
               </span>
             </div>
             <div className="flex items-center gap-2">
