@@ -106,6 +106,8 @@ export const useAuth = create<AuthState>()(
 
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false });
+        // Очищаем localStorage от данных авторизации
+        localStorage.removeItem('auth-storage');
       },
     }),
     {

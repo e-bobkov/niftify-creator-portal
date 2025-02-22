@@ -85,7 +85,7 @@ export const ProfileCollections = ({ limit }: { limit?: number }) => {
         <div 
           key={collection.id} 
           className="group cursor-pointer" 
-          onClick={() => navigate(`/collection/${collection.id}`)}
+          onClick={() => navigate(`/my-collection/${collection.id}`)}
         >
           <div className="glass-card rounded-lg overflow-hidden">
             <div className="relative aspect-square">
