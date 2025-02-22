@@ -87,11 +87,11 @@ const Collection = () => {
             {tokens.map((token) => (
               <NFTCard
                 key={token.id}
-                id={token.id}
+                id={token.id.toString()}
                 title={token.metadata.name}
                 image={token.metadata.image}
-                price={token.total_amount}
-                creator={token.partner_id}
+                price={token.price || 0}
+                creator=""
                 likes={0}
               />
             ))}
