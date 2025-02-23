@@ -137,7 +137,7 @@ const Index = () => {
                   onClick={() => navigate('/create')}
                 >
                   <Sparkles className="mr-2" />
-                  Начать творить сейчас
+                  Start Creating Now
                 </Button>
               </div>
             </div>
