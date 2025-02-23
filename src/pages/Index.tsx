@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Collection } from "@/types/user";
 import { format } from "date-fns";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, TrendingUp, Users, CircleDollarSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface TopCollection extends Collection {
@@ -20,50 +20,67 @@ const HotCollection = memo(({ collection, soldCount }: { collection: Collection;
   const navigate = useNavigate();
 
   return (
-    <div className="glass-card rounded-lg overflow-hidden">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
-        <div className="aspect-square relative rounded-lg overflow-hidden">
-          <img 
-            src={collection.image_url} 
-            alt={collection.name}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      {/* Статистика слева */}
+      <div className="lg:col-span-3 grid grid-cols-1 gap-6">
+        <div className="glass-card p-6 text-center transform hover:scale-105 transition-transform duration-300">
+          <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
+          <p className="text-2xl font-bold text-primary">{soldCount}</p>
+          <p className="text-sm text-muted-foreground">Total Sales</p>
         </div>
-        <div className="space-y-6 flex flex-col justify-between">
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-3xl font-bold mb-2">{collection.name}</h2>
-              <p className="text-muted-foreground">{collection.description}</p>
-            </div>
+        
+        <div className="glass-card p-6 text-center transform hover:scale-105 transition-transform duration-300">
+          <TrendingUp className="w-8 h-8 mx-auto mb-2 text-primary" />
+          <p className="text-2xl font-bold text-primary">
+            {format(new Date(collection.created_at), 'MMM dd')}
+          </p>
+          <p className="text-sm text-muted-foreground">Created</p>
+        </div>
+        
+        <div className="glass-card p-6 text-center transform hover:scale-105 transition-transform duration-300">
+          <CircleDollarSign className="w-8 h-8 mx-auto mb-2 text-primary" />
+          <p className="text-2xl font-bold text-primary">{(soldCount * 0.1).toFixed(1)}K</p>
+          <p className="text-sm text-muted-foreground">Volume</p>
+        </div>
+      </div>
 
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Total Sales</p>
-                <p className="text-2xl font-bold text-primary">{soldCount}</p>
+      {/* Карточка коллекции */}
+      <div className="lg:col-span-9">
+        <div className="glass-card rounded-lg overflow-hidden transform lg:-rotate-1 hover:rotate-0 transition-transform duration-500">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+            <div className="aspect-square relative rounded-lg overflow-hidden">
+              <img 
+                src={collection.image_url} 
+                alt={collection.name}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+            <div className="space-y-6 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-3xl font-bold mb-2">{collection.name}</h3>
+                  <p className="text-muted-foreground">{collection.description}</p>
+                </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">Created</p>
-                <p className="text-base">{format(new Date(collection.created_at), 'PP')}</p>
+
+              <div className="flex flex-col gap-4">
+                <a
+                  href={`https://polygonscan.com/address/${collection.contract_address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View on PolygonScan
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+                <Button 
+                  className="w-full"
+                  onClick={() => navigate(`/my-collection/${collection.id}`)}
+                >
+                  Explore Collection
+                </Button>
               </div>
             </div>
-          </div>
-
-          <div className="flex flex-col gap-4">
-            <a
-              href={`https://polygonscan.com/address/${collection.contract_address}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary hover:underline inline-flex items-center gap-2"
-            >
-              View on PolygonScan
-              <ExternalLink className="w-4 h-4" />
-            </a>
-            <Button 
-              className="w-full"
-              onClick={() => navigate(`/my-collection/${collection.id}`)}
-            >
-              Explore Collection
-            </Button>
           </div>
         </div>
       </div>
@@ -115,9 +132,12 @@ const Index = () => {
               </div>
             </div>
           ) : topCollection ? (
-            <div>
-              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
-                🔥 Hot Collection
+            <div className="space-y-8">
+              <h2 className="text-[8rem] font-bold text-center leading-none tracking-tighter">
+                <span className="text-muted-foreground">#</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/50">
+                  HOT COLLECTION
+                </span>
               </h2>
               <HotCollection 
                 collection={topCollection.collection} 
