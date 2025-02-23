@@ -228,8 +228,8 @@ const Create = () => {
                         <Upload className="w-8 h-8 text-primary mb-2" />
                         <span className="text-sm text-muted-foreground">
                           {form.artworks.length > 0 
-                            ? `${form.artworks.length} files selected`
-                            : "Click to upload your artworks"}
+                            ? `${form.artworks.length} файлов выбрано`
+                            : "Нажмите чтобы загрузить работы"}
                         </span>
                       </label>
                     </div>
@@ -261,10 +261,10 @@ const Create = () => {
                   {step === formBlocks.length - 1 ? (
                     <>
                       <Send className="mr-2" />
-                      Submit Application
+                      Отправить заявку
                     </>
                   ) : (
-                    "Next Step"
+                    "Следующий шаг"
                   )}
                 </Button>
               </div>
