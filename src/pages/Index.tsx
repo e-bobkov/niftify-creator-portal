@@ -1,11 +1,12 @@
 
-import { memo } from "react";
+import { memo, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Collection } from "@/types/user";
 import { format } from "date-fns";
 import { ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { AnimatedPixels } from "@/components/AnimatedPixels";
 
 interface TopCollection extends Collection {
   sold_count: number;
@@ -18,9 +19,11 @@ interface TopCollectionResponse {
 
 const HotCollection = memo(({ collection, soldCount }: { collection: Collection; soldCount: number }) => {
   const navigate = useNavigate();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="glass-card rounded-lg overflow-hidden">
+    <div className="glass-card rounded-lg overflow-hidden relative" ref={containerRef}>
+      <AnimatedPixels containerRef={containerRef} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
         <div className="aspect-square relative rounded-lg overflow-hidden">
           <img 
