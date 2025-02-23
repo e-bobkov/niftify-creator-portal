@@ -84,6 +84,12 @@
     will-change: transform;
   }
 
+  .animate-flip-down {
+    animation: flipDown 0.6s ease-out;
+    transform-origin: top;
+    will-change: transform;
+  }
+
   .glass-card {
     @apply bg-secondary/30 backdrop-blur-md border border-white/10 shadow-xl;
     transition: transform 0.2s ease-out;
@@ -91,8 +97,20 @@
     backface-visibility: hidden;
   }
 
-  .glass-card:hover {
-    transform: translateY(-2px);
+  .canvas-card {
+    @apply bg-secondary border border-white/10;
+    box-shadow: 
+      0 1px 1px rgba(0,0,0,0.12),
+      0 2px 2px rgba(0,0,0,0.12),
+      0 4px 4px rgba(0,0,0,0.12),
+      0 8px 8px rgba(0,0,0,0.12);
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+
+  .canvas-card.completed {
+    animation: flipDown 0.6s ease-out forwards;
+    transform-origin: top;
   }
 }
 
@@ -126,5 +144,16 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes flipDown {
+  0% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: rotateX(-180deg);
+    opacity: 0.3;
   }
 }

@@ -93,9 +93,13 @@ const InfoBlock = ({
 
   return (
     <div 
-      className={`glass-card transition-all duration-500 ${
-        isActive ? 'p-6 space-y-4' : 'p-4'
-      } ${isCompleted ? 'scale-95 opacity-80' : ''}`}
+      className={`canvas-card relative transition-all duration-500 ${
+        isActive ? 'p-6 space-y-4 z-20 bg-secondary' : 'p-4 -mt-2'
+      } ${isCompleted ? 'completed -mt-4 z-10' : ''} rounded-lg`}
+      style={{
+        transformStyle: 'preserve-3d',
+        perspective: '1000px'
+      }}
     >
       <div 
         className="flex items-center gap-3 cursor-pointer"
@@ -112,7 +116,7 @@ const InfoBlock = ({
       </div>
 
       {isActive && (
-        <div className="space-y-4 animate-slideDown">
+        <div className="space-y-4 animate-fade-in">
           {block.fields.map(field => (
             field.isTextarea ? (
               <Textarea
