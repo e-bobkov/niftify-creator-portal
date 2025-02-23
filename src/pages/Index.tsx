@@ -5,13 +5,16 @@ import { Collection } from "@/types/user";
 import { format } from "date-fns";
 import { ExternalLink, TrendingUp, Users, CircleDollarSign, Palette, DollarSign, Rocket, Sparkles, Shield, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
 interface TopCollection extends Collection {
   sold_count: number;
 }
+
 interface TopCollectionResponse {
   collection: Collection;
   sold_count: number;
 }
+
 const PlatformFeature = ({
   icon: Icon,
   title,
@@ -25,6 +28,7 @@ const PlatformFeature = ({
     <h3 className="text-xl font-bold mb-2">{title}</h3>
     <p className="text-muted-foreground">{description}</p>
   </div>;
+
 const PolygonFeature = ({
   icon: Icon,
   title,
@@ -47,6 +51,7 @@ const PolygonFeature = ({
       <p className="text-muted-foreground text-sm leading-relaxed">{description}</p>
     </div>
   </div>;
+
 const HotCollection = memo(({
   collection,
   soldCount
@@ -109,7 +114,9 @@ const HotCollection = memo(({
       </div>
     </div>;
 });
+
 HotCollection.displayName = 'HotCollection';
+
 const Index = () => {
   const navigate = useNavigate();
   const {
@@ -126,15 +133,16 @@ const Index = () => {
     },
     staleTime: 1000 * 60 * 5 // 5 minutes
   });
+
   return <div className="min-h-screen">
       <main className="container mx-auto px-4 pt-24 pb-12">
         <section className="space-y-24 animate-fadeIn">
           <div className="text-center space-y-12">
             <div className="space-y-6 animate-slide-up">
               <h1 className="text-7xl md:text-8xl font-bold tracking-tight">
-                Future of
+                For the sake
                 <span className="block mt-2 bg-gradient-to-r from-primary via-primary/80 to-primary/50 bg-clip-text text-transparent my-0 py-[10px]">
-                  Digital Art
+                  of art
                 </span>
               </h1>
               
@@ -360,4 +368,5 @@ const Index = () => {
       </main>
     </div>;
 };
+
 export default Index;
