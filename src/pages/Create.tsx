@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Palette, Brush, Globe2, Camera, Link2, Award, Send } from "lucide-react";
+import { Palette, Brush, Globe2, Award, Send, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 
 interface CreatorForm {
@@ -18,26 +18,132 @@ interface CreatorForm {
   achievements: string;
 }
 
-const InfoBlock = ({ 
-  icon: Icon, 
-  title, 
-  children 
-}: { 
+interface FormBlock {
+  id: keyof CreatorForm | (keyof CreatorForm)[];
   icon: typeof Palette;
   title: string;
-  children: React.ReactNode;
-}) => (
-  <div className="glass-card p-6 space-y-4">
-    <div className="flex items-center gap-3">
-      <Icon className="w-6 h-6 text-primary" />
-      <h3 className="text-xl font-semibold">{title}</h3>
+  description: string;
+  fields: {
+    id: keyof CreatorForm;
+    placeholder: string;
+    type?: string;
+    isTextarea?: boolean;
+  }[];
+}
+
+const formBlocks: FormBlock[] = [
+  {
+    id: ["fullName", "email", "bio"],
+    icon: Palette,
+    title: "Basic Information",
+    description: "Tell us about yourself",
+    fields: [
+      { id: "fullName", placeholder: "Your Full Name" },
+      { id: "email", placeholder: "Email Address", type: "email" },
+      { id: "bio", placeholder: "Tell us about yourself", isTextarea: true }
+    ]
+  },
+  {
+    id: ["experience", "artStyle"],
+    icon: Brush,
+    title: "Creative Experience",
+    description: "Share your artistic journey",
+    fields: [
+      { id: "experience", placeholder: "Your experience in digital art", isTextarea: true },
+      { id: "artStyle", placeholder: "Preferred art styles" }
+    ]
+  },
+  {
+    id: ["portfolio", "socialLinks"],
+    icon: Globe2,
+    title: "Online Presence",
+    description: "Connect your digital footprint",
+    fields: [
+      { id: "portfolio", placeholder: "Portfolio URL" },
+      { id: "socialLinks", placeholder: "Social Media Links" }
+    ]
+  },
+  {
+    id: ["achievements"],
+    icon: Award,
+    title: "Achievements",
+    description: "Showcase your accomplishments",
+    fields: [
+      { id: "achievements", placeholder: "Your achievements in art", isTextarea: true }
+    ]
+  }
+];
+
+const InfoBlock = ({ 
+  block,
+  isActive,
+  isCompleted,
+  onToggle,
+  values,
+  onChange
+}: { 
+  block: FormBlock;
+  isActive: boolean;
+  isCompleted: boolean;
+  onToggle: () => void;
+  values: CreatorForm;
+  onChange: (id: keyof CreatorForm, value: string) => void;
+}) => {
+  const Icon = isCompleted ? ChevronDown : ChevronUp;
+
+  return (
+    <div 
+      className={`glass-card transition-all duration-500 ${
+        isActive ? 'p-6 space-y-4' : 'p-4'
+      } ${isCompleted ? 'scale-95 opacity-80' : ''}`}
+    >
+      <div 
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={onToggle}
+      >
+        <block.icon className="w-6 h-6 text-primary" />
+        <div className="flex-1">
+          <h3 className="text-xl font-semibold">{block.title}</h3>
+          {isActive && (
+            <p className="text-muted-foreground text-sm">{block.description}</p>
+          )}
+        </div>
+        <Icon className="w-5 h-5" />
+      </div>
+
+      {isActive && (
+        <div className="space-y-4 animate-slideDown">
+          {block.fields.map(field => (
+            field.isTextarea ? (
+              <Textarea
+                key={field.id}
+                name={field.id}
+                placeholder={field.placeholder}
+                value={values[field.id]}
+                onChange={e => onChange(field.id, e.target.value)}
+                required
+              />
+            ) : (
+              <Input
+                key={field.id}
+                name={field.id}
+                type={field.type || "text"}
+                placeholder={field.placeholder}
+                value={values[field.id]}
+                onChange={e => onChange(field.id, e.target.value)}
+                required
+              />
+            )
+          ))}
+        </div>
+      )}
     </div>
-    {children}
-  </div>
-);
+  );
+};
 
 const Create = () => {
   const navigate = useNavigate();
+  const [activeBlockIndex, setActiveBlockIndex] = useState(0);
   const [form, setForm] = useState<CreatorForm>({
     fullName: "",
     email: "",
@@ -49,103 +155,77 @@ const Create = () => {
     achievements: "",
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+  const handleChange = (id: keyof CreatorForm, value: string) => {
+    setForm(prev => ({ ...prev, [id]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // В реальном приложении здесь будет отправка данных на сервер
-    toast.success("Форма успешно отправлена! Мы свяжемся с вами в ближайшее время.");
+    toast.success("Application submitted successfully! We'll get back to you soon.");
     navigate('/');
+  };
+
+  const isBlockComplete = (block: FormBlock) => {
+    const fields = Array.isArray(block.id) ? block.id : [block.id];
+    return fields.every(field => form[field].trim().length > 0);
+  };
+
+  const handleNext = () => {
+    if (activeBlockIndex < formBlocks.length - 1) {
+      const currentBlock = formBlocks[activeBlockIndex];
+      if (isBlockComplete(currentBlock)) {
+        setActiveBlockIndex(prev => prev + 1);
+      } else {
+        toast.error("Please fill in all required fields");
+      }
+    }
   };
 
   return (
     <div className="min-h-screen pt-24 pb-12">
       <div className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-2xl mx-auto space-y-8">
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold">Стать Креатором</h1>
+            <h1 className="text-4xl font-bold">Become a Creator</h1>
             <p className="text-muted-foreground text-lg">
-              Расскажите нам о себе и своем творчестве
+              Join our creative community and start monetizing your digital art
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid gap-6 md:grid-cols-2">
-              <InfoBlock icon={Palette} title="Основная информация">
-                <Input
-                  name="fullName"
-                  placeholder="Ваше имя"
-                  value={form.fullName}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  name="email"
-                  type="email"
-                  placeholder="Email"
-                  value={form.email}
-                  onChange={handleChange}
-                  required
-                />
-                <Textarea
-                  name="bio"
-                  placeholder="Расскажите о себе"
-                  value={form.bio}
-                  onChange={handleChange}
-                  required
-                />
-              </InfoBlock>
-
-              <InfoBlock icon={Brush} title="Творческий опыт">
-                <Textarea
-                  name="experience"
-                  placeholder="Опыт в создании цифрового искусства"
-                  value={form.experience}
-                  onChange={handleChange}
-                  required
-                />
-                <Input
-                  name="artStyle"
-                  placeholder="Предпочитаемые стили"
-                  value={form.artStyle}
-                  onChange={handleChange}
-                  required
-                />
-              </InfoBlock>
-
-              <InfoBlock icon={Globe2} title="Онлайн присутствие">
-                <Input
-                  name="portfolio"
-                  placeholder="Ссылка на портфолио"
-                  value={form.portfolio}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
+              {formBlocks.map((block, index) => (
+                <InfoBlock
+                  key={index}
+                  block={block}
+                  isActive={index === activeBlockIndex}
+                  isCompleted={index < activeBlockIndex}
+                  onToggle={() => setActiveBlockIndex(index)}
+                  values={form}
                   onChange={handleChange}
                 />
-                <Input
-                  name="socialLinks"
-                  placeholder="Ссылки на соц. сети"
-                  value={form.socialLinks}
-                  onChange={handleChange}
-                />
-              </InfoBlock>
-
-              <InfoBlock icon={Award} title="Достижения">
-                <Textarea
-                  name="achievements"
-                  placeholder="Ваши достижения в сфере искусства"
-                  value={form.achievements}
-                  onChange={handleChange}
-                />
-              </InfoBlock>
+              ))}
             </div>
 
-            <div className="flex justify-center pt-6">
-              <Button size="lg" className="px-8" type="submit">
-                <Send className="mr-2" />
-                Отправить заявку
-              </Button>
+            <div className="flex justify-end pt-6 gap-4">
+              {activeBlockIndex < formBlocks.length - 1 ? (
+                <Button 
+                  type="button" 
+                  onClick={handleNext}
+                  size="lg"
+                >
+                  Next Step
+                </Button>
+              ) : (
+                <Button 
+                  type="submit"
+                  size="lg"
+                  className="px-8"
+                >
+                  <Send className="mr-2" />
+                  Submit Application
+                </Button>
+              )}
             </div>
           </form>
         </div>
