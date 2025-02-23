@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -78,45 +77,46 @@ const InfoBlock = ({
   block,
   isActive,
   isCompleted,
-  onToggle,
+  onNext,
   values,
-  onChange
+  onChange,
+  style
 }: { 
   block: FormBlock;
   isActive: boolean;
   isCompleted: boolean;
-  onToggle: () => void;
+  onNext: () => void;
   values: CreatorForm;
   onChange: (id: keyof CreatorForm, value: string) => void;
+  style?: React.CSSProperties;
 }) => {
-  const Icon = isCompleted ? ChevronDown : ChevronUp;
+  const isBlockComplete = () => {
+    const fields = Array.isArray(block.id) ? block.id : [block.id];
+    return fields.every(field => values[field].trim().length > 0);
+  };
 
   return (
     <div 
-      className={`canvas-card relative transition-all duration-500 ${
-        isActive ? 'p-6 space-y-4 z-20 bg-secondary' : 'p-4 -mt-2'
-      } ${isCompleted ? 'completed -mt-4 z-10' : ''} rounded-lg`}
+      className={`canvas-card p-6 rounded-lg ${isCompleted ? 'completed' : ''}`}
       style={{
-        transformStyle: 'preserve-3d',
-        perspective: '1000px'
+        ...style,
+        boxShadow: `
+          0 1px 1px rgba(0,0,0,0.12),
+          0 2px 2px rgba(0,0,0,0.12),
+          0 ${isActive ? '8px' : '4px'} ${isActive ? '8px' : '4px'} rgba(0,0,0,0.12)
+        `
       }}
     >
-      <div 
-        className="flex items-center gap-3 cursor-pointer"
-        onClick={onToggle}
-      >
-        <block.icon className="w-6 h-6 text-primary" />
-        <div className="flex-1">
-          <h3 className="text-xl font-semibold">{block.title}</h3>
-          {isActive && (
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <block.icon className="w-6 h-6 text-primary" />
+          <div className="flex-1">
+            <h3 className="text-xl font-semibold">{block.title}</h3>
             <p className="text-muted-foreground text-sm">{block.description}</p>
-          )}
+          </div>
         </div>
-        <Icon className="w-5 h-5" />
-      </div>
 
-      {isActive && (
-        <div className="space-y-4 animate-fade-in">
+        <div className="space-y-4">
           {block.fields.map(field => (
             field.isTextarea ? (
               <Textarea
@@ -140,7 +140,18 @@ const InfoBlock = ({
             )
           ))}
         </div>
-      )}
+
+        <div className="flex justify-end">
+          <Button 
+            type="button" 
+            onClick={onNext}
+            disabled={!isBlockComplete()}
+            size="lg"
+          >
+            Next Step
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
@@ -163,26 +174,17 @@ const Create = () => {
     setForm(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Application submitted successfully! We'll get back to you soon.");
-    navigate('/');
-  };
-
-  const isBlockComplete = (block: FormBlock) => {
-    const fields = Array.isArray(block.id) ? block.id : [block.id];
-    return fields.every(field => form[field].trim().length > 0);
-  };
-
   const handleNext = () => {
     if (activeBlockIndex < formBlocks.length - 1) {
-      const currentBlock = formBlocks[activeBlockIndex];
-      if (isBlockComplete(currentBlock)) {
-        setActiveBlockIndex(prev => prev + 1);
-      } else {
-        toast.error("Please fill in all required fields");
-      }
+      setActiveBlockIndex(prev => prev + 1);
+    } else {
+      handleSubmit();
     }
+  };
+
+  const handleSubmit = () => {
+    toast.success("Application submitted successfully! We'll get back to you soon.");
+    navigate('/');
   };
 
   return (
@@ -196,42 +198,24 @@ const Create = () => {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-4">
-              {formBlocks.map((block, index) => (
-                <InfoBlock
-                  key={index}
-                  block={block}
-                  isActive={index === activeBlockIndex}
-                  isCompleted={index < activeBlockIndex}
-                  onToggle={() => setActiveBlockIndex(index)}
-                  values={form}
-                  onChange={handleChange}
-                />
-              ))}
-            </div>
-
-            <div className="flex justify-end pt-6 gap-4">
-              {activeBlockIndex < formBlocks.length - 1 ? (
-                <Button 
-                  type="button" 
-                  onClick={handleNext}
-                  size="lg"
-                >
-                  Next Step
-                </Button>
-              ) : (
-                <Button 
-                  type="submit"
-                  size="lg"
-                  className="px-8"
-                >
-                  <Send className="mr-2" />
-                  Submit Application
-                </Button>
-              )}
-            </div>
-          </form>
+          <div className="relative" style={{ height: '480px' }}>
+            {formBlocks.map((block, index) => (
+              <InfoBlock
+                key={index}
+                block={block}
+                isActive={index === activeBlockIndex}
+                isCompleted={index < activeBlockIndex}
+                onNext={handleNext}
+                values={form}
+                onChange={handleChange}
+                style={{
+                  zIndex: formBlocks.length - index,
+                  transform: `translateY(${index * 8}px)`,
+                  opacity: index < activeBlockIndex ? 0 : 1
+                }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
