@@ -1,9 +1,10 @@
 
 import { memo } from 'react';
 import { Shield, Rocket, CircleDollarSign, Globe, ExternalLink } from 'lucide-react';
+import type { FC } from 'react';
 import { PolygonFeature } from '../Index';
 
-const PolygonSection = () => {
+const PolygonSection: FC = () => {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">

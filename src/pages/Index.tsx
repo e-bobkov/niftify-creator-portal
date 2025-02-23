@@ -1,4 +1,3 @@
-
 import { memo, Suspense, lazy } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -6,6 +5,7 @@ import { Collection } from "@/types/user";
 import { format } from "date-fns";
 import { ExternalLink, TrendingUp, Users, CircleDollarSign, Palette, DollarSign, Rocket, Sparkles, Shield, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import HotCollection from "@/components/HotCollection";
 
 interface TopCollection extends Collection {
   sold_count: number;
@@ -35,7 +35,7 @@ const PlatformFeature = memo(({
 
 PlatformFeature.displayName = 'PlatformFeature';
 
-const PolygonFeature = memo(({
+export const PolygonFeature = memo(({
   icon: Icon,
   title,
   description,
