@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -154,7 +153,7 @@ const Create = () => {
     setTimeout(() => {
       toast.success("Application submitted successfully! We'll get back to you soon.");
       navigate('/');
-    }, 3000);
+    }, 5000);
   };
 
   if (isSubmitted) {
