@@ -22,7 +22,7 @@ const HotCollection = memo(({ collection, soldCount }: { collection: Collection;
   const containerRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="glass-card rounded-lg overflow-hidden relative" ref={containerRef}>
+    <div className="relative rounded-lg overflow-hidden backdrop-blur-lg bg-background/30" ref={containerRef}>
       <AnimatedPixels containerRef={containerRef} />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
         <div className="aspect-square relative rounded-lg overflow-hidden">
