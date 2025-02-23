@@ -1,4 +1,3 @@
-
 import { memo, Suspense, lazy } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -98,10 +97,8 @@ const Index = () => {
     <div className="min-h-screen">
       <main className="container mx-auto px-4 pt-24 pb-12">
         <section className="space-y-24">
-          {/* Hero секция всегда загружается первой */}
           <HeroSection />
 
-          {/* Загрузка коллекции с плейсхолдером */}
           {isLoading ? (
             <div className="glass-card rounded-lg p-8 animate-pulse">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -123,7 +120,6 @@ const Index = () => {
             />
           ) : null}
 
-          {/* Ленивая загрузка остальных секций */}
           <Suspense fallback={<div className="h-96 glass-card rounded-lg animate-pulse" />}>
             <MarketplaceCallToAction />
           </Suspense>
