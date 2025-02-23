@@ -5,6 +5,7 @@ export interface UserProfile {
   name: string;
   bio: string;
   avatar: number;
+  role: 'user' | 'partner';
   social?: {
     telegram?: string;
     discord?: string;
@@ -34,6 +35,11 @@ export interface Token {
   standart: string | null;
   chain: string;
   updated_at: string | null;
+  buyer_id?: string | null;
+  owner?: {
+    first_name: string;
+    last_name: string;
+  } | null;
   metadata: {
     name: string;
     description: string;

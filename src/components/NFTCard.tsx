@@ -3,6 +3,7 @@ import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/format";
 import { BaseComponentProps } from "@/types/common";
 
@@ -12,6 +13,11 @@ interface NFTCardProps extends BaseComponentProps {
   title: string;
   image: string;
   price: number;
+  soldAt?: string | null;
+  owner?: {
+    first_name: string;
+    last_name: string;
+  } | null;
   onExplore?: () => void;
 }
 
@@ -21,6 +27,8 @@ export const NFTCard = memo(({
   title, 
   image, 
   price, 
+  soldAt,
+  owner,
   onExplore,
   className 
 }: NFTCardProps) => {
@@ -56,10 +64,22 @@ export const NFTCard = memo(({
               Explore
             </Button>
           </div>
+          <div className="absolute top-2 right-2">
+            <Badge variant={soldAt ? "destructive" : "secondary"}>
+              {soldAt ? "Sold" : "Available"}
+            </Badge>
+          </div>
         </div>
         <div className="p-4">
           <div className="flex justify-between items-start gap-2">
-            <h3 className="font-semibold leading-tight break-words flex-1">{title}</h3>
+            <div className="flex-1">
+              <h3 className="font-semibold leading-tight break-words">{title}</h3>
+              {owner && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Owned by: {owner.first_name} {owner.last_name}
+                </p>
+              )}
+            </div>
             <div className="text-sm text-primary font-medium whitespace-nowrap">
               {formatPrice(price)}
             </div>

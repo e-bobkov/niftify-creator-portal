@@ -53,14 +53,18 @@ const Profile = () => {
               <UserIcon className="w-4 h-4 mr-2" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="collections" onClick={() => setActiveTab("collections")} className="flex-1">
-              <Grid className="w-4 h-4 mr-2" />
-              My Collections
-            </TabsTrigger>
-            <TabsTrigger value="sales" onClick={() => setActiveTab("sales")} className="flex-1">
-              <PieChart className="w-4 h-4 mr-2" />
-              Sales
-            </TabsTrigger>
+            {profile.role === 'partner' && (
+              <>
+                <TabsTrigger value="collections" onClick={() => setActiveTab("collections")} className="flex-1">
+                  <Grid className="w-4 h-4 mr-2" />
+                  My Collections
+                </TabsTrigger>
+                <TabsTrigger value="sales" onClick={() => setActiveTab("sales")} className="flex-1">
+                  <PieChart className="w-4 h-4 mr-2" />
+                  Sales
+                </TabsTrigger>
+              </>
+            )}
             <TabsTrigger value="purchases" onClick={() => setActiveTab("purchases")} className="flex-1">
               <ShoppingBag className="w-4 h-4 mr-2" />
               Purchases
@@ -83,43 +87,47 @@ const Profile = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="collections">
-          <div className="glass-card rounded-lg p-6 animate-fade-in">
-            <h2 className="text-2xl font-bold mb-6">My Collections</h2>
-            <ProfileCollections />
-          </div>
-        </TabsContent>
+        {profile.role === 'partner' && (
+          <>
+            <TabsContent value="collections">
+              <div className="glass-card rounded-lg p-6 animate-fade-in">
+                <h2 className="text-2xl font-bold mb-6">My Collections</h2>
+                <ProfileCollections />
+              </div>
+            </TabsContent>
 
-        <TabsContent value="sales">
-          <div className="animate-fade-in space-y-6">
-            <SalesAnalytics sales={sales} purchases={purchases} />
-            <div className="glass-card rounded-lg p-6">
-              <h2 className="text-2xl font-bold mb-6">Sales History</h2>
-              {sales.length > 0 ? (
-                <div className="space-y-4">
-                  {sales.map((sale) => (
-                    <div key={sale.id} className="flex items-center justify-between p-4 bg-primary/5 rounded-lg">
-                      <div>
-                        <p className="font-medium">
-                          {sale.metadata?.name || 'Unnamed Token'}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Sold on {sale.sold_at ? format(new Date(sale.sold_at), 'PP') : 'Unknown date'}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold">${sale.price || 0}</p>
-                        <p className="text-sm text-muted-foreground">{sale.chain}</p>
-                      </div>
+            <TabsContent value="sales">
+              <div className="animate-fade-in space-y-6">
+                <SalesAnalytics sales={sales} purchases={purchases} />
+                <div className="glass-card rounded-lg p-6">
+                  <h2 className="text-2xl font-bold mb-6">Sales History</h2>
+                  {sales.length > 0 ? (
+                    <div className="space-y-4">
+                      {sales.map((sale) => (
+                        <div key={sale.id} className="flex items-center justify-between p-4 bg-primary/5 rounded-lg">
+                          <div>
+                            <p className="font-medium">
+                              {sale.metadata?.name || 'Unnamed Token'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              Sold on {sale.sold_at ? format(new Date(sale.sold_at), 'PP') : 'Unknown date'}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold">${sale.price || 0}</p>
+                            <p className="text-sm text-muted-foreground">{sale.chain}</p>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    <p className="text-muted-foreground text-center">No sales yet</p>
+                  )}
                 </div>
-              ) : (
-                <p className="text-muted-foreground text-center">No sales yet</p>
-              )}
-            </div>
-          </div>
-        </TabsContent>
+              </div>
+            </TabsContent>
+          </>
+        )}
 
         <TabsContent value="purchases">
           <div className="glass-card rounded-lg p-6 animate-fade-in">

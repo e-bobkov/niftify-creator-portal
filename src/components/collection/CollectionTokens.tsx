@@ -41,6 +41,8 @@ export const CollectionTokens = ({ tokens, collectionId }: CollectionTokensProps
                 title={token.metadata.name}
                 image={token.metadata.image}
                 price={token.price || 0}
+                soldAt={token.sold_at}
+                owner={token.owner}
               />
             ))}
           </div>
