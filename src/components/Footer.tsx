@@ -64,11 +64,14 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {/* Company Info */}
             <div className="space-y-6">
-              <Logo />
+              <div className="space-y-2">
+                <Logo />
+                <p className="text-sm font-medium text-muted-foreground">TLYSN INTERNATIONAL CO., LTD</p>
+              </div>
               <div className="space-y-4">
                 <ContactItem 
                   icon={Building2} 
-                  text="123 Blockchain Street, Crypto Valley, CH-6300 Zug, Switzerland" 
+                  text="House/Building No. D១៤, Street/Road No. ១៣៧K៣២, Trapeang Chrey, Kakab 2, Pur SenChey, Phnom Penh, Cambodia" 
                 />
                 <ContactItem 
                   icon={Mail} 
@@ -76,7 +79,7 @@ const Footer = () => {
                 />
                 <ContactItem 
                   icon={Phone} 
-                  text="+41 123 456 789" 
+                  text="+855 31 203 6789" 
                 />
               </div>
             </div>
