@@ -179,12 +179,23 @@ const Index = () => {
             </div>
           ) : topCollection ? (
             <div className="space-y-8">
-              <h2 className="text-[8rem] font-bold text-center leading-none tracking-tighter">
+              <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] font-bold text-center leading-none tracking-tighter transition-all duration-300">
                 <span className="text-muted-foreground">#</span>
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/50">
                   HOT COLLECTION
                 </span>
               </h2>
+              <div className="relative">
+                <div className="absolute -left-4 top-0 w-1 h-full bg-primary/50 rounded-full hidden md:block" />
+                <div className="space-y-4 md:pl-8">
+                  <h3 className="text-2xl md:text-3xl font-bold tracking-tight">
+                    Featured Collection
+                  </h3>
+                  <p className="text-muted-foreground text-base md:text-lg leading-relaxed max-w-3xl">
+                    Discover our most popular and trending digital art collection, showcasing exceptional creativity and innovation in the NFT space.
+                  </p>
+                </div>
+              </div>
               <HotCollection 
                 collection={topCollection.collection} 
                 soldCount={topCollection.sold_count} 
