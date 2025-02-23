@@ -10,6 +10,7 @@ interface ApiProfile {
     first_name: string;
     last_name: string;
     email: string;
+    role: 'user' | 'partner';
   };
   socialLinks: {
     social: string;
@@ -43,6 +44,7 @@ export const useProfile = () => {
         name: `${data.profile.first_name} ${data.profile.last_name}`,
         bio: data.profile.bio || "No bio provided",
         avatar: 0,
+        role: data.profile.role,
         social: data.socialLinks.reduce((acc, link) => ({
           ...acc,
           [link.social]: link.link
