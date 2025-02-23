@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
@@ -83,6 +84,10 @@
     will-change: transform;
   }
 
+  .animate-tilt {
+    animation: tilt 10s infinite linear;
+  }
+
   .glass-card {
     @apply bg-secondary/30 backdrop-blur-md border border-white/10 shadow-xl;
     transition: transform 0.2s ease-out;
@@ -138,5 +143,17 @@
   to {
     transform: scale(1);
     opacity: 1;
+  }
+}
+
+@keyframes tilt {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(1deg);
+  }
+  75% {
+    transform: rotate(-1deg);
   }
 }

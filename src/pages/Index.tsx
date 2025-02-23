@@ -344,6 +344,83 @@ const Index = () => {
               </a>
             </div>
           </div>
+
+          <div className="relative">
+            <div className="absolute -inset-x-4 inset-y-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 rounded-[2rem] blur-3xl" />
+            <div className="glass-card rounded-3xl p-12 md:p-16 lg:p-20 relative overflow-hidden">
+              <div className="max-w-7xl mx-auto">
+                <div className="text-center mb-16 space-y-4">
+                  <h2 className="text-3xl md:text-4xl lg:text-6xl font-bold tracking-tight leading-none">
+                    Why Digital Art is the
+                    <span className="block mt-2 bg-gradient-to-r from-primary via-primary/80 to-primary/50 bg-clip-text text-transparent">
+                      Future of Collecting
+                    </span>
+                  </h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                  <div className="group relative">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-purple-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt" />
+                    <div className="glass-card p-8 relative space-y-4">
+                      <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 transform -rotate-6 group-hover:rotate-6 transition-transform duration-300">
+                        <Shield className="w-8 h-8 text-primary" />
+                      </div>
+                      <h3 className="text-2xl font-bold">Authenticity</h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Each piece is unique and verifiable on the blockchain, ensuring genuine ownership and provenance.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="group relative md:translate-y-8">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt" />
+                    <div className="glass-card p-8 relative space-y-4">
+                      <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 transform rotate-6 group-hover:-rotate-6 transition-transform duration-300">
+                        <TrendingUp className="w-8 h-8 text-primary" />
+                      </div>
+                      <h3 className="text-2xl font-bold">Investment Potential</h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Digital art market is growing exponentially, offering significant returns on investment.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="group relative lg:translate-y-16">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt" />
+                    <div className="glass-card p-8 relative space-y-4">
+                      <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 transform -rotate-3 group-hover:rotate-3 transition-transform duration-300">
+                        <Users className="w-8 h-8 text-primary" />
+                      </div>
+                      <h3 className="text-2xl font-bold">Community</h3>
+                      <p className="text-muted-foreground leading-relaxed">
+                        Join a thriving community of collectors, artists, and enthusiasts sharing the same passion.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-20 relative">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-primary/20 blur-2xl" />
+                  <div className="relative glass-card rounded-2xl p-8 md:p-12 text-center transform hover:scale-[1.02] transition-transform duration-300">
+                    <h3 className="text-3xl md:text-4xl font-bold mb-6">
+                      Ready to Start Your Collection?
+                    </h3>
+                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+                      Experience the future of art ownership with our curated digital masterpieces
+                    </p>
+                    <Button 
+                      size="lg" 
+                      className="text-lg px-12 py-6 bg-primary/90 hover:bg-primary transition-all duration-300 shadow-xl hover:shadow-primary/20"
+                      onClick={() => navigate('/marketplace')}
+                    >
+                      <Sparkles className="mr-2 w-5 h-5" />
+                      Start Collecting
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
       </main>
     </div>
