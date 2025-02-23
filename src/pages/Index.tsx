@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Collection } from "@/types/user";
 import { format } from "date-fns";
-import { ExternalLink, TrendingUp, Users, CircleDollarSign, Palette, DollarSign, Rocket } from "lucide-react";
+import { ExternalLink, TrendingUp, Users, CircleDollarSign, Palette, DollarSign, Rocket, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface TopCollection extends Collection {
@@ -100,6 +100,7 @@ const HotCollection = memo(({ collection, soldCount }: { collection: Collection;
 HotCollection.displayName = 'HotCollection';
 
 const Index = () => {
+  const navigate = useNavigate();
   const { data: topCollection, isLoading } = useQuery<TopCollectionResponse>({
     queryKey: ['top-collection'],
     queryFn: async () => {
@@ -128,6 +129,17 @@ const Index = () => {
               <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
                 Transform your digital creations into valuable assets
               </p>
+
+              <div className="pt-6">
+                <Button 
+                  size="lg" 
+                  className="text-lg px-8 py-6"
+                  onClick={() => navigate('/create')}
+                >
+                  <Sparkles className="mr-2" />
+                  Начать творить сейчас
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
