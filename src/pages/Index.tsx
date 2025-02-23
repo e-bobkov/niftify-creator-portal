@@ -1,10 +1,9 @@
-
 import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Collection } from "@/types/user";
 import { format } from "date-fns";
-import { ExternalLink, TrendingUp, Users, CircleDollarSign } from "lucide-react";
+import { ExternalLink, TrendingUp, Users, CircleDollarSign, Palette, DollarSign, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface TopCollection extends Collection {
@@ -16,12 +15,23 @@ interface TopCollectionResponse {
   sold_count: number;
 }
 
+const PlatformFeature = ({ icon: Icon, title, description }: { 
+  icon: typeof Palette, 
+  title: string, 
+  description: string 
+}) => (
+  <div className="glass-card p-8 text-center transform hover:scale-105 transition-all duration-300 hover:shadow-2xl">
+    <Icon className="w-12 h-12 mx-auto mb-4 text-primary" />
+    <h3 className="text-xl font-bold mb-2">{title}</h3>
+    <p className="text-muted-foreground">{description}</p>
+  </div>
+);
+
 const HotCollection = memo(({ collection, soldCount }: { collection: Collection; soldCount: number }) => {
   const navigate = useNavigate();
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-      {/* Статистика слева */}
       <div className="lg:col-span-3 grid grid-cols-1 gap-6">
         <div className="glass-card p-6 text-center transform hover:scale-105 transition-transform duration-300">
           <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
@@ -44,7 +54,6 @@ const HotCollection = memo(({ collection, soldCount }: { collection: Collection;
         </div>
       </div>
 
-      {/* Карточка коллекции */}
       <div className="lg:col-span-9">
         <div className="glass-card rounded-lg overflow-hidden transform lg:-rotate-1 hover:rotate-0 transition-transform duration-500">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
@@ -106,15 +115,40 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <main className="container mx-auto px-4 pt-24 pb-12">
-        <section className="space-y-12 animate-fadeIn">
-          <div className="text-center space-y-4 animate-slide-up">
-            <h1 className="text-4xl md:text-6xl font-bold">
-              Discover, Create & Sell
-              <span className="text-primary block mt-2 animate-scale">Digital Art</span>
-            </h1>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              The world's first and largest digital marketplace for crypto collectibles and NFTs.
-            </p>
+        <section className="space-y-24 animate-fadeIn">
+          <div className="text-center space-y-12">
+            <div className="space-y-6 animate-slide-up">
+              <h1 className="text-7xl md:text-8xl font-bold tracking-tight">
+                Future of
+                <span className="block mt-2 bg-gradient-to-r from-primary via-primary/80 to-primary/50 bg-clip-text text-transparent">
+                  Digital Art
+                </span>
+              </h1>
+              
+              <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+                Transform your digital creations into valuable assets
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
+              <PlatformFeature 
+                icon={Palette}
+                title="Create"
+                description="Turn your digital art into unique NFT collections"
+              />
+              
+              <PlatformFeature 
+                icon={DollarSign}
+                title="Monetize"
+                description="Sell your art and earn real money"
+              />
+              
+              <PlatformFeature 
+                icon={Rocket}
+                title="Launch"
+                description="Join the digital art revolution"
+              />
+            </div>
           </div>
 
           {isLoading ? (
