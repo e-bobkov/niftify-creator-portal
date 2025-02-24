@@ -57,7 +57,7 @@ export const Navbar = memo(() => {
         <div className="flex items-center justify-between h-16">
           <Logo />
 
-          <div className="hidden md:flex items-center space-x-2 animate-fade-in">
+          <div className="hidden md:flex items-center space-x-4 animate-fade-in">
             <div className="bg-secondary/20 rounded-xl p-1 backdrop-blur-sm">
               <div className="flex items-center space-x-1">
                 <NavLink to="/explore">Explore</NavLink>
@@ -66,7 +66,7 @@ export const Navbar = memo(() => {
             </div>
 
             {isAuthenticated ? (
-              <div className="flex items-center space-x-2 ml-4">
+              <div className="flex items-center space-x-2">
                 <div className="bg-secondary/20 rounded-xl p-1 backdrop-blur-sm">
                   <div className="flex items-center space-x-1">
                     <NavButton onClick={() => navigate("/profile")} icon={User}>Profile</NavButton>
@@ -75,15 +75,12 @@ export const Navbar = memo(() => {
                 </div>
               </div>
             ) : (
-              <div className="ml-4">
-                <Button 
-                  onClick={() => navigate("/auth")} 
-                  className="px-6 py-5 h-auto bg-primary/90 hover:bg-primary transition-colors duration-300"
-                >
-                  <User size={18} className="mr-2" />
-                  Sign In
-                </Button>
-              </div>
+              <NavButton
+                onClick={() => navigate("/auth")}
+                icon={User}
+              >
+                Sign In
+              </NavButton>
             )}
           </div>
 

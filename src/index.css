@@ -47,7 +47,6 @@
     @apply bg-background text-foreground font-inter antialiased;
   }
 
-  /* Стили для выделения текста */
   ::selection {
     background-color: rgba(180, 230, 110, 0.3);
     color: hsl(var(--foreground));
@@ -57,7 +56,6 @@
     color: hsl(var(--foreground));
   }
 
-  /* Для текста, который уже зеленый (primary) */
   .text-primary ::selection {
     background-color: rgba(210, 240, 98, 0.2);
     color: hsl(var(--primary));
@@ -89,14 +87,14 @@
   }
 
   .glass-card {
-    @apply bg-secondary/30 backdrop-blur-md border border-white/10 shadow-xl;
+    @apply bg-secondary/20 backdrop-blur-md border border-white/5 shadow-lg;
     transition: transform 0.2s ease-out;
     transform: translateZ(0);
     backface-visibility: hidden;
   }
 
   .canvas-card {
-    @apply bg-secondary border border-white/10;
+    @apply bg-secondary border border-white/5;
     position: absolute;
     top: 0;
     left: 0;
