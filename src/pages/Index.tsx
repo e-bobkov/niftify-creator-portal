@@ -6,6 +6,7 @@ import { HeroSection } from "./home/HeroSection";
 import { FeaturesSection } from "./home/FeaturesSection";
 import { HotCollection } from "./home/HotCollection";
 import { PolygonFeatures } from "./home/PolygonFeatures";
+import { WhyDigitalArt } from "./home/WhyDigitalArt";
 import { CallToAction } from "./home/CallToAction";
 
 interface TopCollectionResponse {
@@ -74,6 +75,7 @@ const Index = () => {
           ) : null}
 
           <PolygonFeatures />
+          <WhyDigitalArt />
           <CallToAction />
         </section>
       </main>
