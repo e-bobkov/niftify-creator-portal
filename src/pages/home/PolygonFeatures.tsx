@@ -1,5 +1,5 @@
 
-import { Shield, Rocket, CircleDollarSign, Globe } from "lucide-react";
+import { Shield, Rocket, CircleDollarSign, Globe, ExternalLink } from "lucide-react";
 
 const PolygonFeature = ({
   icon: Icon,
