@@ -20,6 +20,7 @@ import Security from "@/pages/Security";
 import Refund from "@/pages/Refund";
 import Privacy from "@/pages/Privacy";
 import License from "@/pages/License";
+import IntellectualProperty from "@/pages/IntellectualProperty";
 import { PrivateRoute } from "@/components/PrivateRoute";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/refund" element={<Refund />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/license" element={<License />} />
+            <Route path="/intellectual-property" element={<IntellectualProperty />} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/my-collection/:id" element={<PrivateRoute><Collection /></PrivateRoute>} />
             <Route path="/my-collection/:collectionId/:tokenId" element={<PrivateRoute><TokenDetails /></PrivateRoute>} />
