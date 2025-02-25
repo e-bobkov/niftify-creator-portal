@@ -1,4 +1,3 @@
-
 import { memo } from 'react';
 import { Link } from "react-router-dom";
 import { Logo } from "./Logo";
@@ -25,17 +24,24 @@ const PolicyLink = memo(({
   icon: typeof FileText; 
   text: string; 
   href: string;
-}) => (
-  <Link 
-    to={href} 
-    className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
-  >
-    <div className="p-2 bg-secondary/30 rounded-lg group-hover:bg-primary/10 transition-colors">
-      <Icon className="w-4 h-4" />
-    </div>
-    <span className="text-sm">{text}</span>
-  </Link>
-));
+}) => {
+  const handleClick = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  return (
+    <Link 
+      to={href} 
+      onClick={handleClick}
+      className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group"
+    >
+      <div className="p-2 bg-secondary/30 rounded-lg group-hover:bg-primary/10 transition-colors">
+        <Icon className="w-4 h-4" />
+      </div>
+      <span className="text-sm">{text}</span>
+    </Link>
+  );
+});
 
 PolicyLink.displayName = 'PolicyLink';
 

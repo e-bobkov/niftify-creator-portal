@@ -1,4 +1,3 @@
-
 import { useState, memo, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,8 +8,6 @@ import { AlertCircle, Eye, EyeOff, Lock, Mail, Check, X } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
-
-<lov-add-dependency>framer-motion@latest</lov-add-dependency>
 
 const PasswordRequirement = ({ meets, label }: { meets: boolean; label: string }) => (
   <div className="flex items-center gap-2 text-sm">
@@ -257,7 +254,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center p-4">
+    <div className="min-h-screen relative flex items-center justify-center p-4 pt-16 md:pt-4">
       <CubeBackground />
       
       <motion.div

@@ -48,7 +48,7 @@ const Profile = () => {
     <div className="container mx-auto px-4 py-24 max-w-4xl animate-fade-in">
       <Tabs defaultValue="profile" className="space-y-8">
         <div className="flex items-center justify-between">
-          <TabsList className="w-full">
+          <TabsList className="w-full flex-col sm:flex-row">
             <TabsTrigger value="profile" onClick={() => setActiveTab("profile")} className="flex-1">
               <UserIcon className="w-4 h-4 mr-2" />
               Profile
