@@ -17,6 +17,7 @@ import TokenDetails from "@/pages/TokenDetails";
 import Terms from "@/pages/Terms";
 import Tax from "@/pages/Tax";
 import Security from "@/pages/Security";
+import Refund from "@/pages/Refund";
 import { PrivateRoute } from "@/components/PrivateRoute";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
             <Route path="/terms" element={<Terms />} />
             <Route path="/tax" element={<Tax />} />
             <Route path="/security" element={<Security />} />
+            <Route path="/refund" element={<Refund />} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
             <Route path="/my-collection/:id" element={<PrivateRoute><Collection /></PrivateRoute>} />
             <Route path="/my-collection/:collectionId/:tokenId" element={<PrivateRoute><TokenDetails /></PrivateRoute>} />
