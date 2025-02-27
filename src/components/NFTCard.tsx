@@ -41,6 +41,7 @@ export const NFTCard = memo(({
     if (onExplore) {
       onExplore();
     } else if (isMarketplace) {
+      // Для маркетплейса используем только числовой ID токена
       navigate(`/marketplace/${id}`);
     } else {
       navigate(`/my-collection/${collectionId}/${id}`);

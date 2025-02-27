@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useMarketplaceTokenDetails } from "@/hooks/useMarketplace";
 import { useToast } from "@/components/ui/use-toast";
+import { useEffect } from "react";
 
 const MarketplaceTokenDetails = () => {
   const { tokenId } = useParams();
@@ -13,13 +14,15 @@ const MarketplaceTokenDetails = () => {
 
   const { data: tokenDetails, isLoading, error } = useMarketplaceTokenDetails(tokenId);
 
-  if (error) {
-    toast({
-      title: "Error",
-      description: "Failed to load token details. Please try again later.",
-      variant: "destructive"
-    });
-  }
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load token details. Please try again later.",
+        variant: "destructive"
+      });
+    }
+  }, [error, toast]);
 
   if (isLoading) {
     return (
