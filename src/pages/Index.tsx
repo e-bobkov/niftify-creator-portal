@@ -6,6 +6,7 @@ import { Collection } from "@/types/user";
 import { format } from "date-fns";
 import { ExternalLink, TrendingUp, Users, CircleDollarSign, Palette, DollarSign, Rocket, Sparkles, Shield, Globe } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { Inventory } from "@/components/inventory/Inventory";
 
 interface TopCollection extends Collection {
   sold_count: number;
@@ -158,6 +159,9 @@ const Index = () => {
                 </Button>
               </div>
             </div>
+
+            {/* Добавляем раздел инвентаря */}
+            <Inventory />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="transform hover:scale-105 transition-all duration-300 relative">
