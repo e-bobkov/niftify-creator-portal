@@ -1,5 +1,6 @@
 
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -8,13 +9,15 @@ import {
   Search,
   SortAsc,
   Package,
-  ShieldAlert
+  ShieldAlert,
+  Eye
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InventoryCard, InventoryItem } from "./InventoryCard";
 import { SkeletonCard } from "@/components/ui/skeleton-card";
+import { formatPrice } from "@/utils/format";
 
 interface InventoryGridProps {
   items: InventoryItem[];
@@ -23,7 +26,37 @@ interface InventoryGridProps {
 
 const ITEMS_PER_PAGE = 8;
 
+// Конфигурация для стилизации на основе редкости
+const rarityConfig = {
+  common: {
+    color: "bg-slate-400",
+    label: "Common",
+    borderGlow: "group-hover:shadow-slate-500/30"
+  },
+  uncommon: {
+    color: "bg-green-500",
+    label: "Uncommon",
+    borderGlow: "group-hover:shadow-green-500/30"
+  },
+  rare: {
+    color: "bg-blue-500",
+    label: "Rare",
+    borderGlow: "group-hover:shadow-blue-500/30"
+  },
+  legendary: {
+    color: "bg-purple-500",
+    label: "Legendary",
+    borderGlow: "group-hover:shadow-purple-500/30"
+  },
+  mythic: {
+    color: "bg-yellow-400",
+    label: "Mythic",
+    borderGlow: "group-hover:shadow-yellow-400/30"
+  }
+};
+
 export const InventoryGrid = ({ items, isLoading = false }: InventoryGridProps) => {
+  const navigate = useNavigate(); // Добавляем хук useNavigate
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeFilter, setActiveFilter] = useState<InventoryItem["rarity"] | "all">("all");
