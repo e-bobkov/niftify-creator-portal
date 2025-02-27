@@ -25,6 +25,9 @@ import AMLKYC from "@/pages/AMLKYC";
 import { PrivateRoute } from "@/components/PrivateRoute";
 import Marketplace from "@/pages/Marketplace";
 import MarketplaceTokenDetails from "@/pages/MarketplaceTokenDetails";
+import Author from "@/pages/Author";
+import AuthorCollection from "@/pages/AuthorCollection";
+import AuthorToken from "@/pages/AuthorToken";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,9 @@ const App = () => (
             <Route path="/create" element={<Create />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/marketplace/:tokenId" element={<MarketplaceTokenDetails />} />
+            <Route path="/author/:authorId" element={<Author />} />
+            <Route path="/author/:authorId/collection/:collectionId" element={<AuthorCollection />} />
+            <Route path="/author/:authorId/token/:tokenId" element={<AuthorToken />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/tax" element={<Tax />} />
             <Route path="/security" element={<Security />} />

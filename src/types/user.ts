@@ -21,6 +21,7 @@ export interface Collection {
   contract_address: string;
   image_url: string;
   created_at: string;
+  partner_id?: string; // Добавляем partner_id
 }
 
 export interface Token {
@@ -46,4 +47,23 @@ export interface Token {
     image: string;
   };
   metadata_url?: string;
+}
+
+export interface Author {
+  id: string;
+  email: string;
+  full_name: string | null;
+  role: 'partner';
+  created_at: string;
+  updated_at: string;
+  bio: string;
+  first_name: string;
+  last_name: string;
+}
+
+export interface AuthorSocial {
+  id: string;
+  profile_id: string;
+  social: string;
+  link: string;
 }

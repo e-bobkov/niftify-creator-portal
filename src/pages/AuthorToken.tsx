@@ -1,60 +1,69 @@
 
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar, User } from "lucide-react";
+import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
-import { useMarketplaceTokenDetails } from "@/hooks/useMarketplace";
-import { useAuthorByTokenId } from "@/hooks/useAuthor";
+import { useAuthorById, useAuthorCollectionTokens } from "@/hooks/useAuthor";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
-const MarketplaceTokenDetails = () => {
-  const { tokenId } = useParams();
+const AuthorToken = () => {
+  const { authorId, tokenId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { data: tokenDetails, isLoading, error } = useMarketplaceTokenDetails(tokenId);
-  const { data: author, isLoading: isAuthorLoading } = useAuthorByTokenId(tokenDetails?.id);
+  const { data: author } = useAuthorById(authorId);
+  const { data: authorCollections } = useAuthorCollectionTokens(authorId);
+  
+  const token = useMemo(() => {
+    if (!authorCollections || !tokenId) return null;
+    
+    // Ищем токен с указанным tokenId среди всех коллекций автора
+    for (const collection of Object.values(authorCollections || {})) {
+      const foundToken = collection.find(t => t.id === Number(tokenId));
+      if (foundToken) return foundToken;
+    }
+    return null;
+  }, [authorCollections, tokenId]);
 
   useEffect(() => {
-    if (error) {
+    if (!token && authorCollections) {
       toast({
         title: "Error",
-        description: "Failed to load token details. Please try again later.",
+        description: "Token not found",
         variant: "destructive"
       });
     }
-  }, [error, toast]);
+  }, [token, authorCollections, toast]);
 
-  if (isLoading) {
+  if (!token) {
     return (
       <div className="container mx-auto px-4 py-24 max-w-4xl">
-        <div className="animate-pulse space-y-8">
-          <div className="h-64 bg-primary/10 rounded-lg"></div>
-          <div className="space-y-4">
-            <div className="h-8 bg-primary/10 rounded w-1/3"></div>
-            <div className="h-4 bg-primary/10 rounded w-2/3"></div>
-          </div>
+        <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Button>
+        <div className="glass-card rounded-xl p-8 mt-4 text-center">
+          <h2 className="text-xl font-semibold">Token not found</h2>
+          <p className="text-muted-foreground mt-2">
+            The token you're looking for might have been removed or doesn't exist.
+          </p>
         </div>
       </div>
     );
   }
 
-  if (!tokenDetails) {
-    return null;
-  }
-
   const handleShare = () => {
     navigator.share?.({
-      title: tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`,
-      text: tokenDetails.metadata?.description || "",
+      title: token.metadata?.name || `Token #${token.token_id}`,
+      text: token.metadata?.description || "",
       url: window.location.href
     }).catch(console.error);
   };
 
   const handleContractClick = () => {
-    if (tokenDetails.address) {
-      window.open(`https://polygonscan.com/address/${tokenDetails.address}`, '_blank');
+    if (token.address) {
+      window.open(`https://polygonscan.com/address/${token.address}`, '_blank');
     }
   };
 
@@ -68,7 +77,7 @@ const MarketplaceTokenDetails = () => {
       <div className="flex justify-between items-center mb-8">
         <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
-          Back to Marketplace
+          Back
         </Button>
         <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center gap-2">
           <Share2 className="w-4 h-4" />
@@ -79,8 +88,8 @@ const MarketplaceTokenDetails = () => {
       <div className="glass-card rounded-xl overflow-hidden">
         <div className="aspect-[16/9] relative">
           <img 
-            src={tokenDetails.metadata?.image || "/placeholder.svg"} 
-            alt={tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`} 
+            src={token.metadata?.image || "/placeholder.svg"} 
+            alt={token.metadata?.name || `Token #${token.token_id}`} 
             className="w-full h-full object-cover"
           />
         </div>
@@ -88,7 +97,7 @@ const MarketplaceTokenDetails = () => {
         <div className="p-6 space-y-6">
           <div>
             <h1 className="text-2xl font-bold mb-4">
-              {tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`}
+              {token.metadata?.name || `Token #${token.token_id}`}
             </h1>
             
             {author && (
@@ -98,7 +107,6 @@ const MarketplaceTokenDetails = () => {
                   className="flex items-center gap-2 text-primary"
                   onClick={() => navigate(`/author/${author.id}`)}
                 >
-                  <User className="w-4 h-4" />
                   <span>By {author.first_name} {author.last_name}</span>
                 </Button>
               </div>
@@ -109,7 +117,7 @@ const MarketplaceTokenDetails = () => {
                 <div>
                   <h2 className="text-sm font-medium mb-2">Description</h2>
                   <div className="text-sm text-muted-foreground">
-                    {tokenDetails.metadata?.description || "No description available"}
+                    {token.metadata?.description || "No description available"}
                   </div>
                 </div>
               </div>
@@ -125,7 +133,7 @@ const MarketplaceTokenDetails = () => {
                   Contract Address
                 </div>
                 <button onClick={handleContractClick} className="font-medium font-mono text-primary hover:underline cursor-pointer">
-                  {tokenDetails.address ? truncateAddress(tokenDetails.address) : 'N/A'}
+                  {token.address ? truncateAddress(token.address) : 'N/A'}
                 </button>
               </div>
               
@@ -134,7 +142,7 @@ const MarketplaceTokenDetails = () => {
                   <Hash className="w-4 h-4" />
                   Token ID
                 </div>
-                <div className="font-medium">#{tokenDetails.token_id}</div>
+                <div className="font-medium">#{token.token_id}</div>
               </div>
               
               <div>
@@ -142,7 +150,7 @@ const MarketplaceTokenDetails = () => {
                   <Package className="w-4 h-4" />
                   Token Standard
                 </div>
-                <div className="font-medium">{tokenDetails.standart || 'N/A'}</div>
+                <div className="font-medium">{token.standart || 'N/A'}</div>
               </div>
               
               <div>
@@ -150,7 +158,7 @@ const MarketplaceTokenDetails = () => {
                   <LinkIcon className="w-4 h-4" />
                   Chain
                 </div>
-                <div className="font-medium">{tokenDetails.chain}</div>
+                <div className="font-medium">{token.chain}</div>
               </div>
               
               <div>
@@ -159,21 +167,21 @@ const MarketplaceTokenDetails = () => {
                   Minted
                 </div>
                 <div className="font-medium">
-                  {tokenDetails.minted_at ? format(new Date(tokenDetails.minted_at), 'PP') : 'N/A'}
+                  {token.minted_at ? format(new Date(token.minted_at), 'PP') : 'N/A'}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="pt-4 border-t">
-            {tokenDetails.sold_at ? (
+            {token.sold_at ? (
               <div className="text-sm text-red-500 font-medium flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                Sold on {format(new Date(tokenDetails.sold_at), 'PP')}
+                Sold on {format(new Date(token.sold_at), 'PP')}
               </div>
-            ) : tokenDetails.price ? (
+            ) : token.price ? (
               <div className="flex items-center gap-2 text-lg font-semibold">
-                <span>${tokenDetails.price.toFixed(2)}</span>
+                <span>${token.price.toFixed(2)}</span>
               </div>
             ) : null}
           </div>
@@ -183,4 +191,4 @@ const MarketplaceTokenDetails = () => {
   );
 };
 
-export default MarketplaceTokenDetails;
+export default AuthorToken;
