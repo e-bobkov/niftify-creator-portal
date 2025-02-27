@@ -7,12 +7,12 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/format";
 import { BaseComponentProps } from "@/types/common";
 
-// Функция для получения градиента для автора на основе его ID
-const getAuthorGradient = (authorId?: string) => {
-  if (!authorId) return 'bg-secondary/20';
+// Функция для получения градиента для коллекции на основе её ID
+const getCollectionGradient = (collectionId?: string) => {
+  if (!collectionId) return 'bg-secondary/20';
   
   // Используем последние символы ID для определения градиента
-  const lastChar = authorId.slice(-1).charCodeAt(0);
+  const lastChar = collectionId.slice(-1).charCodeAt(0);
   
   const gradients = [
     'bg-gradient-to-r from-[#F2FCE280] to-[#E2D1C380]', // Soft Green
@@ -102,7 +102,7 @@ export const NFTCard = memo(({
     }
   }, [authorId, navigate]);
 
-  const authorGradient = getAuthorGradient(authorId);
+  const collectionGradient = getCollectionGradient(collectionId);
 
   return (
     <div className="group relative">
@@ -122,27 +122,24 @@ export const NFTCard = memo(({
             fetchPriority="auto"
           />
           
-          {/* Collection Badge в левом верхнем углу */}
+          {/* Collection Badge в левом верхнем углу с градиентом */}
           {collectionName && (
             <div className="absolute top-2 left-2 max-w-[70%] z-10">
-              <Badge 
-                variant="secondary" 
-                className="truncate cursor-pointer hover:bg-primary/20 transition-colors"
+              <div 
+                className={`${collectionGradient} px-2 py-1 rounded-full truncate cursor-pointer hover:opacity-80 transition-colors text-xs font-medium`}
                 onClick={handleAuthorClick}
               >
                 {collectionName}
-              </Badge>
+              </div>
             </div>
           )}
           
-          {/* Status Badge только если это не маркетплейс */}
-          {!isMarketplace && (
-            <div className="absolute top-2 right-2">
-              <Badge variant={soldAt ? "destructive" : "secondary"}>
-                {soldAt ? "Sold" : "Available"}
-              </Badge>
-            </div>
-          )}
+          {/* Status Badge */}
+          <div className="absolute top-2 right-2">
+            <Badge variant={soldAt ? "destructive" : "secondary"}>
+              {soldAt ? "Sold" : "Available"}
+            </Badge>
+          </div>
           
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col gap-2">
@@ -176,14 +173,10 @@ export const NFTCard = memo(({
             <div className="flex-1">
               <h3 className="font-semibold leading-tight break-words">{title}</h3>
               
-              {/* Стилизованное имя автора */}
               {authorName && (
-                <button 
-                  onClick={handleAuthorClick}
-                  className={`text-sm mt-1 px-2 py-0.5 rounded-full transition-colors ${authorGradient} hover:opacity-80`}
-                >
+                <p className="text-sm text-muted-foreground mt-1 cursor-pointer hover:text-primary" onClick={handleAuthorClick}>
                   By: {authorName}
-                </button>
+                </p>
               )}
               
               {owner && (
