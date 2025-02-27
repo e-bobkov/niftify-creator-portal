@@ -133,7 +133,7 @@ const Checkout = () => {
       // Создаем тело запроса
       const requestBody = {
         id: item.id.toString(), // Преобразуем в строку, если это число
-        collection_id: parseInt(item.collection_id), // Преобразуем в число
+        collection_id: item.collection_id, // Используем строковый идентификатор коллекции без преобразования
         amount: item.price,
         buyer_id: user.id
       };
