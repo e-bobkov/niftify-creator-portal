@@ -1,3 +1,4 @@
+
 import { Token } from "@/types/user";
 
 export interface MarketplaceCollection {
@@ -67,7 +68,15 @@ export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
     }
     
     const data = await response.json();
-    return data === true; // API возвращает true если токен доступен
+    
+    // Проверяем формат ответа - может быть либо булево значение, либо объект со свойством status
+    if (typeof data === 'boolean') {
+      return data;
+    } else if (data && typeof data === 'object' && 'status' in data) {
+      return data.status === true;
+    }
+    
+    return false; // Неизвестный формат ответа считаем как недоступен
   } catch (error) {
     console.error('Error checking token status:', error);
     return false; // В случае ошибки считаем токен недоступным
