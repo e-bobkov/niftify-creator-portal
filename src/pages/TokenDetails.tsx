@@ -53,7 +53,7 @@ const TokenDetails = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-24 max-w-5xl">
+    <div className="container mx-auto px-4 py-24 max-w-6xl">
       <div className="flex justify-between items-center mb-8">
         <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
@@ -66,100 +66,111 @@ const TokenDetails = () => {
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden">
-        <div className="aspect-[16/9] relative">
-          <img 
-            src={tokenDetails.metadata.image} 
-            alt={tokenDetails.metadata.name} 
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="p-6 space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold mb-4">{tokenDetails.metadata.name}</h1>
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <div>
-                  <h2 className="text-sm font-medium mb-2">Description</h2>
-                  <div className={`text-sm text-muted-foreground relative ${!isDescriptionExpanded ? 'max-h-20 overflow-hidden' : ''}`}>
-                    {tokenDetails.metadata.description}
-                    {tokenDetails.metadata.description.length > 100}
+        <div className="flex flex-col md:flex-row">
+          <div className="md:w-1/2">
+            <div className="aspect-square relative">
+              <img 
+                src={tokenDetails.metadata.image} 
+                alt={tokenDetails.metadata.name} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          
+          <div className="md:w-1/2 p-6 md:p-8 space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold mb-4">{tokenDetails.metadata.name}</h1>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <div>
+                    <h2 className="text-sm font-medium mb-2">Description</h2>
+                    <div className={`text-sm text-muted-foreground relative ${!isDescriptionExpanded ? 'max-h-20 overflow-hidden' : ''}`}>
+                      {tokenDetails.metadata.description}
+                      {tokenDetails.metadata.description.length > 100 && (
+                        <button 
+                          onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                          className="text-primary hover:underline mt-1 block"
+                        >
+                          {isDescriptionExpanded ? 'Show less' : 'Show more'}
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <h2 className="font-medium text-lg flex items-center gap-2">Details</h2>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Contract Address
+            <div className="space-y-4">
+              <h2 className="font-medium text-lg flex items-center gap-2">Details</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Contract Address
+                  </div>
+                  <button onClick={handleContractClick} className="font-medium font-mono text-primary hover:underline cursor-pointer">
+                    {tokenDetails.address ? truncateAddress(tokenDetails.address) : 'N/A'}
+                  </button>
                 </div>
-                <button onClick={handleContractClick} className="font-medium font-mono text-primary hover:underline cursor-pointer">
-                  {tokenDetails.address ? truncateAddress(tokenDetails.address) : 'N/A'}
-                </button>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <Hash className="w-4 h-4" />
-                  Token ID
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <Hash className="w-4 h-4" />
+                    Token ID
+                  </div>
+                  <div className="font-medium">#{tokenDetails.token_id}</div>
                 </div>
-                <div className="font-medium">#{tokenDetails.token_id}</div>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <Package className="w-4 h-4" />
-                  Token Standard
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    Token Standard
+                  </div>
+                  <div className="font-medium">{tokenDetails.standart || 'N/A'}</div>
                 </div>
-                <div className="font-medium">{tokenDetails.standart || 'N/A'}</div>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <LinkIcon className="w-4 h-4" />
-                  Chain
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <LinkIcon className="w-4 h-4" />
+                    Chain
+                  </div>
+                  <div className="font-medium">{tokenDetails.chain}</div>
                 </div>
-                <div className="font-medium">{tokenDetails.chain}</div>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Last Updated
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Last Updated
+                  </div>
+                  <div className="font-medium">
+                    {tokenDetails.updated_at ? format(new Date(tokenDetails.updated_at), 'PP') : 'N/A'}
+                  </div>
                 </div>
-                <div className="font-medium">
-                  {tokenDetails.updated_at ? format(new Date(tokenDetails.updated_at), 'PP') : 'N/A'}
-                </div>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Minted
-                </div>
-                <div className="font-medium">
-                  {format(new Date(tokenDetails.minted_at), 'PP')}
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Minted
+                  </div>
+                  <div className="font-medium">
+                    {format(new Date(tokenDetails.minted_at), 'PP')}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="pt-4 border-t">
-            {tokenDetails.sold_at ? (
-              <div className="text-sm text-red-500 font-medium flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Sold on {format(new Date(tokenDetails.sold_at), 'PP')}
-              </div>
-            ) : tokenDetails.price ? (
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                <span>${tokenDetails.price.toFixed(2)}</span>
-              </div>
-            ) : null}
+            <div className="pt-4 border-t">
+              {tokenDetails.sold_at ? (
+                <div className="text-sm text-red-500 font-medium flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Sold on {format(new Date(tokenDetails.sold_at), 'PP')}
+                </div>
+              ) : tokenDetails.price ? (
+                <div className="flex items-center gap-2 text-lg font-semibold">
+                  <span>${tokenDetails.price.toFixed(2)}</span>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>

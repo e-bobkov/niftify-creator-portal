@@ -77,7 +77,7 @@ const AuthorToken = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-24 max-w-5xl">
+    <div className="container mx-auto px-4 py-24 max-w-6xl">
       <div className="flex justify-between items-center mb-8">
         <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
@@ -90,110 +90,114 @@ const AuthorToken = () => {
       </div>
 
       <div className="glass-card rounded-xl overflow-hidden">
-        <div className="aspect-[16/9] relative">
-          <img 
-            src={token.metadata?.image || "/placeholder.svg"} 
-            alt={token.metadata?.name || `Token #${token.token_id}`} 
-            className="w-full h-full object-cover"
-          />
-        </div>
-
-        <div className="p-6 space-y-6">
-          <div>
-            <h1 className="text-2xl font-bold mb-4">
-              {token.metadata?.name || `Token #${token.token_id}`}
-            </h1>
-            
-            {author && (
-              <div className="flex items-center gap-2 mb-4">
-                <Button 
-                  variant="ghost" 
-                  className="flex items-center gap-2 text-primary"
-                  onClick={() => navigate(`/author/${author.id}`)}
-                >
-                  <span>By {author.first_name} {author.last_name}</span>
-                </Button>
-              </div>
-            )}
-            
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <div>
-                  <h2 className="text-sm font-medium mb-2">Description</h2>
-                  <div className="text-sm text-muted-foreground">
-                    {token.metadata?.description || "No description available"}
+        <div className="flex flex-col md:flex-row">
+          <div className="md:w-1/2">
+            <div className="aspect-square relative">
+              <img 
+                src={token.metadata?.image || "/placeholder.svg"} 
+                alt={token.metadata?.name || `Token #${token.token_id}`} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+          </div>
+          
+          <div className="md:w-1/2 p-6 md:p-8 space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold mb-4">
+                {token.metadata?.name || `Token #${token.token_id}`}
+              </h1>
+              
+              {author && (
+                <div className="flex items-center gap-2 mb-4">
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center gap-2 text-primary"
+                    onClick={() => navigate(`/author/${author.id}`)}
+                  >
+                    <span>By {author.first_name} {author.last_name}</span>
+                  </Button>
+                </div>
+              )}
+              
+              <div className="space-y-2">
+                <div className="flex items-start gap-2">
+                  <div>
+                    <h2 className="text-sm font-medium mb-2">Description</h2>
+                    <div className="text-sm text-muted-foreground">
+                      {token.metadata?.description || "No description available"}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="space-y-4">
-            <h2 className="font-medium text-lg flex items-center gap-2">Details</h2>
-            <div className="grid grid-cols-2 gap-x-8 gap-y-3 text-sm">
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Contract Address
+            <div className="space-y-4">
+              <h2 className="font-medium text-lg flex items-center gap-2">Details</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-3 text-sm">
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Contract Address
+                  </div>
+                  <button onClick={handleContractClick} className="font-medium font-mono text-primary hover:underline cursor-pointer">
+                    {token.address ? truncateAddress(token.address) : 'N/A'}
+                  </button>
                 </div>
-                <button onClick={handleContractClick} className="font-medium font-mono text-primary hover:underline cursor-pointer">
-                  {token.address ? truncateAddress(token.address) : 'N/A'}
-                </button>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <Hash className="w-4 h-4" />
-                  Token ID
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <Hash className="w-4 h-4" />
+                    Token ID
+                  </div>
+                  <div className="font-medium">#{token.token_id}</div>
                 </div>
-                <div className="font-medium">#{token.token_id}</div>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <Package className="w-4 h-4" />
-                  Token Standard
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <Package className="w-4 h-4" />
+                    Token Standard
+                  </div>
+                  <div className="font-medium">{token.standart || 'N/A'}</div>
                 </div>
-                <div className="font-medium">{token.standart || 'N/A'}</div>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <LinkIcon className="w-4 h-4" />
-                  Chain
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <LinkIcon className="w-4 h-4" />
+                    Chain
+                  </div>
+                  <div className="font-medium">{token.chain}</div>
                 </div>
-                <div className="font-medium">{token.chain}</div>
-              </div>
-              
-              <div>
-                <div className="text-muted-foreground mb-1 flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  Minted
-                </div>
-                <div className="font-medium">
-                  {token.minted_at ? format(new Date(token.minted_at), 'PP') : 'N/A'}
+                
+                <div>
+                  <div className="text-muted-foreground mb-1 flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    Minted
+                  </div>
+                  <div className="font-medium">
+                    {token.minted_at ? format(new Date(token.minted_at), 'PP') : 'N/A'}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="pt-4 border-t">
-            {token.sold_at ? (
-              <div className="text-sm text-red-500 font-medium flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Sold on {format(new Date(token.sold_at), 'PP')}
-              </div>
-            ) : token.price ? (
-              <div className="flex items-center justify-between">
-                <div className="text-lg font-semibold">
-                  <span>${token.price.toFixed(2)}</span>
+            <div className="pt-4 border-t">
+              {token.sold_at ? (
+                <div className="text-sm text-red-500 font-medium flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Sold on {format(new Date(token.sold_at), 'PP')}
                 </div>
-                <Button onClick={handleBuy} className="flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4" />
-                  Buy Now
-                </Button>
-              </div>
-            ) : null}
+              ) : token.price ? (
+                <div className="flex items-center justify-between">
+                  <div className="text-lg font-semibold">
+                    <span>${token.price.toFixed(2)}</span>
+                  </div>
+                  <Button onClick={handleBuy} className="flex items-center gap-2">
+                    <ShoppingCart className="w-4 h-4" />
+                    Buy Now
+                  </Button>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </div>

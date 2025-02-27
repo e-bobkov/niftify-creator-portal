@@ -109,6 +109,15 @@
     opacity: 0;
     pointer-events: none;
   }
+  
+  /* Добавляем стили для карточек NFT */
+  .group:hover .aspect-square img {
+    transform: scale(1.05);
+  }
+  
+  .group .aspect-square {
+    overflow: hidden;
+  }
 }
 
 @keyframes fadeIn {
