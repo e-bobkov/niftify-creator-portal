@@ -28,7 +28,7 @@ import {
 } from "@/hooks/useMarketplace";
 import { MarketplaceToken } from "@/api/marketplace";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Настройки пагинации
 const MOBILE_TOKENS_PER_PAGE = 4;
@@ -41,7 +41,7 @@ const Marketplace = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // По умолчанию от дорогих к дешевым
