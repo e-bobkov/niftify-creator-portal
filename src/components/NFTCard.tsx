@@ -7,6 +7,24 @@ import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/format";
 import { BaseComponentProps } from "@/types/common";
 
+// Функция для получения градиента для автора на основе его ID
+const getAuthorGradient = (authorId?: string) => {
+  if (!authorId) return 'bg-secondary/20';
+  
+  // Используем последние символы ID для определения градиента
+  const lastChar = authorId.slice(-1).charCodeAt(0);
+  
+  const gradients = [
+    'bg-gradient-to-r from-[#F2FCE280] to-[#E2D1C380]', // Soft Green
+    'bg-gradient-to-r from-[#FEF7CD80] to-[#FEC6A180]', // Soft Yellow
+    'bg-gradient-to-r from-[#E5DEFF80] to-[#D3E4FD80]', // Soft Purple
+    'bg-gradient-to-r from-[#FFDEE280] to-[#FDE1D380]', // Soft Pink
+    'bg-gradient-to-r from-[#D3E4FD80] to-[#F1F0FB80]', // Soft Blue
+  ];
+  
+  return gradients[lastChar % gradients.length];
+};
+
 interface NFTCardProps extends BaseComponentProps {
   id: string;
   collectionId: string;
@@ -22,11 +40,9 @@ interface NFTCardProps extends BaseComponentProps {
   showBuyButton?: boolean;
   onExplore?: () => void;
   onBuy?: () => void;
-  // Проперти
   collectionName?: string;
   authorId?: string;
   authorName?: string;
-  collectionDescription?: string; // Оставляем в типе, но не будем использовать
 }
 
 export const NFTCard = memo(({ 
@@ -42,7 +58,6 @@ export const NFTCard = memo(({
   onExplore,
   onBuy,
   className,
-  // Поля
   collectionName,
   authorId,
   authorName
@@ -56,7 +71,6 @@ export const NFTCard = memo(({
     if (onExplore) {
       onExplore();
     } else if (isMarketplace) {
-      // Для маркетплейса используем только числовой ID токена
       navigate(`/marketplace/${id}`);
     } else {
       navigate(`/my-collection/${collectionId}/${id}`);
@@ -68,7 +82,6 @@ export const NFTCard = memo(({
     if (onBuy) {
       onBuy();
     } else {
-      // Placeholder for future buy functionality
       console.log("Buy clicked for token", id);
     }
   }, [onBuy, id]);
@@ -81,13 +94,15 @@ export const NFTCard = memo(({
     setImageError(true);
   }, []);
 
-  const handleCollectionClick = useCallback((e: React.MouseEvent) => {
+  const handleAuthorClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (authorId && collectionId) {
-      navigate(`/author/${authorId}/collection/${collectionId}`);
+    if (authorId) {
+      navigate(`/author/${authorId}`);
     }
-  }, [authorId, collectionId, navigate]);
+  }, [authorId, navigate]);
+
+  const authorGradient = getAuthorGradient(authorId);
 
   return (
     <div className="group relative">
@@ -113,19 +128,21 @@ export const NFTCard = memo(({
               <Badge 
                 variant="secondary" 
                 className="truncate cursor-pointer hover:bg-primary/20 transition-colors"
-                onClick={handleCollectionClick}
+                onClick={handleAuthorClick}
               >
                 {collectionName}
               </Badge>
             </div>
           )}
           
-          {/* Status Badge в правом верхнем углу */}
-          <div className="absolute top-2 right-2">
-            <Badge variant={soldAt ? "destructive" : "secondary"}>
-              {soldAt ? "Sold" : "Available"}
-            </Badge>
-          </div>
+          {/* Status Badge только если это не маркетплейс */}
+          {!isMarketplace && (
+            <div className="absolute top-2 right-2">
+              <Badge variant={soldAt ? "destructive" : "secondary"}>
+                {soldAt ? "Sold" : "Available"}
+              </Badge>
+            </div>
+          )}
           
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col gap-2">
@@ -159,11 +176,14 @@ export const NFTCard = memo(({
             <div className="flex-1">
               <h3 className="font-semibold leading-tight break-words">{title}</h3>
               
-              {/* Оставляем только информацию об авторе */}
+              {/* Стилизованное имя автора */}
               {authorName && (
-                <p className="text-sm text-muted-foreground mt-1 truncate">
+                <button 
+                  onClick={handleAuthorClick}
+                  className={`text-sm mt-1 px-2 py-0.5 rounded-full transition-colors ${authorGradient} hover:opacity-80`}
+                >
                   By: {authorName}
-                </p>
+                </button>
               )}
               
               {owner && (
