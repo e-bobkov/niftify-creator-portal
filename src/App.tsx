@@ -39,35 +39,47 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <div className="min-h-screen flex flex-col">
-          <PixelBackground />
-          <Navbar />
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/create" element={<Create />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/marketplace/:tokenId" element={<MarketplaceTokenDetails />} />
-            <Route path="/author/:authorId" element={<Author />} />
-            <Route path="/author/:authorId/collection/:collectionId" element={<AuthorCollection />} />
-            <Route path="/author/:authorId/token/:tokenId" element={<AuthorToken />} />
-            <Route path="/terms" element={<Terms />} />
-            <Route path="/tax" element={<Tax />} />
-            <Route path="/security" element={<Security />} />
-            <Route path="/refund" element={<Refund />} />
-            <Route path="/privacy" element={<Privacy />} />
-            <Route path="/license" element={<License />} />
-            <Route path="/intellectual-property" element={<IntellectualProperty />} />
-            <Route path="/aml-kyc" element={<AMLKYC />} />
-            <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-            <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
-            <Route path="/my-collection/:id" element={<PrivateRoute><Collection /></PrivateRoute>} />
-            <Route path="/my-collection/:collectionId/:tokenId" element={<PrivateRoute><TokenDetails /></PrivateRoute>} />
-            <Route path="/checkout/:item" element={<Checkout />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Footer />
-        </div>
+        <Routes>
+          {/* Маршрут чекаута без навбара и футера */}
+          <Route path="/checkout/:item" element={
+            <div className="min-h-screen flex flex-col">
+              <PixelBackground />
+              <Checkout />
+            </div>
+          } />
+          
+          {/* Остальные маршруты с общим layout (навбар и футер) */}
+          <Route path="*" element={
+            <div className="min-h-screen flex flex-col">
+              <PixelBackground />
+              <Navbar />
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/create" element={<Create />} />
+                <Route path="/marketplace" element={<Marketplace />} />
+                <Route path="/marketplace/:tokenId" element={<MarketplaceTokenDetails />} />
+                <Route path="/author/:authorId" element={<Author />} />
+                <Route path="/author/:authorId/collection/:collectionId" element={<AuthorCollection />} />
+                <Route path="/author/:authorId/token/:tokenId" element={<AuthorToken />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/tax" element={<Tax />} />
+                <Route path="/security" element={<Security />} />
+                <Route path="/refund" element={<Refund />} />
+                <Route path="/privacy" element={<Privacy />} />
+                <Route path="/license" element={<License />} />
+                <Route path="/intellectual-property" element={<IntellectualProperty />} />
+                <Route path="/aml-kyc" element={<AMLKYC />} />
+                <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+                <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
+                <Route path="/my-collection/:id" element={<PrivateRoute><Collection /></PrivateRoute>} />
+                <Route path="/my-collection/:collectionId/:tokenId" element={<PrivateRoute><TokenDetails /></PrivateRoute>} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Footer />
+            </div>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

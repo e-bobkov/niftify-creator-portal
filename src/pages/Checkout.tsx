@@ -178,39 +178,16 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <div className="container mx-auto px-4 pt-6">
-        <div className="flex items-center text-sm text-muted-foreground">
-          <Button 
-            variant="link" 
-            className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/')}
-          >
-            <Home className="h-3.5 w-3.5 mr-1" />
-            Home
-          </Button>
-          <span className="mx-2">/</span>
-          <Button 
-            variant="link" 
-            className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
-            onClick={() => navigate('/marketplace')}
-          >
-            Marketplace
-          </Button>
-          <span className="mx-2">/</span>
-          <span className="text-foreground">Checkout</span>
-        </div>
-      </div>
-      
       <main className="container mx-auto px-4 py-10">
         <div className="max-w-3xl mx-auto">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('/marketplace')} // Всегда ведёт на страницу маркетплейса
             className="mb-6"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
-            Back
+            Back to Marketplace
           </Button>
           
           <motion.div 
