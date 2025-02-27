@@ -238,7 +238,7 @@ const Checkout = () => {
                 
                 <div className="md:w-3/5">
                   <div className="space-y-6">
-                    <Alert className="border-[#bcf65550]-500/30 bg-[#bcf65]/[0.29]">
+                    <Alert className="bg-[#d7ff6b]/10 border-[#bcf655]/30">
                       <Info className="h-5 w-5 text-[#bcf655]" />
                       <AlertTitle className="font-semibold text-[#bcf655]">NFT Storage Information</AlertTitle>
                       <AlertDescription className="text-sm">
