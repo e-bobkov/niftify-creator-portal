@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useAuthorById, useAuthorCollections, useAuthorCollectionTokens } from "@/hooks/useAuthor";
 import { useToast } from "@/components/ui/use-toast";
 import { NFTCard } from "@/components/NFTCard";
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { Separator } from "@/components/ui/separator";
 import { format } from "date-fns";
+import { LoadingState } from "@/components/collection/LoadingState";
 
 const AuthorCollection = () => {
   const { authorId, collectionId } = useParams();
@@ -15,15 +16,25 @@ const AuthorCollection = () => {
   const { toast } = useToast();
 
   const { data: author } = useAuthorById(authorId);
-  const { data: collections } = useAuthorCollections(authorId);
+  
+  const { 
+    data: collections, 
+    isLoading: isCollectionsLoading 
+  } = useAuthorCollections(authorId);
+  
   const { 
     data: tokens, 
     isLoading: isTokensLoading, 
-    error: tokensError 
+    error: tokensError,
+    prefetchCollectionTokens
   } = useAuthorCollectionTokens(authorId, collectionId);
 
-  const collection = collections?.find(c => c.id === collectionId);
+  // Извлекаем данные о текущей коллекции
+  const collection = useMemo(() => {
+    return collections?.find(c => c.id === collectionId);
+  }, [collections, collectionId]);
 
+  // Обработка ошибок
   useEffect(() => {
     if (tokensError) {
       toast({
@@ -34,16 +45,45 @@ const AuthorCollection = () => {
     }
   }, [tokensError, toast]);
 
-  if (isTokensLoading) {
+  // Предварительная загрузка токенов коллекции
+  useEffect(() => {
+    if (authorId && collectionId && !tokens && !isTokensLoading) {
+      prefetchCollectionTokens(authorId, collectionId);
+    }
+  }, [authorId, collectionId, tokens, isTokensLoading, prefetchCollectionTokens]);
+
+  // Обработчик для перехода к деталям токена
+  const handleTokenClick = useCallback((tokenId: number | string) => {
+    if (authorId) {
+      navigate(`/author/${authorId}/token/${tokenId}`);
+    }
+  }, [authorId, navigate]);
+
+  // Обработчик для нажатия на контракт
+  const handleContractClick = useCallback((address: string) => {
+    if (address) {
+      window.open(`https://polygonscan.com/address/${address}`, '_blank');
+    }
+  }, []);
+
+  const isLoading = isTokensLoading || isCollectionsLoading || !collection;
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (!collection) {
     return (
-      <div className="container mx-auto px-4 py-24 max-w-5xl">
-        <div className="animate-pulse space-y-8">
-          <div className="h-20 bg-primary/10 rounded-lg"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-primary/10 rounded-lg"></div>
-            ))}
-          </div>
+      <div className="container mx-auto px-4 py-24 max-w-4xl">
+        <Button variant="ghost" onClick={() => navigate(`/author/${authorId}`)} className="flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Author
+        </Button>
+        <div className="glass-card rounded-xl p-8 mt-4 text-center">
+          <h2 className="text-xl font-semibold">Collection not found</h2>
+          <p className="text-muted-foreground mt-2">
+            The collection you're looking for might have been removed or doesn't exist.
+          </p>
         </div>
       </div>
     );
@@ -58,55 +98,52 @@ const AuthorCollection = () => {
         </Button>
       </div>
 
-      {collection && (
-        <div className="glass-card rounded-xl p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-6">
-            <div className="w-full md:w-64 h-64 rounded-lg overflow-hidden">
-              <img 
-                src={collection.image_url || "/placeholder.svg"} 
-                alt={collection.name} 
-                className="w-full h-full object-cover"
-              />
-            </div>
+      <div className="glass-card rounded-xl p-6 mb-8">
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="w-full md:w-64 h-64 rounded-lg overflow-hidden">
+            <img 
+              src={collection.image_url || "/placeholder.svg"} 
+              alt={collection.name} 
+              className="w-full h-full object-cover"
+              loading="eager" // Приоритетная загрузка изображения
+            />
+          </div>
+          
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold mb-2">{collection.name}</h1>
+            <p className="text-muted-foreground mb-4">{collection.description}</p>
             
-            <div className="flex-1">
-              <h1 className="text-2xl font-bold mb-2">{collection.name}</h1>
-              <p className="text-muted-foreground mb-4">{collection.description}</p>
-              
-              <Separator className="my-4" />
-              
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                <div>
-                  <div className="text-muted-foreground mb-1">Created</div>
-                  <div className="font-medium">
-                    {format(new Date(collection.created_at), 'PP')}
-                  </div>
+            <Separator className="my-4" />
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+              <div>
+                <div className="text-muted-foreground mb-1">Created</div>
+                <div className="font-medium">
+                  {format(new Date(collection.created_at), 'PP')}
                 </div>
-                
-                <div>
-                  <div className="text-muted-foreground mb-1">Items</div>
-                  <div className="font-medium">{tokens?.length || 0}</div>
-                </div>
-                
-                {collection.contract_address && (
-                  <div>
-                    <div className="text-muted-foreground mb-1">Contract</div>
-                    <a 
-                      href={`https://polygonscan.com/address/${collection.contract_address}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-primary hover:underline font-medium"
-                    >
-                      {collection.contract_address.slice(0, 6)}...{collection.contract_address.slice(-4)}
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                )}
               </div>
+              
+              <div>
+                <div className="text-muted-foreground mb-1">Items</div>
+                <div className="font-medium">{tokens?.length || 0}</div>
+              </div>
+              
+              {collection.contract_address && (
+                <div>
+                  <div className="text-muted-foreground mb-1">Contract</div>
+                  <button 
+                    onClick={() => handleContractClick(collection.contract_address)}
+                    className="flex items-center gap-1 text-primary hover:underline font-medium"
+                  >
+                    {collection.contract_address.slice(0, 6)}...{collection.contract_address.slice(-4)}
+                    <ExternalLink className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
-      )}
+      </div>
 
       <div className="glass-card rounded-xl p-6">
         <h2 className="text-xl font-semibold mb-6">Collection Items</h2>
@@ -128,9 +165,8 @@ const AuthorCollection = () => {
                 soldAt={token.sold_at}
                 showBuyButton={!token.sold_at}
                 onExplore={() => {
-                  // Проверяем, что id существует, прежде чем использовать его
                   if (token.id !== undefined) {
-                    navigate(`/author/${authorId}/token/${token.id}`);
+                    handleTokenClick(token.id);
                   } else {
                     console.error("Token id is undefined", token);
                     toast({

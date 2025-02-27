@@ -6,70 +6,97 @@ import { format } from "date-fns";
 import { useMarketplaceTokenDetails } from "@/hooks/useMarketplace";
 import { useAuthorByTokenId } from "@/hooks/useAuthor";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
+import { LoadingState } from "@/components/collection/LoadingState";
 
 const MarketplaceTokenDetails = () => {
   const { tokenId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const { data: tokenDetails, isLoading, error } = useMarketplaceTokenDetails(tokenId);
-  const { data: author, isLoading: isAuthorLoading } = useAuthorByTokenId(tokenDetails?.id);
+  const { 
+    data: tokenDetails, 
+    isLoading: isTokenLoading, 
+    error: tokenError 
+  } = useMarketplaceTokenDetails(tokenId);
+  
+  const { 
+    data: author, 
+    isLoading: isAuthorLoading, 
+    prefetchAuthorByToken 
+  } = useAuthorByTokenId(tokenDetails?.id);
 
+  // Обработка ошибок
   useEffect(() => {
-    if (error) {
+    if (tokenError) {
       toast({
         title: "Error",
         description: "Failed to load token details. Please try again later.",
         variant: "destructive"
       });
     }
-  }, [error, toast]);
+  }, [tokenError, toast]);
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-24 max-w-4xl">
-        <div className="animate-pulse space-y-8">
-          <div className="h-64 bg-primary/10 rounded-lg"></div>
-          <div className="space-y-4">
-            <div className="h-8 bg-primary/10 rounded w-1/3"></div>
-            <div className="h-4 bg-primary/10 rounded w-2/3"></div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Предварительно загружаем данные об авторе, как только получаем данные о токене
+  useEffect(() => {
+    if (tokenDetails?.id) {
+      prefetchAuthorByToken(tokenDetails.id);
+    }
+  }, [tokenDetails, prefetchAuthorByToken]);
 
-  if (!tokenDetails) {
-    return null;
-  }
-
-  const handleShare = () => {
+  const handleShare = useCallback(() => {
+    if (!tokenDetails) return;
+    
     navigator.share?.({
       title: tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`,
       text: tokenDetails.metadata?.description || "",
       url: window.location.href
     }).catch(console.error);
-  };
+  }, [tokenDetails]);
 
-  const handleContractClick = () => {
-    if (tokenDetails.address) {
+  const handleContractClick = useCallback(() => {
+    if (tokenDetails?.address) {
       window.open(`https://polygonscan.com/nft/${tokenDetails.address}/${tokenDetails.token_id}`, '_blank');
     }
-  };
+  }, [tokenDetails]);
 
-  const handleBuy = () => {
+  const handleBuy = useCallback(() => {
+    if (!tokenDetails) return;
+    
     // Placeholder for future buy functionality
     toast({
       title: "Purchase initiated",
       description: `You are about to purchase ${tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`}`,
     });
-  };
+  }, [tokenDetails, toast]);
 
-  const truncateAddress = (address: string) => {
+  const truncateAddress = useCallback((address: string) => {
     if (!address) return 'N/A';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
+  }, []);
+
+  const isLoading = isTokenLoading || isAuthorLoading;
+
+  if (isLoading) {
+    return <LoadingState />;
+  }
+
+  if (!tokenDetails) {
+    return (
+      <div className="container mx-auto px-4 py-24 max-w-4xl">
+        <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Marketplace
+        </Button>
+        <div className="glass-card rounded-xl p-8 mt-4 text-center">
+          <h2 className="text-xl font-semibold">Token not found</h2>
+          <p className="text-muted-foreground mt-2">
+            The token you're looking for might have been removed or doesn't exist.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-24 max-w-6xl">
@@ -92,6 +119,7 @@ const MarketplaceTokenDetails = () => {
                 src={tokenDetails.metadata?.image || "/placeholder.svg"} 
                 alt={tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`} 
                 className="w-full h-full object-cover"
+                loading="eager" // Приоритетная загрузка изображения
               />
             </div>
           </div>

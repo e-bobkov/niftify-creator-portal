@@ -1,13 +1,11 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Calendar, 
   DollarSign, 
   Filter, 
   Search,
-  Users,
-  X,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -29,61 +27,68 @@ import {
   useMarketplaceCollectionTokens 
 } from "@/hooks/useMarketplace";
 import { MarketplaceToken } from "@/api/marketplace";
+import { useNavigate, useParams } from "react-router-dom";
 
 const TOKENS_PER_PAGE = 16;
 
 const Marketplace = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<string>("");
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-
-  // Fetch collections
+  
+  // Получаем коллекции
   const { 
     data: collections, 
     isLoading: isLoadingCollections, 
     error: collectionsError 
   } = useMarketplaceCollections();
 
-  // Fetch tokens based on selected collection
+  // Получаем токены выбранной коллекции
   const { 
     data: collectionTokens, 
-    isLoading: isLoadingCollectionTokens 
+    isLoading: isLoadingCollectionTokens,
+    prefetchTokens
   } = useMarketplaceCollectionTokens(selectedCollection);
 
-  // Fetch all tokens grouped by collection if no collection selected
+  // Получаем все токены со всех коллекций, если ни одна не выбрана
   const { 
     data: allTokensData, 
     isLoading: isLoadingAllTokens, 
     error: allTokensError 
   } = useAllMarketplaceTokens();
 
-  // Handle errors
-  if (collectionsError || allTokensError) {
-    toast({
-      title: "Error",
-      description: "Failed to load marketplace data. Please try again later.",
-      variant: "destructive"
-    });
-  }
+  // Обрабатываем ошибки
+  useEffect(() => {
+    if (collectionsError || allTokensError) {
+      toast({
+        title: "Error",
+        description: "Failed to load marketplace data. Please try again later.",
+        variant: "destructive"
+      });
+    }
+  }, [collectionsError, allTokensError, toast]);
 
-  // Get all tokens from all collections if no specific collection is selected
+  // Получаем все токены из всех коллекций, если конкретная коллекция не выбрана
   const allTokens: MarketplaceToken[] = useMemo(() => {
     if (!allTokensData) return [];
     
     return Object.values(allTokensData).flat();
   }, [allTokensData]);
 
-  // Determine which tokens to display based on whether a collection is selected
-  const tokensToDisplay = selectedCollection ? collectionTokens || [] : allTokens;
+  // Определяем, какие токены отображать в зависимости от того, выбрана ли коллекция
+  const tokensToDisplay = useMemo(() => {
+    return selectedCollection ? collectionTokens || [] : allTokens;
+  }, [selectedCollection, collectionTokens, allTokens]);
 
-  // Apply filters to tokens
+  // Применяем фильтры к токенам
   const filteredTokens = useMemo(() => {
     return tokensToDisplay.filter(token => {
-      const matchesSearch = token.metadata?.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = token.metadata?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
       const matchesPrice = !token.price || (token.price >= priceRange[0] && token.price <= priceRange[1]);
       const matchesDate = !selectedDate || 
         (token.minted_at && format(new Date(token.minted_at), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd'));
@@ -92,7 +97,7 @@ const Marketplace = () => {
     });
   }, [tokensToDisplay, searchQuery, priceRange, selectedDate]);
 
-  // Paginate tokens
+  // Пагинация токенов
   const paginatedTokens = useMemo(() => {
     const startIndex = (currentPage - 1) * TOKENS_PER_PAGE;
     return filteredTokens.slice(startIndex, startIndex + TOKENS_PER_PAGE);
@@ -100,7 +105,8 @@ const Marketplace = () => {
 
   const totalPages = Math.ceil(filteredTokens.length / TOKENS_PER_PAGE);
 
-  const removeFilter = (filter: string) => {
+  // Функция для удаления фильтра
+  const removeFilter = useCallback((filter: string) => {
     switch (filter) {
       case 'collection':
         setSelectedCollection("");
@@ -115,16 +121,81 @@ const Marketplace = () => {
         break;
     }
     setActiveFilters(filters => filters.filter(f => f !== filter));
-    setCurrentPage(1); // Reset to first page when filters change
-  };
+    setCurrentPage(1); // Сбрасываем на первую страницу при изменении фильтров
+  }, []);
 
-  const handleCollectionChange = (collectionId: string) => {
+  // Функция для изменения выбранной коллекции
+  const handleCollectionChange = useCallback((collectionId: string) => {
     setSelectedCollection(collectionId);
     setActiveFilters(prev => [...new Set([...prev, 'collection'])]);
-    setCurrentPage(1); // Reset to first page when collection changes
-  };
+    setCurrentPage(1); // Сбрасываем на первую страницу при смене коллекции
+    
+    // Предварительно загружаем токены для выбранной коллекции
+    prefetchTokens(collectionId);
+  }, [prefetchTokens]);
 
+  // Предварительно загружаем данные для пагинации
+  const prefetchNextPage = useCallback(() => {
+    if (currentPage < totalPages) {
+      // Здесь нет необходимости делать дополнительные запросы, так как у нас уже есть все данные
+      // Мы просто готовимся к следующей странице
+      console.log(`Preparing for page ${currentPage + 1}`);
+    }
+  }, [currentPage, totalPages]);
+
+  // Предварительно загружаем данные для предыдущей страницы
+  const prefetchPrevPage = useCallback(() => {
+    if (currentPage > 1) {
+      // Здесь нет необходимости делать дополнительные запросы, так как у нас уже есть все данные
+      // Мы просто готовимся к предыдущей странице
+      console.log(`Preparing for page ${currentPage - 1}`);
+    }
+  }, [currentPage]);
+
+  // Вызываем предварительную загрузку при изменении текущей страницы
+  useEffect(() => {
+    prefetchNextPage();
+    prefetchPrevPage();
+  }, [currentPage, prefetchNextPage, prefetchPrevPage]);
+
+  // Считаем, загружаются ли данные
   const isLoading = isLoadingCollections || isLoadingAllTokens || isLoadingCollectionTokens;
+
+  // Определяем видимые страницы для пагинации
+  const visiblePages = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    
+    let pages = [];
+    
+    // Всегда показываем первую страницу
+    pages.push(1);
+    
+    // Определяем диапазон страниц вокруг текущей
+    let startPage = Math.max(2, currentPage - 2);
+    let endPage = Math.min(totalPages - 1, currentPage + 2);
+    
+    // Добавляем разделитель перед диапазоном, если нужно
+    if (startPage > 2) {
+      pages.push(-1); // -1 обозначает разделитель "..."
+    }
+    
+    // Добавляем страницы в диапазоне
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+    
+    // Добавляем разделитель после диапазона, если нужно
+    if (endPage < totalPages - 1) {
+      pages.push(-2); // -2 обозначает другой разделитель "..."
+    }
+    
+    // Всегда показываем последнюю страницу
+    pages.push(totalPages);
+    
+    return pages;
+  }, [currentPage, totalPages]);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
@@ -147,7 +218,7 @@ const Marketplace = () => {
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
-                  setCurrentPage(1); // Reset to first page when search changes
+                  setCurrentPage(1); // Сбрасываем на первую страницу при изменении поиска
                 }}
               />
             </div>
@@ -174,7 +245,7 @@ const Marketplace = () => {
                           <Button
                             key={collection.id}
                             variant="ghost"
-                            className="w-full justify-start"
+                            className={`w-full justify-start ${selectedCollection === collection.id ? 'bg-primary/20' : ''}`}
                             onClick={() => handleCollectionChange(collection.id)}
                           >
                             {collection.name}
@@ -206,7 +277,7 @@ const Marketplace = () => {
                       onValueChange={(value) => {
                         setPriceRange(value);
                         setActiveFilters(prev => [...new Set([...prev, 'price'])]);
-                        setCurrentPage(1); // Reset to first page when price changes
+                        setCurrentPage(1); // Сбрасываем на первую страницу при изменении цены
                       }}
                     />
                   </div>
@@ -227,7 +298,7 @@ const Marketplace = () => {
                     onSelect={(date) => {
                       setSelectedDate(date);
                       setActiveFilters(prev => [...new Set([...prev, 'date'])]);
-                      setCurrentPage(1); // Reset to first page when date changes
+                      setCurrentPage(1); // Сбрасываем на первую страницу при изменении даты
                     }}
                     initialFocus
                   />
@@ -310,7 +381,12 @@ const Marketplace = () => {
                           title={token.metadata?.name || `Token #${token.token_id}`}
                           image={token.metadata?.image || "/placeholder.svg"}
                           price={token.price || 0}
+                          soldAt={token.sold_at}
+                          showBuyButton={!token.sold_at}
                           isMarketplace={true}
+                          onExplore={() => {
+                            navigate(`/marketplace/${token.id}`);
+                          }}
                         />
                       </motion.div>
                     ))}
@@ -325,27 +401,38 @@ const Marketplace = () => {
                     size="icon"
                     onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
+                    onMouseEnter={prefetchPrevPage}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
+                  
                   <div className="flex items-center gap-2">
-                    {Array.from({ length: totalPages }).map((_, i) => (
-                      <Button
-                        key={i}
-                        variant={currentPage === i + 1 ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setCurrentPage(i + 1)}
-                        className="w-8 h-8 p-0"
-                      >
-                        {i + 1}
-                      </Button>
-                    ))}
+                    {visiblePages.map((pageNum, i) => {
+                      if (pageNum < 0) {
+                        // Отображаем разделитель
+                        return <span key={`ellipsis-${i}`} className="px-2">...</span>;
+                      }
+                      
+                      return (
+                        <Button
+                          key={pageNum}
+                          variant={currentPage === pageNum ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(pageNum)}
+                          className="w-8 h-8 p-0"
+                        >
+                          {pageNum}
+                        </Button>
+                      );
+                    })}
                   </div>
+                  
                   <Button
                     variant="outline"
                     size="icon"
                     onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
+                    onMouseEnter={prefetchNextPage}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>

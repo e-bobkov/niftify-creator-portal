@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useAuthorById, useAuthorCollectionTokens } from "@/hooks/useAuthor";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useCallback } from "react";
+import { LoadingState } from "@/components/collection/LoadingState";
 
 const AuthorToken = () => {
   const { authorId, tokenId } = useParams();
@@ -13,24 +14,64 @@ const AuthorToken = () => {
   const { toast } = useToast();
 
   const { data: author } = useAuthorById(authorId);
-  const { data: tokens } = useAuthorCollectionTokens(authorId, undefined);
+  const { data: tokens, isLoading: isTokensLoading } = useAuthorCollectionTokens(authorId, undefined);
   
+  // Находим конкретный токен из массива токенов
   const token = useMemo(() => {
     if (!tokens || !tokenId) return null;
     
-    // Find the token with the matching ID
+    // Пытаемся найти токен по ID
     return tokens.find(t => t.id === Number(tokenId)) || null;
   }, [tokens, tokenId]);
 
+  // Обработка случая, когда токен не найден
   useEffect(() => {
-    if (!token && tokens) {
+    if (!token && !isTokensLoading && tokens) {
       toast({
         title: "Error",
         description: "Token not found",
         variant: "destructive"
       });
     }
-  }, [token, tokens, toast]);
+  }, [token, tokens, isTokensLoading, toast]);
+
+  // Обработчик для функции поделиться
+  const handleShare = useCallback(() => {
+    if (!token) return;
+    
+    navigator.share?.({
+      title: token.metadata?.name || `Token #${token.token_id}`,
+      text: token.metadata?.description || "",
+      url: window.location.href
+    }).catch(console.error);
+  }, [token]);
+
+  // Обработчик для клика на контракт
+  const handleContractClick = useCallback(() => {
+    if (token?.address) {
+      window.open(`https://polygonscan.com/nft/${token.address}/${token.token_id}`, '_blank');
+    }
+  }, [token]);
+
+  // Обработчик для клика на кнопку купить
+  const handleBuy = useCallback(() => {
+    if (!token) return;
+    
+    toast({
+      title: "Purchase initiated",
+      description: `You are about to purchase ${token.metadata?.name || `Token #${token.token_id}`}`,
+    });
+  }, [token, toast]);
+
+  // Хелпер для сокращения адреса
+  const truncateAddress = useCallback((address: string) => {
+    if (!address) return 'N/A';
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  }, []);
+
+  if (isTokensLoading) {
+    return <LoadingState />;
+  }
 
   if (!token) {
     return (
@@ -48,33 +89,6 @@ const AuthorToken = () => {
       </div>
     );
   }
-
-  const handleShare = () => {
-    navigator.share?.({
-      title: token.metadata?.name || `Token #${token.token_id}`,
-      text: token.metadata?.description || "",
-      url: window.location.href
-    }).catch(console.error);
-  };
-
-  const handleContractClick = () => {
-    if (token.address) {
-      window.open(`https://polygonscan.com/nft/${token.address}/${token.token_id}`, '_blank');
-    }
-  };
-
-  const handleBuy = () => {
-    // Placeholder for future buy functionality
-    toast({
-      title: "Purchase initiated",
-      description: `You are about to purchase ${token.metadata?.name || `Token #${token.token_id}`}`,
-    });
-  };
-
-  const truncateAddress = (address: string) => {
-    if (!address) return 'N/A';
-    return `${address.slice(0, 6)}...${address.slice(-4)}`;
-  };
 
   return (
     <div className="container mx-auto px-4 py-24 max-w-6xl">
@@ -97,6 +111,7 @@ const AuthorToken = () => {
                 src={token.metadata?.image || "/placeholder.svg"} 
                 alt={token.metadata?.name || `Token #${token.token_id}`} 
                 className="w-full h-full object-cover"
+                loading="eager" // Приоритетная загрузка изображения
               />
             </div>
           </div>

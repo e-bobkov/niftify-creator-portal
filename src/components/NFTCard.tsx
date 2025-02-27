@@ -1,5 +1,5 @@
 
-import { memo } from "react";
+import { memo, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,8 +39,10 @@ export const NFTCard = memo(({
   className 
 }: NFTCardProps) => {
   const navigate = useNavigate();
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
-  const handleExplore = (e: React.MouseEvent) => {
+  const handleExplore = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     if (onExplore) {
       onExplore();
@@ -50,9 +52,9 @@ export const NFTCard = memo(({
     } else {
       navigate(`/my-collection/${collectionId}/${id}`);
     }
-  };
+  }, [onExplore, isMarketplace, navigate, id, collectionId]);
 
-  const handleBuy = (e: React.MouseEvent) => {
+  const handleBuy = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     if (onBuy) {
       onBuy();
@@ -60,18 +62,33 @@ export const NFTCard = memo(({
       // Placeholder for future buy functionality
       console.log("Buy clicked for token", id);
     }
-  };
+  }, [onBuy, id]);
+
+  const handleImageLoad = useCallback(() => {
+    setImageLoaded(true);
+  }, []);
+
+  const handleImageError = useCallback(() => {
+    setImageError(true);
+  }, []);
 
   return (
     <div className="group relative">
       <div className="glass-card rounded-lg overflow-hidden">
         <div className="relative aspect-square">
+          {!imageLoaded && !imageError && (
+            <div className="absolute inset-0 bg-primary/10 animate-pulse" />
+          )}
+          
           <img
-            src={image}
+            src={imageError ? "/placeholder.svg" : image}
             alt={title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
             loading="lazy"
+            onLoad={handleImageLoad}
+            onError={handleImageError}
           />
+          
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col gap-2">
               <Button 
@@ -97,12 +114,14 @@ export const NFTCard = memo(({
               )}
             </div>
           </div>
+          
           <div className="absolute top-2 right-2">
             <Badge variant={soldAt ? "destructive" : "secondary"}>
               {soldAt ? "Sold" : "Available"}
             </Badge>
           </div>
         </div>
+        
         <div className="p-4">
           <div className="flex justify-between items-start gap-2">
             <div className="flex-1">
