@@ -20,11 +20,13 @@ import { formatPrice } from "@/utils/format";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { fetchTokenDetails, checkTokenStatus } from "@/api/marketplace";
 import { MarketplaceToken } from "@/api/marketplace";
+import { useAuth } from "@/hooks/useAuth";
 
 const Checkout = () => {
   const { item: itemId } = useParams<{ item: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { token, user } = useAuth(); // Получаем данные авторизации
   
   const [item, setItem] = useState<MarketplaceToken | null>(null);
   const [loading, setLoading] = useState(true);
@@ -106,27 +108,72 @@ const Checkout = () => {
       return;
     }
     
+    if (!item) {
+      toast({
+        title: "Error",
+        description: "Item data is missing. Please try again later.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!user || !user.id || !token) {
+      toast({
+        title: "Authentication required",
+        description: "You need to be logged in to complete this purchase.",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
+    
     try {
       setProcessing(true);
       
-      // Имитация запроса на обработку оплаты
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Создаем тело запроса
+      const requestBody = {
+        id: item.id.toString(), // Преобразуем в строку, если это число
+        collection_id: parseInt(item.collection_id), // Преобразуем в число
+        amount: item.price,
+        buyer_id: user.id
+      };
       
-      toast({
-        title: "Payment successful!",
-        description: "Thank you for your purchase. Your NFT will appear in your inventory shortly.",
+      console.log('Creating order with data:', requestBody);
+      
+      // Отправляем запрос на создание заказа
+      const response = await fetch('https://test.ftsoa.art/order/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(requestBody)
       });
       
-      // Перенаправляем на страницу инвентаря
-      setTimeout(() => {
-        navigate('/inventory');
-      }, 1500);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Failed to create order');
+      }
+      
+      const data = await response.json();
+      
+      if (!data.payment_link) {
+        throw new Error('Payment link not received from server');
+      }
+      
+      toast({
+        title: "Redirecting to payment",
+        description: "You will be redirected to complete your payment.",
+      });
+      
+      // Открываем платежную ссылку в новой вкладке
+      window.open(data.payment_link, '_blank');
       
     } catch (err) {
       console.error('Payment error:', err);
       toast({
         title: "Payment failed",
-        description: "There was an error processing your payment. Please try again.",
+        description: err instanceof Error ? err.message : "There was an error processing your payment. Please try again.",
         variant: "destructive"
       });
     } finally {
