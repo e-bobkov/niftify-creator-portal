@@ -202,6 +202,99 @@ export const InventoryGrid = ({ items, isLoading = false }: InventoryGridProps) 
     { label: "Rarity", value: "rarity" }
   ];
 
+  // Рендеринг содержимого грид-вида
+  const renderGridContent = () => {
+    if (isLoading) {
+      return <SkeletonCard count={8} aspectRatio="square" />;
+    }
+    
+    if (filteredAndSortedItems.length > 0) {
+      return (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+          {visibleItems.map((item) => (
+            <InventoryCard key={item.id} item={item} />
+          ))}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="text-center py-12 glass-card rounded-lg">
+        <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+        <h3 className="mt-4 text-lg font-semibold">No items found</h3>
+        <p className="text-muted-foreground">Try changing your search or filters</p>
+      </div>
+    );
+  };
+  
+  // Рендеринг содержимого списочного вида
+  const renderListContent = () => {
+    if (isLoading) {
+      return (
+        <div className="space-y-2">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="animate-pulse glass-card rounded-lg p-4 flex items-center gap-4">
+              <div className="bg-primary/10 h-16 w-16 rounded-md"></div>
+              <div className="flex-1 space-y-2">
+                <div className="h-4 bg-primary/10 rounded w-1/3"></div>
+                <div className="h-3 bg-primary/10 rounded w-1/2"></div>
+              </div>
+              <div className="h-8 w-24 bg-primary/10 rounded"></div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    if (filteredAndSortedItems.length > 0) {
+      return (
+        <div className="space-y-2">
+          {visibleItems.map((item) => (
+            <div 
+              key={item.id} 
+              className="glass-card rounded-lg p-3 flex items-center gap-4 hover:bg-secondary/10 transition-colors cursor-pointer group"
+              onClick={() => navigate(`/my-collection/${item.collectionId}/${item.id}`)}
+            >
+              <div className="relative h-16 w-16 rounded-md overflow-hidden">
+                <img 
+                  src={item.image} 
+                  alt={item.title}
+                  className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
+                />
+                <div className={`absolute top-0 right-0 w-2 h-2 rounded-full ${rarityConfig[item.rarity].color}`}></div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium truncate">{item.title}</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  From <span className="text-primary">{item.collectionName}</span> • Acquired {new Date(item.acquiredAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="font-semibold text-primary">{formatPrice(item.price)}</p>
+                <p className="text-xs flex items-center justify-end">
+                  <span className={`inline-block h-2 w-2 rounded-full ${rarityConfig[item.rarity].color} mr-1`}></span>
+                  {rarityConfig[item.rarity].label}
+                </p>
+              </div>
+              <Button variant="ghost" size="sm" className="hidden md:flex">
+                <Eye className="h-4 w-4 mr-1" />
+                View
+              </Button>
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="text-center py-12 glass-card rounded-lg">
+        <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
+        <h3 className="mt-4 text-lg font-semibold">No items found</h3>
+        <p className="text-muted-foreground">Try changing your search or filters</p>
+      </div>
+    );
+  };
+
   return (
     <div className="w-full">
       <div className="space-y-6">
@@ -299,89 +392,29 @@ export const InventoryGrid = ({ items, isLoading = false }: InventoryGridProps) 
           </div>
         )}
         
+        {/* Мобильные табы */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="sm:hidden mb-4">
           <TabsList className="grid grid-cols-2 w-full">
             <TabsTrigger value="grid">Grid View</TabsTrigger>
             <TabsTrigger value="list">List View</TabsTrigger>
           </TabsList>
+          <TabsContent value="grid" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            {renderGridContent()}
+          </TabsContent>
+          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            {renderListContent()}
+          </TabsContent>
         </Tabs>
         
-        <TabsContent value="grid" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-          {isLoading ? (
-            <SkeletonCard count={8} aspectRatio="square" />
-          ) : filteredAndSortedItems.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
-              {visibleItems.map((item) => (
-                <InventoryCard key={item.id} item={item} />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 glass-card rounded-lg">
-              <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <h3 className="mt-4 text-lg font-semibold">No items found</h3>
-              <p className="text-muted-foreground">Try changing your search or filters</p>
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-          {isLoading ? (
-            <div className="space-y-2">
-              {[...Array(5)].map((_, index) => (
-                <div key={index} className="animate-pulse glass-card rounded-lg p-4 flex items-center gap-4">
-                  <div className="bg-primary/10 h-16 w-16 rounded-md"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-primary/10 rounded w-1/3"></div>
-                    <div className="h-3 bg-primary/10 rounded w-1/2"></div>
-                  </div>
-                  <div className="h-8 w-24 bg-primary/10 rounded"></div>
-                </div>
-              ))}
-            </div>
-          ) : filteredAndSortedItems.length > 0 ? (
-            <div className="space-y-2">
-              {visibleItems.map((item) => (
-                <div 
-                  key={item.id} 
-                  className="glass-card rounded-lg p-3 flex items-center gap-4 hover:bg-secondary/10 transition-colors cursor-pointer group"
-                  onClick={() => navigate(`/my-collection/${item.collectionId}/${item.id}`)}
-                >
-                  <div className="relative h-16 w-16 rounded-md overflow-hidden">
-                    <img 
-                      src={item.image} 
-                      alt={item.title}
-                      className="h-full w-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
-                    <div className={`absolute top-0 right-0 w-2 h-2 rounded-full ${rarityConfig[item.rarity].color}`}></div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{item.title}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      From <span className="text-primary">{item.collectionName}</span> • Acquired {new Date(item.acquiredAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-primary">{formatPrice(item.price)}</p>
-                    <p className="text-xs flex items-center justify-end">
-                      <span className={`inline-block h-2 w-2 rounded-full ${rarityConfig[item.rarity].color} mr-1`}></span>
-                      {rarityConfig[item.rarity].label}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="hidden md:flex">
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12 glass-card rounded-lg">
-              <Package className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
-              <h3 className="mt-4 text-lg font-semibold">No items found</h3>
-              <p className="text-muted-foreground">Try changing your search or filters</p>
-            </div>
-          )}
-        </TabsContent>
+        {/* Десктопные табы */}
+        <Tabs value={activeTab} className="hidden sm:block">
+          <TabsContent value="grid" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            {renderGridContent()}
+          </TabsContent>
+          <TabsContent value="list" className="mt-0 focus-visible:outline-none focus-visible:ring-0">
+            {renderListContent()}
+          </TabsContent>
+        </Tabs>
         
         {/* Пагинация */}
         {totalPages > 1 && (
