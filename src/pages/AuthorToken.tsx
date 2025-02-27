@@ -13,28 +13,24 @@ const AuthorToken = () => {
   const { toast } = useToast();
 
   const { data: author } = useAuthorById(authorId);
-  const { data: authorCollections } = useAuthorCollectionTokens(authorId);
+  const { data: tokens } = useAuthorCollectionTokens(authorId, undefined);
   
   const token = useMemo(() => {
-    if (!authorCollections || !tokenId) return null;
+    if (!tokens || !tokenId) return null;
     
-    // Ищем токен с указанным tokenId среди всех коллекций автора
-    for (const collection of Object.values(authorCollections || {})) {
-      const foundToken = collection.find(t => t.id === Number(tokenId));
-      if (foundToken) return foundToken;
-    }
-    return null;
-  }, [authorCollections, tokenId]);
+    // Find the token with the matching ID
+    return tokens.find(t => t.id === Number(tokenId)) || null;
+  }, [tokens, tokenId]);
 
   useEffect(() => {
-    if (!token && authorCollections) {
+    if (!token && tokens) {
       toast({
         title: "Error",
         description: "Token not found",
         variant: "destructive"
       });
     }
-  }, [token, authorCollections, toast]);
+  }, [token, tokens, toast]);
 
   if (!token) {
     return (
