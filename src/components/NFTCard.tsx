@@ -22,6 +22,11 @@ interface NFTCardProps extends BaseComponentProps {
   showBuyButton?: boolean;
   onExplore?: () => void;
   onBuy?: () => void;
+  // Добавляем новые проперти
+  collectionName?: string;
+  collectionDescription?: string;
+  authorId?: string;
+  authorName?: string;
 }
 
 export const NFTCard = memo(({ 
@@ -36,7 +41,12 @@ export const NFTCard = memo(({
   showBuyButton = false,
   onExplore,
   onBuy,
-  className 
+  className,
+  // Новые поля
+  collectionName,
+  collectionDescription,
+  authorId,
+  authorName
 }: NFTCardProps) => {
   const navigate = useNavigate();
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -72,6 +82,14 @@ export const NFTCard = memo(({
     setImageError(true);
   }, []);
 
+  const handleCollectionClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (authorId && collectionId) {
+      navigate(`/author/${authorId}/collection/${collectionId}`);
+    }
+  }, [authorId, collectionId, navigate]);
+
   return (
     <div className="group relative">
       <div className="glass-card rounded-lg overflow-hidden">
@@ -87,7 +105,28 @@ export const NFTCard = memo(({
             loading="lazy"
             onLoad={handleImageLoad}
             onError={handleImageError}
+            fetchPriority="auto"
           />
+          
+          {/* Collection Badge в левом верхнем углу */}
+          {collectionName && (
+            <div className="absolute top-2 left-2 max-w-[70%] z-10">
+              <Badge 
+                variant="secondary" 
+                className="truncate cursor-pointer hover:bg-primary/20 transition-colors"
+                onClick={handleCollectionClick}
+              >
+                {collectionName}
+              </Badge>
+            </div>
+          )}
+          
+          {/* Status Badge в правом верхнем углу */}
+          <div className="absolute top-2 right-2">
+            <Badge variant={soldAt ? "destructive" : "secondary"}>
+              {soldAt ? "Sold" : "Available"}
+            </Badge>
+          </div>
           
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col gap-2">
@@ -114,18 +153,26 @@ export const NFTCard = memo(({
               )}
             </div>
           </div>
-          
-          <div className="absolute top-2 right-2">
-            <Badge variant={soldAt ? "destructive" : "secondary"}>
-              {soldAt ? "Sold" : "Available"}
-            </Badge>
-          </div>
         </div>
         
         <div className="p-4">
           <div className="flex justify-between items-start gap-2">
             <div className="flex-1">
               <h3 className="font-semibold leading-tight break-words">{title}</h3>
+              
+              {/* Новая информация об авторе и коллекции */}
+              {authorName && (
+                <p className="text-sm text-muted-foreground mt-1 truncate">
+                  By: {authorName}
+                </p>
+              )}
+              
+              {collectionDescription && (
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                  {collectionDescription}
+                </p>
+              )}
+              
               {owner && (
                 <p className="text-sm text-muted-foreground mt-1">
                   Owned by: {owner.first_name} {owner.last_name}

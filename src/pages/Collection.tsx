@@ -58,6 +58,9 @@ const Collection = () => {
           <CollectionTokens 
             tokens={tokens || []} 
             collectionId={id || ''}
+            collectionName={collection.name}
+            collectionDescription={collection.description}
+            authorId={collection.partner_id}
           />
         </>
       )}

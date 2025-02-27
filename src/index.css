@@ -64,6 +64,14 @@
     background-color: rgba(210, 240, 98, 0.2);
     color: hsl(var(--primary));
   }
+  
+  /* Оптимизация загрузки изображений */
+  img {
+    content-visibility: auto;
+    contain: content;
+    will-change: transform;
+    transform: translateZ(0);
+  }
 }
 
 @layer utilities {
@@ -110,13 +118,33 @@
     pointer-events: none;
   }
   
-  /* Добавляем стили для карточек NFT */
+  /* Улучшенные стили для карточек NFT */
   .group:hover .aspect-square img {
     transform: scale(1.05);
   }
   
   .group .aspect-square {
     overflow: hidden;
+  }
+  
+  /* Анимация появления изображений */
+  .image-loading {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .image-loaded {
+    opacity: 1;
+  }
+  
+  /* Стилизация слайдера */
+  [role="slider"] {
+    @apply h-4 w-4 rounded-full bg-primary shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring;
+  }
+  
+  /* Стилизация фильтров */
+  .filters-container {
+    @apply space-y-4 p-4 rounded-lg backdrop-blur-sm;
   }
 }
 

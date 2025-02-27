@@ -89,6 +89,10 @@ const AuthorCollection = () => {
     );
   }
 
+  const authorFullName = author?.first_name && author?.last_name 
+    ? `${author.first_name} ${author.last_name}` 
+    : author?.full_name || 'Unknown Author';
+
   return (
     <div className="container mx-auto px-4 py-24 max-w-5xl">
       <div className="flex justify-between items-center mb-8">
@@ -164,6 +168,10 @@ const AuthorCollection = () => {
                 price={token.price || 0}
                 soldAt={token.sold_at}
                 showBuyButton={!token.sold_at}
+                collectionName={collection.name}
+                collectionDescription={collection.description}
+                authorId={authorId}
+                authorName={authorFullName}
                 onExplore={() => {
                   if (token.id !== undefined) {
                     handleTokenClick(token.id);

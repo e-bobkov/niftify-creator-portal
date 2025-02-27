@@ -9,11 +9,22 @@ import { BaseComponentProps } from "@/types/common";
 interface CollectionTokensProps extends BaseComponentProps {
   tokens: Token[];
   collectionId: string;
+  collectionName?: string;
+  authorId?: string;
+  authorName?: string;
+  collectionDescription?: string;
 }
 
 const TOKENS_PER_PAGE = 9;
 
-export const CollectionTokens = ({ tokens, collectionId }: CollectionTokensProps) => {
+export const CollectionTokens = ({ 
+  tokens, 
+  collectionId, 
+  collectionName,
+  authorId,
+  authorName,
+  collectionDescription 
+}: CollectionTokensProps) => {
   const [currentPage, setCurrentPage] = useState(1);
   
   const totalPages = Math.ceil(tokens.length / TOKENS_PER_PAGE);
@@ -43,6 +54,10 @@ export const CollectionTokens = ({ tokens, collectionId }: CollectionTokensProps
                 price={token.price || 0}
                 soldAt={token.sold_at}
                 owner={token.owner}
+                collectionName={collectionName}
+                authorId={authorId}
+                authorName={authorName}
+                collectionDescription={collectionDescription}
               />
             ))}
           </div>

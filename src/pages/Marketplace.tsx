@@ -18,7 +18,6 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
-import { TransactionTicker } from "@/components/explore/TransactionTicker";
 import { ExploreBackground } from "@/components/explore/ExploreBackground";
 import { FilterBadge } from "@/components/explore/FilterBadge";
 import { 
@@ -137,8 +136,6 @@ const Marketplace = () => {
   // Предварительно загружаем данные для пагинации
   const prefetchNextPage = useCallback(() => {
     if (currentPage < totalPages) {
-      // Здесь нет необходимости делать дополнительные запросы, так как у нас уже есть все данные
-      // Мы просто готовимся к следующей странице
       console.log(`Preparing for page ${currentPage + 1}`);
     }
   }, [currentPage, totalPages]);
@@ -146,8 +143,6 @@ const Marketplace = () => {
   // Предварительно загружаем данные для предыдущей страницы
   const prefetchPrevPage = useCallback(() => {
     if (currentPage > 1) {
-      // Здесь нет необходимости делать дополнительные запросы, так как у нас уже есть все данные
-      // Мы просто готовимся к предыдущей странице
       console.log(`Preparing for page ${currentPage - 1}`);
     }
   }, [currentPage]);
@@ -157,6 +152,11 @@ const Marketplace = () => {
     prefetchNextPage();
     prefetchPrevPage();
   }, [currentPage, prefetchNextPage, prefetchPrevPage]);
+
+  // Получаем информацию о коллекции по ID
+  const getCollectionInfo = useCallback((collectionId: string) => {
+    return collections?.find(c => c.id === collectionId);
+  }, [collections]);
 
   // Считаем, загружаются ли данные
   const isLoading = isLoadingCollections || isLoadingAllTokens || isLoadingCollectionTokens;
@@ -201,8 +201,8 @@ const Marketplace = () => {
     <div className="min-h-screen bg-background relative overflow-hidden">
       <ExploreBackground />
       
-      <TransactionTicker />
-
+      {/* Убираем бегущую строку TransactionTicker */}
+      
       <div className="container mx-auto px-4 py-24">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -226,9 +226,14 @@ const Marketplace = () => {
             <div className="flex gap-2 flex-wrap">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button 
+                    variant={selectedCollection ? "default" : "outline"} 
+                    className="gap-2"
+                  >
                     <Filter className="w-4 h-4" />
-                    Collection
+                    {selectedCollection 
+                      ? getCollectionInfo(selectedCollection)?.name?.slice(0, 12) || 'Collection' 
+                      : 'Collection'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64">
@@ -259,9 +264,14 @@ const Marketplace = () => {
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button 
+                    variant={activeFilters.includes('price') ? "default" : "outline"} 
+                    className="gap-2"
+                  >
                     <DollarSign className="w-4 h-4" />
-                    Price
+                    {activeFilters.includes('price') 
+                      ? `$${priceRange[0]}-$${priceRange[1]}`
+                      : 'Price'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64">
@@ -279,16 +289,31 @@ const Marketplace = () => {
                         setActiveFilters(prev => [...new Set([...prev, 'price'])]);
                         setCurrentPage(1); // Сбрасываем на первую страницу при изменении цены
                       }}
+                      // Стилизуем ползунки для лучшей визуализации
+                      className="mt-6"
                     />
+                    <div className="flex justify-between">
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground">
+                        {priceRange[0]}
+                      </div>
+                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground">
+                        {priceRange[1]}
+                      </div>
+                    </div>
                   </div>
                 </PopoverContent>
               </Popover>
 
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="gap-2">
+                  <Button 
+                    variant={selectedDate ? "default" : "outline"}
+                    className="gap-2"
+                  >
                     <Calendar className="w-4 h-4" />
-                    Date
+                    {selectedDate 
+                      ? format(selectedDate, 'P')
+                      : 'Date'}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
@@ -366,30 +391,39 @@ const Marketplace = () => {
                   className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
                 >
                   <AnimatePresence>
-                    {paginatedTokens.map((token) => (
-                      <motion.div
-                        key={`${token.collection_id}-${token.token_id}`}
-                        layout
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.9 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <NFTCard
-                          id={token.id !== undefined ? token.id.toString() : `${token.collection_id}-${token.token_id}`}
-                          collectionId={token.collection_id}
-                          title={token.metadata?.name || `Token #${token.token_id}`}
-                          image={token.metadata?.image || "/placeholder.svg"}
-                          price={token.price || 0}
-                          soldAt={token.sold_at}
-                          showBuyButton={!token.sold_at}
-                          isMarketplace={true}
-                          onExplore={() => {
-                            navigate(`/marketplace/${token.id}`);
-                          }}
-                        />
-                      </motion.div>
-                    ))}
+                    {paginatedTokens.map((token) => {
+                      // Получаем информацию о коллекции для токена
+                      const collectionInfo = getCollectionInfo(token.collection_id);
+                      
+                      return (
+                        <motion.div
+                          key={`${token.collection_id}-${token.token_id}`}
+                          layout
+                          initial={{ opacity: 0, scale: 0.9 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.9 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <NFTCard
+                            id={token.id !== undefined ? token.id.toString() : `${token.collection_id}-${token.token_id}`}
+                            collectionId={token.collection_id}
+                            title={token.metadata?.name || `Token #${token.token_id}`}
+                            image={token.metadata?.image || "/placeholder.svg"}
+                            price={token.price || 0}
+                            soldAt={token.sold_at}
+                            showBuyButton={!token.sold_at}
+                            isMarketplace={true}
+                            onExplore={() => {
+                              navigate(`/marketplace/${token.id}`);
+                            }}
+                            // Добавляем новые свойства
+                            collectionName={collectionInfo?.name}
+                            collectionDescription={collectionInfo?.description}
+                            authorId={collectionInfo?.partner_id}
+                          />
+                        </motion.div>
+                      );
+                    })}
                   </AnimatePresence>
                 </motion.div>
               )}
