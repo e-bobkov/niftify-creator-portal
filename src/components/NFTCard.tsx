@@ -14,15 +14,9 @@ const getCollectionGradient = (collectionId?: string) => {
   // Используем последние символы ID для определения градиента
   const lastChar = collectionId.slice(-1).charCodeAt(0);
   
-  const gradients = [
-    'bg-gradient-to-r from-[#F2FCE2] to-[#E2D1C3]', // Soft Green (убрали прозрачность)
-    'bg-gradient-to-r from-[#FEF7CD] to-[#FEC6A1]', // Soft Yellow (убрали прозрачность)
-    'bg-gradient-to-r from-[#E5DEFF] to-[#D3E4FD]', // Soft Purple (убрали прозрачность)
-    'bg-gradient-to-r from-[#FFDEE2] to-[#FDE1D3]', // Soft Pink (убрали прозрачность)
-    'bg-gradient-to-r from-[#D3E4FD] to-[#F1F0FB]', // Soft Blue (убрали прозрачность)
-  ];
-  
-  return gradients[lastChar % gradients.length];
+  // Кислотно-розовый градиент как основной
+  // Используем немного прозрачности (90%)
+  return 'bg-gradient-to-r from-[#FF3DB0E6] to-[#D946EFE6]';
 };
 
 interface NFTCardProps extends BaseComponentProps {
@@ -143,7 +137,7 @@ export const NFTCard = memo(({
           {collectionName && (
             <div className="absolute top-2 left-2 max-w-[70%] z-10">
               <div 
-                className={`${collectionGradient} backdrop-blur-sm px-2 py-1 rounded-full truncate cursor-pointer hover:opacity-80 transition-colors text-xs font-medium border border-white/10 shadow-sm text-black`}
+                className={`${collectionGradient} backdrop-blur-sm px-2 py-1 rounded-full truncate cursor-pointer hover:opacity-80 transition-colors text-xs font-medium border border-white/20 shadow-sm text-white font-semibold`}
                 onClick={handleCollectionClick}
               >
                 {collectionName}
