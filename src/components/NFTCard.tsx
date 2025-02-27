@@ -76,9 +76,10 @@ export const NFTCard = memo(({
     if (onBuy) {
       onBuy();
     } else {
-      console.log("Buy clicked for token", id);
+      // Перенаправляем на страницу чекаута
+      navigate(`/checkout/${id}`);
     }
-  }, [onBuy, id]);
+  }, [onBuy, id, navigate]);
 
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
