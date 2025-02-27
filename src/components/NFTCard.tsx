@@ -94,6 +94,23 @@ export const NFTCard = memo(({
     setImageError(true);
   }, []);
 
+  // Изменяем обработчик клика на коллекцию
+  const handleCollectionClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (collectionId) {
+      // Для страницы автора и маркетплейса логика навигации разная
+      if (isMarketplace) {
+        navigate(`/marketplace/collection/${collectionId}`);
+      } else if (authorId) {
+        navigate(`/author/${authorId}/collection/${collectionId}`);
+      } else {
+        navigate(`/collection/${collectionId}`);
+      }
+    }
+  }, [collectionId, isMarketplace, authorId, navigate]);
+
+  // Отдельная функция для клика на автора
   const handleAuthorClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
@@ -127,7 +144,7 @@ export const NFTCard = memo(({
             <div className="absolute top-2 left-2 max-w-[70%] z-10">
               <div 
                 className={`${collectionGradient} px-2 py-1 rounded-full truncate cursor-pointer hover:opacity-80 transition-colors text-xs font-medium`}
-                onClick={handleAuthorClick}
+                onClick={handleCollectionClick}
               >
                 {collectionName}
               </div>
