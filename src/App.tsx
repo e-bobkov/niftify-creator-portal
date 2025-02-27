@@ -29,6 +29,7 @@ import Author from "@/pages/Author";
 import AuthorCollection from "@/pages/AuthorCollection";
 import AuthorToken from "@/pages/AuthorToken";
 import Inventory from "@/pages/Inventory";
+import Checkout from "@/pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ const App = () => (
             <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
             <Route path="/my-collection/:id" element={<PrivateRoute><Collection /></PrivateRoute>} />
             <Route path="/my-collection/:collectionId/:tokenId" element={<PrivateRoute><TokenDetails /></PrivateRoute>} />
+            <Route path="/checkout/:item" element={<Checkout />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Footer />
