@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/format";
 import { BaseComponentProps } from "@/types/common";
+import { checkTokenStatus } from "@/api/marketplace";
+import { useToast } from "@/components/ui/use-toast";
 
 // Функция для получения градиента для коллекции на основе её ID
 const getCollectionGradient = (collectionId?: string) => {
@@ -57,8 +59,10 @@ export const NFTCard = memo(({
   authorName
 }: NFTCardProps) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [isProcessingBuy, setIsProcessingBuy] = useState(false);
 
   const handleExplore = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
@@ -71,15 +75,49 @@ export const NFTCard = memo(({
     }
   }, [onExplore, isMarketplace, navigate, id, collectionId]);
 
-  const handleBuy = useCallback((e: React.MouseEvent) => {
+  const handleBuy = useCallback(async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onBuy) {
-      onBuy();
-    } else {
-      // Перенаправляем на страницу чекаута
-      navigate(`/checkout/${id}`);
+    e.preventDefault();
+    
+    if (isProcessingBuy) return;
+    
+    try {
+      setIsProcessingBuy(true);
+      
+      if (onBuy) {
+        onBuy();
+        return;
+      }
+      
+      // Проверяем статус токена перед переходом на страницу чекаута
+      const isAvailable = await checkTokenStatus(id);
+      
+      if (isAvailable) {
+        // Если токен доступен, перенаправляем на страницу чекаута
+        navigate(`/checkout/${id}`);
+      } else {
+        // Если токен недоступен, показываем уведомление и перенаправляем на маркетплейс
+        toast({
+          title: "Token unavailable",
+          description: "This NFT is no longer available for purchase.",
+          variant: "destructive"
+        });
+        
+        setTimeout(() => {
+          navigate('/marketplace');
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Error during buy process:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process your request. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingBuy(false);
     }
-  }, [onBuy, id, navigate]);
+  }, [onBuy, id, navigate, isProcessingBuy, toast]);
 
   const handleImageLoad = useCallback(() => {
     setImageLoaded(true);
@@ -173,9 +211,10 @@ export const NFTCard = memo(({
                   size="lg" 
                   className="opacity-0 group-hover:opacity-100 transform group-hover:scale-100 scale-75 transition-all duration-300"
                   onClick={handleBuy}
+                  disabled={isProcessingBuy}
                 >
                   <ShoppingCart className="mr-2" />
-                  Buy Now
+                  {isProcessingBuy ? "Processing..." : "Buy Now"}
                 </Button>
               )}
             </div>

@@ -1,6 +1,5 @@
-
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar, User, ShoppingCart, Home } from "lucide-react";
+import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar, User, ShoppingCart, Home, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useMarketplaceTokenDetails } from "@/hooks/useMarketplace";
@@ -8,6 +7,8 @@ import { useAuthorByTokenId } from "@/hooks/useAuthor";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useCallback, useState } from "react";
 import { LoadingState } from "@/components/collection/LoadingState";
+import { formatPrice } from "@/utils/format";
+import { checkTokenStatus } from "@/api/marketplace";
 
 interface Breadcrumb {
   path: string;
@@ -19,6 +20,7 @@ const MarketplaceTokenDetails = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
+  const [isBuying, setIsBuying] = useState(false);
 
   const { 
     data: tokenDetails, 
@@ -100,15 +102,41 @@ const MarketplaceTokenDetails = () => {
     }
   }, [tokenDetails]);
 
-  const handleBuy = useCallback(() => {
-    if (!tokenDetails) return;
+  const handleBuy = useCallback(async () => {
+    if (!tokenDetails || isBuying) return;
     
-    // Placeholder for future buy functionality
-    toast({
-      title: "Purchase initiated",
-      description: `You are about to purchase ${tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`}`,
-    });
-  }, [tokenDetails, toast]);
+    try {
+      setIsBuying(true);
+      
+      // Проверяем статус токена перед переходом на страницу чекаута
+      const isAvailable = await checkTokenStatus(tokenId || '');
+      
+      if (isAvailable) {
+        // Если токен доступен, перенаправляем на страницу чекаута
+        navigate(`/checkout/${tokenId}`);
+      } else {
+        // Если токен недоступен, показываем уведомление и перенаправляем на маркетплейс
+        toast({
+          title: "Token unavailable",
+          description: "This NFT is no longer available for purchase.",
+          variant: "destructive"
+        });
+        
+        setTimeout(() => {
+          navigate('/marketplace');
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Error checking token status:', err);
+      toast({
+        title: "Error",
+        description: "Failed to process your request. Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsBuying(false);
+    }
+  }, [tokenDetails, tokenId, navigate, toast, isBuying]);
 
   const handleAuthorClick = useCallback(() => {
     if (author) {
@@ -294,11 +322,24 @@ const MarketplaceTokenDetails = () => {
               ) : tokenDetails.price ? (
                 <div className="flex items-center justify-between">
                   <div className="text-lg font-semibold">
-                    <span>${tokenDetails.price.toFixed(2)}</span>
+                    <span>{formatPrice(tokenDetails.price)}</span>
                   </div>
-                  <Button onClick={handleBuy} className="flex items-center gap-2">
-                    <ShoppingCart className="w-4 h-4" />
-                    Buy Now
+                  <Button 
+                    onClick={handleBuy} 
+                    className="flex items-center gap-2"
+                    disabled={isBuying}
+                  >
+                    {isBuying ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingCart className="w-4 h-4" />
+                        Buy Now
+                      </>
+                    )}
                   </Button>
                 </div>
               ) : null}

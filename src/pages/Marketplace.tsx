@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -36,6 +35,25 @@ const DESKTOP_TOKENS_PER_PAGE = 12;
 
 // Настройки для отображения сетки
 type GridType = "3-col" | "4-col" | "6-col";
+
+// Компонент для отображения скелетона карточки
+const SkeletonCard = ({ count, aspectRatio }: { count: number; aspectRatio: string }) => {
+  return (
+    <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6`}>
+      {[...Array(count)].map((_, i) => (
+        <div key={i} className="animate-pulse">
+          <div className="bg-secondary/10 rounded-lg">
+            <div className={`aspect-w-1 aspect-h-1 ${aspectRatio === "square" ? 'aspect-square' : ''}`}></div>
+            <div className="p-4 space-y-2">
+              <div className="h-4 bg-secondary/50 rounded w-2/3"></div>
+              <div className="h-4 bg-secondary/50 rounded w-1/3"></div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const Marketplace = () => {
   const { toast } = useToast();
@@ -255,6 +273,66 @@ const Marketplace = () => {
       ]));
     }
   }, [location]);
+
+  const renderGridContent = () => {
+    if (isLoading) {
+      return <SkeletonCard count={8} aspectRatio="square" />;
+    }
+    
+    if (sortedTokens.length > 0) {
+      return (
+        <div className={`grid ${gridClass} gap-6`}>
+          {paginatedTokens.map((token) => {
+            // Получаем информацию о коллекции для токена
+            const collectionInfo = getCollectionInfo(token.collection_id);
+            
+            return (
+              <motion.div
+                key={`${token.collection_id}-${token.token_id}`}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                transition={{ duration: 0.3 }}
+              >
+                <NFTCard
+                  id={token.id !== undefined ? token.id.toString() : `${token.collection_id}-${token.token_id}`}
+                  collectionId={token.collection_id}
+                  title={token.metadata?.name || `Token #${token.token_id}`}
+                  image={token.metadata?.image || "/placeholder.svg"}
+                  price={token.price || 0}
+                  soldAt={token.sold_at}
+                  showBuyButton={!token.sold_at}
+                  isMarketplace={true}
+                  onExplore={() => {
+                    // Сохраняем путь для хлебных крошек
+                    const breadcrumbs = [
+                      { path: '/marketplace', label: 'Marketplace' },
+                      { path: `/marketplace/${token.id}`, label: token.metadata?.name || `Token #${token.token_id}` }
+                    ];
+                    sessionStorage.setItem('breadcrumbs', JSON.stringify(breadcrumbs));
+                    navigate(`/marketplace/${token.id}`);
+                  }}
+                  // Добавляем новые свойства
+                  collectionName={collectionInfo?.name}
+                  authorId={collectionInfo?.partner_id}
+                />
+              </motion.div>
+            );
+          })}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="text-center p-10 glass-card rounded-lg">
+        <h3 className="text-xl font-medium mb-2">No tokens found</h3>
+        <p className="text-muted-foreground">
+          Try adjusting your filters or search query
+        </p>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -16,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { formatPrice } from "@/utils/format";
-import { fetchTokenDetails } from "@/api/marketplace";
+import { fetchTokenDetails, checkTokenStatus } from "@/api/marketplace";
 import { MarketplaceToken } from "@/api/marketplace";
 
 const Checkout = () => {
@@ -33,10 +32,8 @@ const Checkout = () => {
   const [privacyChecked, setPrivacyChecked] = useState(false);
   const [refundChecked, setRefundChecked] = useState(false);
   
-  // Выбранный метод оплаты (пока только карта)
   const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto'>('card');
 
-  // Получаем информацию о товаре
   useEffect(() => {
     const checkItem = async () => {
       if (!itemId) return;
@@ -45,9 +42,26 @@ const Checkout = () => {
         setLoading(true);
         setError(null);
         
+        const isAvailable = await checkTokenStatus(itemId);
+        
+        if (!isAvailable) {
+          setError('This NFT is no longer available for purchase.');
+          toast({
+            title: "Item unavailable",
+            description: "This NFT has already been sold or is no longer available.",
+            variant: "destructive"
+          });
+          
+          // Перенаправляем обратно через 3 секунды
+          setTimeout(() => {
+            navigate('/marketplace');
+          }, 3000);
+          
+          return;
+        }
+        
         const itemData = await fetchTokenDetails(itemId);
         
-        // Проверяем, не продан ли уже NFT
         if (itemData.sold_at) {
           setError('This NFT has already been sold.');
           toast({
@@ -81,7 +95,6 @@ const Checkout = () => {
     checkItem();
   }, [itemId, navigate, toast]);
 
-  // Метод обработки оплаты
   const handlePayment = async () => {
     if (!termsChecked || !privacyChecked || !refundChecked) {
       toast({
@@ -120,7 +133,6 @@ const Checkout = () => {
     }
   };
 
-  // Если загрузка или ошибка
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -165,7 +177,6 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Хлебные крошки для навигации */}
       <div className="container mx-auto px-4 pt-6">
         <div className="flex items-center text-sm text-muted-foreground">
           <Button 
@@ -210,7 +221,6 @@ const Checkout = () => {
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Complete your purchase</h1>
               
               <div className="flex flex-col md:flex-row gap-6">
-                {/* Информация о товаре */}
                 <div className="md:w-2/5">
                   <div className="glass-card rounded-lg overflow-hidden">
                     <div className="aspect-square">
@@ -248,7 +258,6 @@ const Checkout = () => {
                   </div>
                 </div>
                 
-                {/* Форма оплаты */}
                 <div className="md:w-3/5">
                   <div className="space-y-6">
                     <div>
@@ -321,7 +330,6 @@ const Checkout = () => {
                       </div>
                     )}
                     
-                    {/* Соглашения */}
                     <div className="space-y-3 pt-4">
                       <h3 className="text-lg font-semibold mb-2">Agreements</h3>
                       
@@ -374,7 +382,6 @@ const Checkout = () => {
                       </div>
                     </div>
                     
-                    {/* Итоговая сумма и кнопка оплаты */}
                     <div className="pt-4 space-y-4">
                       <div className="flex justify-between py-2 border-t border-b border-secondary/30">
                         <span className="font-semibold">Total</span>
@@ -404,7 +411,6 @@ const Checkout = () => {
             </div>
           </motion.div>
           
-          {/* Информация о безопасности */}
           <div className="mt-8 text-center text-sm text-muted-foreground">
             <div className="flex items-center justify-center mb-2">
               <LockKeyhole className="h-4 w-4 mr-1" />

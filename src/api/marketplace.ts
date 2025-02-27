@@ -1,4 +1,3 @@
-
 import { Token } from "@/types/user";
 
 export interface MarketplaceCollection {
@@ -57,3 +56,20 @@ export async function fetchAllTokens(): Promise<Record<string, MarketplaceToken[
   }
   return response.json();
 }
+
+// Функция проверки статуса токена (доступен ли для покупки)
+export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
+  try {
+    const response = await fetch(`https://test.ftsoa.art/token/status/${tokenId}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to check token status');
+    }
+    
+    const data = await response.json();
+    return data === true; // API возвращает true если токен доступен
+  } catch (error) {
+    console.error('Error checking token status:', error);
+    return false; // В случае ошибки считаем токен недоступным
+  }
+};
