@@ -134,12 +134,14 @@ export const NFTCard = memo(({
             </div>
           )}
           
-          {/* Status Badge */}
-          <div className="absolute top-2 right-2">
-            <Badge variant={soldAt ? "destructive" : "secondary"}>
-              {soldAt ? "Sold" : "Available"}
-            </Badge>
-          </div>
+          {/* Status Badge - только не на маркетплейсе */}
+          {!isMarketplace && (
+            <div className="absolute top-2 right-2">
+              <Badge variant={soldAt ? "destructive" : "secondary"}>
+                {soldAt ? "Sold" : "Available"}
+              </Badge>
+            </div>
+          )}
           
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
             <div className="flex flex-col gap-2">
