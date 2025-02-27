@@ -6,10 +6,19 @@ import { motion } from "framer-motion";
 interface AuthorCollectionsProps {
   collections: Collection[];
   authorId: string;
+  onCollectionClick?: (collectionId: string) => void;
 }
 
-export const AuthorCollections = ({ collections, authorId }: AuthorCollectionsProps) => {
+export const AuthorCollections = ({ collections, authorId, onCollectionClick }: AuthorCollectionsProps) => {
   const navigate = useNavigate();
+
+  const handleCollectionClick = (collectionId: string) => {
+    if (onCollectionClick) {
+      onCollectionClick(collectionId);
+    } else {
+      navigate(`/author/${authorId}/collection/${collectionId}`);
+    }
+  };
 
   if (!collections.length) {
     return (
@@ -30,7 +39,7 @@ export const AuthorCollections = ({ collections, authorId }: AuthorCollectionsPr
             key={collection.id}
             whileHover={{ scale: 1.03 }}
             className="glass-card rounded-lg overflow-hidden cursor-pointer"
-            onClick={() => navigate(`/author/${authorId}/collection/${collection.id}`)}
+            onClick={() => handleCollectionClick(collection.id)}
           >
             <div className="aspect-square relative">
               <img 
