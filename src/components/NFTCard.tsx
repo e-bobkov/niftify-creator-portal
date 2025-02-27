@@ -15,11 +15,11 @@ const getCollectionGradient = (collectionId?: string) => {
   const lastChar = collectionId.slice(-1).charCodeAt(0);
   
   const gradients = [
-    'bg-gradient-to-r from-[#F2FCE280] to-[#E2D1C380]', // Soft Green
-    'bg-gradient-to-r from-[#FEF7CD80] to-[#FEC6A180]', // Soft Yellow
-    'bg-gradient-to-r from-[#E5DEFF80] to-[#D3E4FD80]', // Soft Purple
-    'bg-gradient-to-r from-[#FFDEE280] to-[#FDE1D380]', // Soft Pink
-    'bg-gradient-to-r from-[#D3E4FD80] to-[#F1F0FB80]', // Soft Blue
+    'bg-gradient-to-r from-[#F2FCE2] to-[#E2D1C3]', // Soft Green (убрали прозрачность)
+    'bg-gradient-to-r from-[#FEF7CD] to-[#FEC6A1]', // Soft Yellow (убрали прозрачность)
+    'bg-gradient-to-r from-[#E5DEFF] to-[#D3E4FD]', // Soft Purple (убрали прозрачность)
+    'bg-gradient-to-r from-[#FFDEE2] to-[#FDE1D3]', // Soft Pink (убрали прозрачность)
+    'bg-gradient-to-r from-[#D3E4FD] to-[#F1F0FB]', // Soft Blue (убрали прозрачность)
   ];
   
   return gradients[lastChar % gradients.length];
@@ -94,13 +94,13 @@ export const NFTCard = memo(({
     setImageError(true);
   }, []);
 
-  // Изменяем обработчик клика на коллекцию для перехода по пути /author/:partner_id/collections/:collection_id/tokens
+  // Изменяем обработчик клика на коллекцию для перехода по пути /author/:partner_id/collection/:collection_id
   const handleCollectionClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
     
     if (collectionId && authorId) {
-      navigate(`/author/${authorId}/collections/${collectionId}/tokens`);
+      navigate(`/author/${authorId}/collection/${collectionId}`);
     } else if (collectionId && isMarketplace) {
       // Для маркетплейса без указания автора
       navigate(`/marketplace/collection/${collectionId}`);
@@ -143,7 +143,7 @@ export const NFTCard = memo(({
           {collectionName && (
             <div className="absolute top-2 left-2 max-w-[70%] z-10">
               <div 
-                className={`${collectionGradient} px-2 py-1 rounded-full truncate cursor-pointer hover:opacity-80 transition-colors text-xs font-medium`}
+                className={`${collectionGradient} backdrop-blur-sm px-2 py-1 rounded-full truncate cursor-pointer hover:opacity-80 transition-colors text-xs font-medium border border-white/10 shadow-sm text-black`}
                 onClick={handleCollectionClick}
               >
                 {collectionName}
