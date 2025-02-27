@@ -57,7 +57,6 @@ export const CollectionTokens = ({
                 collectionName={collectionName}
                 authorId={authorId}
                 authorName={authorName}
-                collectionDescription={collectionDescription}
               />
             ))}
           </div>
