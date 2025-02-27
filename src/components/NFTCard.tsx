@@ -22,11 +22,11 @@ interface NFTCardProps extends BaseComponentProps {
   showBuyButton?: boolean;
   onExplore?: () => void;
   onBuy?: () => void;
-  // Добавляем новые проперти
+  // Проперти
   collectionName?: string;
-  collectionDescription?: string;
   authorId?: string;
   authorName?: string;
+  collectionDescription?: string; // Оставляем в типе, но не будем использовать
 }
 
 export const NFTCard = memo(({ 
@@ -42,9 +42,8 @@ export const NFTCard = memo(({
   onExplore,
   onBuy,
   className,
-  // Новые поля
+  // Поля
   collectionName,
-  collectionDescription,
   authorId,
   authorName
 }: NFTCardProps) => {
@@ -160,16 +159,10 @@ export const NFTCard = memo(({
             <div className="flex-1">
               <h3 className="font-semibold leading-tight break-words">{title}</h3>
               
-              {/* Новая информация об авторе и коллекции */}
+              {/* Оставляем только информацию об авторе */}
               {authorName && (
                 <p className="text-sm text-muted-foreground mt-1 truncate">
                   By: {authorName}
-                </p>
-              )}
-              
-              {collectionDescription && (
-                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                  {collectionDescription}
                 </p>
               )}
               

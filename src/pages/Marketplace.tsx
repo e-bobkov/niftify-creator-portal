@@ -2,19 +2,17 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Calendar, 
-  DollarSign, 
   Filter, 
   Search,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ArrowDown,
+  ArrowUp,
+  Home
 } from "lucide-react";
-import { format } from "date-fns";
 import { NFTCard } from "@/components/NFTCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
@@ -26,17 +24,17 @@ import {
   useMarketplaceCollectionTokens 
 } from "@/hooks/useMarketplace";
 import { MarketplaceToken } from "@/api/marketplace";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 
-const TOKENS_PER_PAGE = 16;
+const TOKENS_PER_PAGE = 6;
 
 const Marketplace = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<string>("");
-  const [priceRange, setPriceRange] = useState([0, 1000]);
-  const [selectedDate, setSelectedDate] = useState<Date>();
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // По умолчанию от дорогих к дешевым
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -88,21 +86,29 @@ const Marketplace = () => {
   const filteredTokens = useMemo(() => {
     return tokensToDisplay.filter(token => {
       const matchesSearch = token.metadata?.name?.toLowerCase().includes(searchQuery.toLowerCase()) || false;
-      const matchesPrice = !token.price || (token.price >= priceRange[0] && token.price <= priceRange[1]);
-      const matchesDate = !selectedDate || 
-        (token.minted_at && format(new Date(token.minted_at), 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd'));
-
-      return matchesSearch && matchesPrice && matchesDate;
+      return matchesSearch;
     });
-  }, [tokensToDisplay, searchQuery, priceRange, selectedDate]);
+  }, [tokensToDisplay, searchQuery]);
+
+  // Сортируем токены по цене
+  const sortedTokens = useMemo(() => {
+    return [...filteredTokens].sort((a, b) => {
+      const priceA = a.price || 0;
+      const priceB = b.price || 0;
+      
+      return sortOrder === 'asc' 
+        ? priceA - priceB // От дешевых к дорогим
+        : priceB - priceA; // От дорогих к дешевым
+    });
+  }, [filteredTokens, sortOrder]);
 
   // Пагинация токенов
   const paginatedTokens = useMemo(() => {
     const startIndex = (currentPage - 1) * TOKENS_PER_PAGE;
-    return filteredTokens.slice(startIndex, startIndex + TOKENS_PER_PAGE);
-  }, [filteredTokens, currentPage]);
+    return sortedTokens.slice(startIndex, startIndex + TOKENS_PER_PAGE);
+  }, [sortedTokens, currentPage]);
 
-  const totalPages = Math.ceil(filteredTokens.length / TOKENS_PER_PAGE);
+  const totalPages = Math.ceil(sortedTokens.length / TOKENS_PER_PAGE);
 
   // Функция для удаления фильтра
   const removeFilter = useCallback((filter: string) => {
@@ -110,11 +116,8 @@ const Marketplace = () => {
       case 'collection':
         setSelectedCollection("");
         break;
-      case 'date':
-        setSelectedDate(undefined);
-        break;
-      case 'price':
-        setPriceRange([0, 1000]);
+      case 'sort':
+        setSortOrder('desc');
         break;
       default:
         break;
@@ -132,6 +135,13 @@ const Marketplace = () => {
     // Предварительно загружаем токены для выбранной коллекции
     prefetchTokens(collectionId);
   }, [prefetchTokens]);
+
+  // Функция для изменения порядка сортировки
+  const handleSortOrderChange = useCallback((order: 'asc' | 'desc') => {
+    setSortOrder(order);
+    setActiveFilters(prev => [...new Set([...prev, 'sort'])]);
+    setCurrentPage(1); // Сбрасываем на первую страницу при изменении сортировки
+  }, []);
 
   // Предварительно загружаем данные для пагинации
   const prefetchNextPage = useCallback(() => {
@@ -196,14 +206,36 @@ const Marketplace = () => {
     
     return pages;
   }, [currentPage, totalPages]);
+  
+  // Добавляем в localStorage текущий путь для хлебных крошек
+  useEffect(() => {
+    if (location.pathname === '/marketplace') {
+      // Сохраняем информацию о том, что мы на странице маркетплейса
+      sessionStorage.setItem('breadcrumbs', JSON.stringify([
+        { path: '/marketplace', label: 'Marketplace' }
+      ]));
+    }
+  }, [location]);
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       <ExploreBackground />
       
-      {/* Убираем бегущую строку TransactionTicker */}
-      
       <div className="container mx-auto px-4 py-24">
+        {/* Добавляем хлебные крошки */}
+        <div className="flex items-center text-sm text-muted-foreground mb-6">
+          <Button 
+            variant="link" 
+            className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
+            onClick={() => navigate('/')}
+          >
+            <Home className="h-3.5 w-3.5 mr-1" />
+            Home
+          </Button>
+          <span className="mx-2">/</span>
+          <span className="text-foreground">Marketplace</span>
+        </div>
+      
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -237,7 +269,7 @@ const Marketplace = () => {
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64">
-                  <ScrollArea className="h-72">
+                  <ScrollArea className="h-auto max-h-72">
                     {isLoadingCollections ? (
                       <div className="space-y-2 animate-pulse">
                         {[...Array(5)].map((_, i) => (
@@ -265,68 +297,41 @@ const Marketplace = () => {
               <Popover>
                 <PopoverTrigger asChild>
                   <Button 
-                    variant={activeFilters.includes('price') ? "default" : "outline"} 
+                    variant={activeFilters.includes('sort') ? "default" : "outline"} 
                     className="gap-2"
                   >
-                    <DollarSign className="w-4 h-4" />
-                    {activeFilters.includes('price') 
-                      ? `$${priceRange[0]}-$${priceRange[1]}`
-                      : 'Price'}
+                    {sortOrder === 'desc' ? (
+                      <>
+                        <ArrowDown className="w-4 h-4" />
+                        Most expensive
+                      </>
+                    ) : (
+                      <>
+                        <ArrowUp className="w-4 h-4" />
+                        Least expensive
+                      </>
+                    )}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-64">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Range: ${priceRange[0]} - ${priceRange[1]}</span>
-                    </div>
-                    <Slider
-                      min={0}
-                      max={1000}
-                      step={50}
-                      value={priceRange}
-                      onValueChange={(value) => {
-                        setPriceRange(value);
-                        setActiveFilters(prev => [...new Set([...prev, 'price'])]);
-                        setCurrentPage(1); // Сбрасываем на первую страницу при изменении цены
-                      }}
-                      // Стилизуем ползунки для лучшей визуализации
-                      className="mt-6"
-                    />
-                    <div className="flex justify-between">
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground">
-                        {priceRange[0]}
-                      </div>
-                      <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-xs text-primary-foreground">
-                        {priceRange[1]}
-                      </div>
-                    </div>
+                  <div className="space-y-2">
+                    <Button
+                      variant="ghost"
+                      className={`w-full justify-start ${sortOrder === 'desc' ? 'bg-primary/20' : ''}`}
+                      onClick={() => handleSortOrderChange('desc')}
+                    >
+                      <ArrowDown className="w-4 h-4 mr-2" />
+                      Most expensive
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      className={`w-full justify-start ${sortOrder === 'asc' ? 'bg-primary/20' : ''}`}
+                      onClick={() => handleSortOrderChange('asc')}
+                    >
+                      <ArrowUp className="w-4 h-4 mr-2" />
+                      Least expensive
+                    </Button>
                   </div>
-                </PopoverContent>
-              </Popover>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant={selectedDate ? "default" : "outline"}
-                    className="gap-2"
-                  >
-                    <Calendar className="w-4 h-4" />
-                    {selectedDate 
-                      ? format(selectedDate, 'P')
-                      : 'Date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <CalendarComponent
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={(date) => {
-                      setSelectedDate(date);
-                      setActiveFilters(prev => [...new Set([...prev, 'date'])]);
-                      setCurrentPage(1); // Сбрасываем на первую страницу при изменении даты
-                    }}
-                    initialFocus
-                  />
                 </PopoverContent>
               </Popover>
             </div>
@@ -345,26 +350,19 @@ const Marketplace = () => {
                   onRemove={() => removeFilter('collection')}
                 />
               )}
-              {activeFilters.includes('price') && (
+              {activeFilters.includes('sort') && (
                 <FilterBadge
-                  filter="price"
-                  value={`$${priceRange[0]} - $${priceRange[1]}`}
-                  onRemove={() => removeFilter('price')}
-                />
-              )}
-              {activeFilters.includes('date') && (
-                <FilterBadge
-                  filter="date"
-                  value={selectedDate ? format(selectedDate, 'PP') : ''}
-                  onRemove={() => removeFilter('date')}
+                  filter="sort"
+                  value={sortOrder === 'desc' ? 'Most expensive' : 'Least expensive'}
+                  onRemove={() => removeFilter('sort')}
                 />
               )}
             </motion.div>
           )}
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {[...Array(8)].map((_, i) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="bg-primary/10 rounded-lg">
                     <div className="aspect-square"></div>
@@ -378,7 +376,7 @@ const Marketplace = () => {
             </div>
           ) : (
             <>
-              {filteredTokens.length === 0 ? (
+              {sortedTokens.length === 0 ? (
                 <div className="text-center p-10 glass-card rounded-lg">
                   <h3 className="text-xl font-medium mb-2">No tokens found</h3>
                   <p className="text-muted-foreground">
@@ -388,7 +386,7 @@ const Marketplace = () => {
               ) : (
                 <motion.div 
                   layout
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                   <AnimatePresence>
                     {paginatedTokens.map((token) => {
@@ -414,11 +412,16 @@ const Marketplace = () => {
                             showBuyButton={!token.sold_at}
                             isMarketplace={true}
                             onExplore={() => {
+                              // Сохраняем путь для хлебных крошек
+                              const breadcrumbs = [
+                                { path: '/marketplace', label: 'Marketplace' },
+                                { path: `/marketplace/${token.id}`, label: token.metadata?.name || `Token #${token.token_id}` }
+                              ];
+                              sessionStorage.setItem('breadcrumbs', JSON.stringify(breadcrumbs));
                               navigate(`/marketplace/${token.id}`);
                             }}
                             // Добавляем новые свойства
                             collectionName={collectionInfo?.name}
-                            collectionDescription={collectionInfo?.description}
                             authorId={collectionInfo?.partner_id}
                           />
                         </motion.div>
@@ -428,7 +431,7 @@ const Marketplace = () => {
                 </motion.div>
               )}
 
-              {filteredTokens.length > 0 && totalPages > 1 && (
+              {sortedTokens.length > 0 && totalPages > 1 && (
                 <div className="flex justify-center mt-8 gap-2">
                   <Button
                     variant="outline"

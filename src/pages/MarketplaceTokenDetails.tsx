@@ -1,18 +1,24 @@
 
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar, User, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar, User, ShoppingCart, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useMarketplaceTokenDetails } from "@/hooks/useMarketplace";
 import { useAuthorByTokenId } from "@/hooks/useAuthor";
 import { useToast } from "@/components/ui/use-toast";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { LoadingState } from "@/components/collection/LoadingState";
+
+interface Breadcrumb {
+  path: string;
+  label: string;
+}
 
 const MarketplaceTokenDetails = () => {
   const { tokenId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [breadcrumbs, setBreadcrumbs] = useState<Breadcrumb[]>([]);
 
   const { 
     data: tokenDetails, 
@@ -36,6 +42,40 @@ const MarketplaceTokenDetails = () => {
       });
     }
   }, [tokenError, toast]);
+
+  // Загружаем хлебные крошки из sessionStorage
+  useEffect(() => {
+    const savedBreadcrumbs = sessionStorage.getItem('breadcrumbs');
+    if (savedBreadcrumbs) {
+      try {
+        const parsedBreadcrumbs = JSON.parse(savedBreadcrumbs) as Breadcrumb[];
+        setBreadcrumbs(parsedBreadcrumbs);
+      } catch (e) {
+        console.error('Failed to parse breadcrumbs:', e);
+      }
+    }
+    
+    // Если нет сохраненных хлебных крошек, создаем базовые
+    if (!savedBreadcrumbs) {
+      setBreadcrumbs([
+        { path: '/marketplace', label: 'Marketplace' },
+        { path: `/marketplace/${tokenId}`, label: 'Token Details' }
+      ]);
+    }
+  }, [tokenId]);
+
+  // Обновляем хлебные крошки когда получаем данные о токене
+  useEffect(() => {
+    if (tokenDetails) {
+      const currentBreadcrumbs = [...breadcrumbs];
+      // Обновляем последний элемент, если он относится к текущему токену
+      if (currentBreadcrumbs.length > 1 && currentBreadcrumbs[currentBreadcrumbs.length - 1].path.includes(tokenId || '')) {
+        currentBreadcrumbs[currentBreadcrumbs.length - 1].label = 
+          tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`;
+        setBreadcrumbs(currentBreadcrumbs);
+      }
+    }
+  }, [tokenDetails, tokenId, breadcrumbs]);
 
   // Предварительно загружаем данные об авторе, как только получаем данные о токене
   useEffect(() => {
@@ -70,6 +110,18 @@ const MarketplaceTokenDetails = () => {
     });
   }, [tokenDetails, toast]);
 
+  const handleAuthorClick = useCallback(() => {
+    if (author) {
+      // Добавляем к хлебным крошкам автора
+      const newBreadcrumbs = [
+        ...breadcrumbs,
+        { path: `/author/${author.id}`, label: `${author.first_name} ${author.last_name}` }
+      ];
+      sessionStorage.setItem('breadcrumbs', JSON.stringify(newBreadcrumbs));
+      navigate(`/author/${author.id}`);
+    }
+  }, [author, navigate, breadcrumbs]);
+
   const truncateAddress = useCallback((address: string) => {
     if (!address) return 'N/A';
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -100,10 +152,39 @@ const MarketplaceTokenDetails = () => {
 
   return (
     <div className="container mx-auto px-4 py-24 max-w-6xl">
+      {/* Хлебные крошки */}
+      <div className="flex items-center text-sm text-muted-foreground mb-6 flex-wrap">
+        <Button 
+          variant="link" 
+          className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
+          onClick={() => navigate('/')}
+        >
+          <Home className="h-3.5 w-3.5 mr-1" />
+          Home
+        </Button>
+        
+        {breadcrumbs.map((crumb, index) => (
+          <span key={crumb.path} className="flex items-center">
+            <span className="mx-2">/</span>
+            {index === breadcrumbs.length - 1 ? (
+              <span className="text-foreground">{crumb.label}</span>
+            ) : (
+              <Button 
+                variant="link" 
+                className="p-0 h-auto font-normal text-muted-foreground hover:text-foreground"
+                onClick={() => navigate(crumb.path)}
+              >
+                {crumb.label}
+              </Button>
+            )}
+          </span>
+        ))}
+      </div>
+    
       <div className="flex justify-between items-center mb-8">
         <Button variant="ghost" onClick={() => navigate(-1)} className="flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" />
-          Back to Marketplace
+          Back
         </Button>
         <Button variant="ghost" size="sm" onClick={handleShare} className="flex items-center gap-2">
           <Share2 className="w-4 h-4" />
@@ -135,7 +216,7 @@ const MarketplaceTokenDetails = () => {
                   <Button 
                     variant="ghost" 
                     className="flex items-center gap-2 text-primary"
-                    onClick={() => navigate(`/author/${author.id}`)}
+                    onClick={handleAuthorClick}
                   >
                     <User className="w-4 h-4" />
                     <span>By {author.first_name} {author.last_name}</span>
