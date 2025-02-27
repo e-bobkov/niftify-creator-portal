@@ -23,7 +23,8 @@ import License from "@/pages/License";
 import IntellectualProperty from "@/pages/IntellectualProperty";
 import AMLKYC from "@/pages/AMLKYC";
 import { PrivateRoute } from "@/components/PrivateRoute";
-import Explore from "@/pages/Explore";
+import Marketplace from "@/pages/Marketplace";
+import MarketplaceTokenDetails from "@/pages/MarketplaceTokenDetails";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +41,8 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/create" element={<Create />} />
-            <Route path="/explore" element={<Explore />} />
+            <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/marketplace/:tokenId" element={<MarketplaceTokenDetails />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/tax" element={<Tax />} />
             <Route path="/security" element={<Security />} />

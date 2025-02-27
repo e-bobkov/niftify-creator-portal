@@ -18,6 +18,7 @@ interface NFTCardProps extends BaseComponentProps {
     first_name: string;
     last_name: string;
   } | null;
+  isMarketplace?: boolean;
   onExplore?: () => void;
 }
 
@@ -29,6 +30,7 @@ export const NFTCard = memo(({
   price, 
   soldAt,
   owner,
+  isMarketplace = false,
   onExplore,
   className 
 }: NFTCardProps) => {
@@ -38,6 +40,8 @@ export const NFTCard = memo(({
     e.preventDefault();
     if (onExplore) {
       onExplore();
+    } else if (isMarketplace) {
+      navigate(`/marketplace/${id}`);
     } else {
       navigate(`/my-collection/${collectionId}/${id}`);
     }
