@@ -15,5 +15,5 @@ export const getExplorerUrl = (address: string, chain: string = 'polygon'): stri
 
 export const formatPrice = (price: number | null): string => {
   if (price === null) return 'N/A';
-  return `${price.toFixed(2)} ETH`;
+  return `$${price.toFixed(2)}`;
 };

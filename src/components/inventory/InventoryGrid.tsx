@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -145,7 +144,7 @@ export const InventoryGrid = ({ items, isLoading = false }: InventoryGridProps) 
         <div className="glass-card p-4 rounded-lg animate-fade-in [animation-delay:100ms]">
           <p className="text-sm text-muted-foreground mb-1">Total Value</p>
           <div className="flex items-center justify-between">
-            <p className="text-2xl font-bold">{totalValue.toFixed(2)} ETH</p>
+            <p className="text-2xl font-bold">${totalValue.toFixed(2)}</p>
             <svg className="h-5 w-5 text-primary" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 1.75L5.75 12.25L12 16L18.25 12.25L12 1.75Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M5.75 13.5L12 17.25L18.25 13.5L12 22.25L5.75 13.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
