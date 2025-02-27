@@ -8,7 +8,10 @@ import {
   ChevronRight,
   ArrowDown,
   ArrowUp,
-  Home
+  Home,
+  Grid2x2,
+  Grid3x3,
+  LayoutGrid
 } from "lucide-react";
 import { NFTCard } from "@/components/NFTCard";
 import { Input } from "@/components/ui/input";
@@ -24,19 +27,27 @@ import {
   useMarketplaceCollectionTokens 
 } from "@/hooks/useMarketplace";
 import { MarketplaceToken } from "@/api/marketplace";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useMobile } from "@/hooks/use-mobile";
 
-const TOKENS_PER_PAGE = 6;
+// Настройки пагинации
+const MOBILE_TOKENS_PER_PAGE = 4;
+const DESKTOP_TOKENS_PER_PAGE = 12;
+
+// Настройки для отображения сетки
+type GridType = "3-col" | "4-col" | "6-col";
 
 const Marketplace = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCollection, setSelectedCollection] = useState<string>("");
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc'); // По умолчанию от дорогих к дешевым
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [gridType, setGridType] = useState<GridType>("6-col"); // По умолчанию 6 в ряд
   
   // Получаем коллекции
   const { 
@@ -58,6 +69,11 @@ const Marketplace = () => {
     isLoading: isLoadingAllTokens, 
     error: allTokensError 
   } = useAllMarketplaceTokens();
+
+  // Определяем количество токенов на странице в зависимости от устройства
+  const tokensPerPage = useMemo(() => 
+    isMobile ? MOBILE_TOKENS_PER_PAGE : DESKTOP_TOKENS_PER_PAGE, 
+  [isMobile]);
 
   // Обрабатываем ошибки
   useEffect(() => {
@@ -104,11 +120,13 @@ const Marketplace = () => {
 
   // Пагинация токенов
   const paginatedTokens = useMemo(() => {
-    const startIndex = (currentPage - 1) * TOKENS_PER_PAGE;
-    return sortedTokens.slice(startIndex, startIndex + TOKENS_PER_PAGE);
-  }, [sortedTokens, currentPage]);
+    const startIndex = (currentPage - 1) * tokensPerPage;
+    return sortedTokens.slice(startIndex, startIndex + tokensPerPage);
+  }, [sortedTokens, currentPage, tokensPerPage]);
 
-  const totalPages = Math.ceil(sortedTokens.length / TOKENS_PER_PAGE);
+  const totalPages = useMemo(() => 
+    Math.ceil(sortedTokens.length / tokensPerPage),
+  [sortedTokens, tokensPerPage]);
 
   // Функция для удаления фильтра
   const removeFilter = useCallback((filter: string) => {
@@ -142,6 +160,11 @@ const Marketplace = () => {
     setActiveFilters(prev => [...new Set([...prev, 'sort'])]);
     setCurrentPage(1); // Сбрасываем на первую страницу при изменении сортировки
   }, []);
+  
+  // Функция для изменения типа сетки
+  const handleGridChange = useCallback((type: GridType) => {
+    setGridType(type);
+  }, []);
 
   // Предварительно загружаем данные для пагинации
   const prefetchNextPage = useCallback(() => {
@@ -162,6 +185,22 @@ const Marketplace = () => {
     prefetchNextPage();
     prefetchPrevPage();
   }, [currentPage, prefetchNextPage, prefetchPrevPage]);
+
+  // Получаем класс для сетки в зависимости от выбранного типа
+  const gridClass = useMemo(() => {
+    if (isMobile) return "grid-cols-1 sm:grid-cols-2";
+    
+    switch (gridType) {
+      case "3-col":
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+      case "4-col":
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4";
+      case "6-col":
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6";
+      default:
+        return "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6";
+    }
+  }, [gridType, isMobile]);
 
   // Получаем информацию о коллекции по ID
   const getCollectionInfo = useCallback((collectionId: string) => {
@@ -241,8 +280,8 @@ const Marketplace = () => {
           animate={{ opacity: 1, y: 0 }}
           className="space-y-8"
         >
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
-            <div className="relative flex-1">
+          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+            <div className="relative flex-1 w-full md:w-auto">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               <Input
                 placeholder="Search NFTs..."
@@ -255,85 +294,120 @@ const Marketplace = () => {
               />
             </div>
             
-            <div className="flex gap-2 flex-wrap">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant={selectedCollection ? "default" : "outline"} 
-                    className="gap-2"
-                  >
-                    <Filter className="w-4 h-4" />
-                    {selectedCollection 
-                      ? getCollectionInfo(selectedCollection)?.name?.slice(0, 12) || 'Collection' 
-                      : 'Collection'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64">
-                  <ScrollArea className="h-auto max-h-72">
-                    {isLoadingCollections ? (
-                      <div className="space-y-2 animate-pulse">
-                        {[...Array(5)].map((_, i) => (
-                          <div key={i} className="h-10 bg-primary/10 rounded-md" />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-2">
-                        {collections?.map((collection) => (
-                          <Button
-                            key={collection.id}
-                            variant="ghost"
-                            className={`w-full justify-start ${selectedCollection === collection.id ? 'bg-primary/20' : ''}`}
-                            onClick={() => handleCollectionChange(collection.id)}
-                          >
-                            {collection.name}
-                          </Button>
-                        ))}
-                      </div>
-                    )}
-                  </ScrollArea>
-                </PopoverContent>
-              </Popover>
+            <div className="flex flex-wrap gap-2 w-full md:w-auto">
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant={selectedCollection ? "default" : "outline"} 
+                      className="gap-2"
+                    >
+                      <Filter className="w-4 h-4" />
+                      {selectedCollection 
+                        ? getCollectionInfo(selectedCollection)?.name?.slice(0, 12) || 'Collection' 
+                        : 'Collection'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64">
+                    <ScrollArea className="h-auto max-h-72">
+                      {isLoadingCollections ? (
+                        <div className="space-y-2 animate-pulse">
+                          {[...Array(5)].map((_, i) => (
+                            <div key={i} className="h-10 bg-primary/10 rounded-md" />
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {collections?.map((collection) => (
+                            <Button
+                              key={collection.id}
+                              variant="ghost"
+                              className={`w-full justify-start ${selectedCollection === collection.id ? 'bg-primary/20' : ''}`}
+                              onClick={() => handleCollectionChange(collection.id)}
+                            >
+                              {collection.name}
+                            </Button>
+                          ))}
+                        </div>
+                      )}
+                    </ScrollArea>
+                  </PopoverContent>
+                </Popover>
 
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button 
-                    variant={activeFilters.includes('sort') ? "default" : "outline"} 
-                    className="gap-2"
-                  >
-                    {sortOrder === 'desc' ? (
-                      <>
-                        <ArrowDown className="w-4 h-4" />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant={activeFilters.includes('sort') ? "default" : "outline"} 
+                      className="gap-2"
+                    >
+                      {sortOrder === 'desc' ? (
+                        <>
+                          <ArrowDown className="w-4 h-4" />
+                          Most expensive
+                        </>
+                      ) : (
+                        <>
+                          <ArrowUp className="w-4 h-4" />
+                          Least expensive
+                        </>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-64">
+                    <div className="space-y-2">
+                      <Button
+                        variant="ghost"
+                        className={`w-full justify-start ${sortOrder === 'desc' ? 'bg-primary/20' : ''}`}
+                        onClick={() => handleSortOrderChange('desc')}
+                      >
+                        <ArrowDown className="w-4 h-4 mr-2" />
                         Most expensive
-                      </>
-                    ) : (
-                      <>
-                        <ArrowUp className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className={`w-full justify-start ${sortOrder === 'asc' ? 'bg-primary/20' : ''}`}
+                        onClick={() => handleSortOrderChange('asc')}
+                      >
+                        <ArrowUp className="w-4 h-4 mr-2" />
                         Least expensive
-                      </>
-                    )}
+                      </Button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              {/* Выбор сетки отображения (только для десктопа) */}
+              {!isMobile && (
+                <div className="hidden md:flex items-center gap-1 ml-2">
+                  <Button
+                    variant={gridType === "3-col" ? "default" : "outline"}
+                    size="icon"
+                    className="w-8 h-8"
+                    onClick={() => handleGridChange("3-col")}
+                    title="3 columns"
+                  >
+                    <Grid2x2 className="w-4 h-4" />
                   </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-64">
-                  <div className="space-y-2">
-                    <Button
-                      variant="ghost"
-                      className={`w-full justify-start ${sortOrder === 'desc' ? 'bg-primary/20' : ''}`}
-                      onClick={() => handleSortOrderChange('desc')}
-                    >
-                      <ArrowDown className="w-4 h-4 mr-2" />
-                      Most expensive
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className={`w-full justify-start ${sortOrder === 'asc' ? 'bg-primary/20' : ''}`}
-                      onClick={() => handleSortOrderChange('asc')}
-                    >
-                      <ArrowUp className="w-4 h-4 mr-2" />
-                      Least expensive
-                    </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  <Button
+                    variant={gridType === "4-col" ? "default" : "outline"}
+                    size="icon"
+                    className="w-8 h-8"
+                    onClick={() => handleGridChange("4-col")}
+                    title="4 columns"
+                  >
+                    <Grid3x3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={gridType === "6-col" ? "default" : "outline"}
+                    size="icon"
+                    className="w-8 h-8"
+                    onClick={() => handleGridChange("6-col")}
+                    title="6 columns"
+                  >
+                    <LayoutGrid className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -361,8 +435,8 @@ const Marketplace = () => {
           )}
 
           {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
+            <div className={`grid ${gridClass} gap-6`}>
+              {[...Array(tokensPerPage)].map((_, i) => (
                 <div key={i} className="animate-pulse">
                   <div className="bg-primary/10 rounded-lg">
                     <div className="aspect-square"></div>
@@ -386,7 +460,7 @@ const Marketplace = () => {
               ) : (
                 <motion.div 
                   layout
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                  className={`grid ${gridClass} gap-6`}
                 >
                   <AnimatePresence>
                     {paginatedTokens.map((token) => {

@@ -6,7 +6,7 @@ import { AuthorCollections } from "@/components/author/AuthorCollections";
 import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useCallback, useState } from "react";
 import { LoadingState } from "@/components/collection/LoadingState";
-import { Home, ArrowLeft } from "lucide-react";
+import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface Breadcrumb {
@@ -143,16 +143,6 @@ const Author = () => {
     }
   }, [authorId, author, collections, navigate, breadcrumbs]);
 
-  const handleBack = useCallback(() => {
-    // Возвращаемся на предыдущую страницу в истории навигации
-    const lastPath = sessionStorage.getItem('lastVisitedPath');
-    if (lastPath && lastPath !== location.pathname) {
-      navigate(-1);
-    } else {
-      navigate('/marketplace');
-    }
-  }, [navigate, location.pathname]);
-
   const isLoading = isAuthorLoading || isSocialsLoading || isCollectionsLoading;
 
   if (isLoading) {
@@ -201,14 +191,6 @@ const Author = () => {
             )}
           </span>
         ))}
-      </div>
-      
-      {/* Кнопка назад */}
-      <div className="mb-8">
-        <Button variant="ghost" onClick={handleBack} className="flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4" />
-          Back
-        </Button>
       </div>
       
       <AuthorHeader author={author} socials={socials} />
