@@ -1,7 +1,18 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ChevronLeft, ShieldCheck, LockKeyhole, AlertCircle, Check, Loader2, Home, Info, ExternalLink } from "lucide-react";
+import {
+  ChevronLeft,
+  ShieldCheck,
+  LockKeyhole,
+  AlertCircle,
+  Check,
+  Loader2,
+  Home,
+  Info,
+  ExternalLink
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
@@ -9,30 +20,31 @@ import { formatPrice } from "@/utils/format";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { fetchTokenDetails, checkTokenStatus } from "@/api/marketplace";
 import { MarketplaceToken } from "@/api/marketplace";
+
 const Checkout = () => {
-  const {
-    item: itemId
-  } = useParams<{
-    item: string;
-  }>();
+  const { item: itemId } = useParams<{ item: string }>();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const [item, setItem] = useState<MarketplaceToken | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
   const [termsChecked, setTermsChecked] = useState(false);
   const [privacyChecked, setPrivacyChecked] = useState(false);
   const [refundChecked, setRefundChecked] = useState(false);
+
   useEffect(() => {
     const checkItem = async () => {
       if (!itemId) return;
+      
       try {
         setLoading(true);
         setError(null);
+        
         const isAvailable = await checkTokenStatus(itemId);
+        
         if (!isAvailable) {
           setError('This NFT is no longer available for purchase.');
           toast({
@@ -40,14 +52,17 @@ const Checkout = () => {
             description: "This NFT has already been sold or is no longer available.",
             variant: "destructive"
           });
-
+          
           // Перенаправляем обратно через 3 секунды
           setTimeout(() => {
             navigate('/marketplace');
           }, 3000);
+          
           return;
         }
+        
         const itemData = await fetchTokenDetails(itemId);
+        
         if (itemData.sold_at) {
           setError('This NFT has already been sold.');
           toast({
@@ -55,13 +70,15 @@ const Checkout = () => {
             description: "This NFT has already been sold.",
             variant: "destructive"
           });
-
+          
           // Перенаправляем обратно через 3 секунды
           setTimeout(() => {
             navigate('/marketplace');
           }, 3000);
+          
           return;
         }
+        
         setItem(itemData);
       } catch (err) {
         console.error('Error fetching token details:', err);
@@ -75,8 +92,10 @@ const Checkout = () => {
         setLoading(false);
       }
     };
+    
     checkItem();
   }, [itemId, navigate, toast]);
+
   const handlePayment = async () => {
     if (!termsChecked || !privacyChecked || !refundChecked) {
       toast({
@@ -86,20 +105,23 @@ const Checkout = () => {
       });
       return;
     }
+    
     try {
       setProcessing(true);
-
+      
       // Имитация запроса на обработку оплаты
       await new Promise(resolve => setTimeout(resolve, 2000));
+      
       toast({
         title: "Payment successful!",
-        description: "Thank you for your purchase. Your NFT will appear in your inventory shortly."
+        description: "Thank you for your purchase. Your NFT will appear in your inventory shortly.",
       });
-
+      
       // Перенаправляем на страницу инвентаря
       setTimeout(() => {
         navigate('/inventory');
       }, 1500);
+      
     } catch (err) {
       console.error('Payment error:', err);
       toast({
@@ -111,17 +133,22 @@ const Checkout = () => {
       setProcessing(false);
     }
   };
+
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-background">
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
           <h3 className="text-lg font-semibold">Checking item availability...</h3>
           <p className="text-muted-foreground mt-2">Please wait a moment</p>
         </div>
-      </div>;
+      </div>
+    );
   }
+
   if (error) {
-    return <div className="min-h-screen flex items-center justify-center bg-background">
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center max-w-lg px-4">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <h3 className="text-xl font-semibold">Item Unavailable</h3>
@@ -130,10 +157,13 @@ const Checkout = () => {
             Return to Marketplace
           </Button>
         </div>
-      </div>;
+      </div>
+    );
   }
+
   if (!item) {
-    return <div className="min-h-screen flex items-center justify-center bg-background">
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
           <h3 className="text-xl font-semibold">Item Not Found</h3>
@@ -142,24 +172,29 @@ const Checkout = () => {
             Return to Marketplace
           </Button>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="min-h-screen bg-background relative overflow-hidden">
+
+  return (
+    <div className="min-h-screen bg-background relative overflow-hidden">
       <main className="container mx-auto px-4 py-10">
         <div className="max-w-3xl mx-auto">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/marketplace')} // Всегда ведёт на страницу маркетплейса
-        className="mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/marketplace')} // Всегда ведёт на страницу маркетплейса
+            className="mb-6"
+          >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Marketplace
           </Button>
           
-          <motion.div initial={{
-          opacity: 0,
-          y: 20
-        }} animate={{
-          opacity: 1,
-          y: 0
-        }} className="glass-card rounded-xl overflow-hidden">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="glass-card rounded-xl overflow-hidden"
+          >
             <div className="p-6 md:p-8 space-y-8">
               <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Complete your purchase</h1>
               
@@ -167,7 +202,11 @@ const Checkout = () => {
                 <div className="md:w-2/5">
                   <div className="glass-card rounded-lg overflow-hidden">
                     <div className="aspect-square">
-                      <img src={item.metadata.image} alt={item.metadata.name} className="w-full h-full object-cover" />
+                      <img 
+                        src={item.metadata.image} 
+                        alt={item.metadata.name} 
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     <div className="p-4">
                       <h3 className="font-semibold text-lg">{item.metadata.name}</h3>
@@ -200,16 +239,21 @@ const Checkout = () => {
                 <div className="md:w-3/5">
                   <div className="space-y-6">
                     <Alert className="border-[#bcf65550]-500/30 bg-[#bcf65]/[0.29]">
-                      <Info className="h-5 w-5 text-blue-500" />
+                      <Info className="h-5 w-5 text-[#bcf655]" />
                       <AlertTitle className="font-semibold text-[#bcf655]">NFT Storage Information</AlertTitle>
                       <AlertDescription className="text-sm">
                         <p className="mb-2">
                           All NFTs are stored centrally on our platform's wallet for enhanced security and ease of access.
                         </p>
-                        <div className="flex items-center gap-1 text-xs font-medium text-blue-500/80 hover:text-blue-500">
-                          <a href="https://polygonscan.com/address/0xe2Ab5329EccBb90fC3EB4542ff674e096A304f36" target="_blank" rel="noopener noreferrer" className="flex items-center">
+                        <div className="flex items-center gap-1 text-xs font-medium text-[#bcf655] hover:text-[#d7ff6b]">
+                          <a 
+                            href="https://polygonscan.com/address/0xe2Ab5329EccBb90fC3EB4542ff674e096A304f36" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center"
+                          >
                             View platform wallet on Polygonscan
-                            <ExternalLink className="h-3 w-3 ml-1" />
+                            <ExternalLink className="h-3 w-3 ml-1 text-[#bcf655]" />
                           </a>
                         </div>
                         <p className="mt-2">
@@ -230,27 +274,48 @@ const Checkout = () => {
                       <h3 className="text-lg font-semibold mb-2">Agreements</h3>
                       
                       <div className="flex space-x-2 items-start">
-                        <Checkbox id="terms" checked={termsChecked} onCheckedChange={checked => setTermsChecked(checked === true)} />
+                        <Checkbox 
+                          id="terms" 
+                          checked={termsChecked}
+                          onCheckedChange={(checked) => setTermsChecked(checked === true)}
+                        />
                         <div className="grid gap-1.5 leading-none">
-                          <label htmlFor="terms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="terms"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             I agree to the <Link to="/terms" className="text-primary hover:underline" target="_blank">Terms of Service</Link>
                           </label>
                         </div>
                       </div>
                       
                       <div className="flex space-x-2 items-start">
-                        <Checkbox id="privacy" checked={privacyChecked} onCheckedChange={checked => setPrivacyChecked(checked === true)} />
+                        <Checkbox 
+                          id="privacy" 
+                          checked={privacyChecked}
+                          onCheckedChange={(checked) => setPrivacyChecked(checked === true)}
+                        />
                         <div className="grid gap-1.5 leading-none">
-                          <label htmlFor="privacy" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="privacy"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             I agree to the <Link to="/privacy" className="text-primary hover:underline" target="_blank">Privacy Policy</Link>
                           </label>
                         </div>
                       </div>
                       
                       <div className="flex space-x-2 items-start">
-                        <Checkbox id="refund" checked={refundChecked} onCheckedChange={checked => setRefundChecked(checked === true)} />
+                        <Checkbox 
+                          id="refund" 
+                          checked={refundChecked}
+                          onCheckedChange={(checked) => setRefundChecked(checked === true)}
+                        />
                         <div className="grid gap-1.5 leading-none">
-                          <label htmlFor="refund" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          <label
+                            htmlFor="refund"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                          >
                             I agree to the <Link to="/refund" className="text-primary hover:underline" target="_blank">Refund and Transaction Cancellation Policy</Link>
                           </label>
                         </div>
@@ -263,13 +328,21 @@ const Checkout = () => {
                         <span className="text-lg font-bold text-primary">{formatPrice(item.price)}</span>
                       </div>
                       
-                      <Button className="w-full py-6 text-base" disabled={!termsChecked || !privacyChecked || !refundChecked || processing} onClick={handlePayment}>
-                        {processing ? <>
+                      <Button 
+                        className="w-full py-6 text-base"
+                        disabled={!termsChecked || !privacyChecked || !refundChecked || processing}
+                        onClick={handlePayment}
+                      >
+                        {processing ? (
+                          <>
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                             Processing...
-                          </> : <>
+                          </>
+                        ) : (
+                          <>
                             Pay Now {formatPrice(item.price)}
-                          </>}
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -287,6 +360,8 @@ const Checkout = () => {
           </div>
         </div>
       </main>
-    </div>;
+    </div>
+  );
 };
+
 export default Checkout;
