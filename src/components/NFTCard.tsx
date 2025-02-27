@@ -1,7 +1,7 @@
 
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
-import { Eye } from "lucide-react";
+import { Eye, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatPrice } from "@/utils/format";
@@ -19,7 +19,9 @@ interface NFTCardProps extends BaseComponentProps {
     last_name: string;
   } | null;
   isMarketplace?: boolean;
+  showBuyButton?: boolean;
   onExplore?: () => void;
+  onBuy?: () => void;
 }
 
 export const NFTCard = memo(({ 
@@ -31,7 +33,9 @@ export const NFTCard = memo(({
   soldAt,
   owner,
   isMarketplace = false,
+  showBuyButton = false,
   onExplore,
+  onBuy,
   className 
 }: NFTCardProps) => {
   const navigate = useNavigate();
@@ -48,6 +52,16 @@ export const NFTCard = memo(({
     }
   };
 
+  const handleBuy = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onBuy) {
+      onBuy();
+    } else {
+      // Placeholder for future buy functionality
+      console.log("Buy clicked for token", id);
+    }
+  };
+
   return (
     <div className="group relative">
       <div className="glass-card rounded-lg overflow-hidden">
@@ -59,15 +73,29 @@ export const NFTCard = memo(({
             loading="lazy"
           />
           <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
-            <Button 
-              variant="secondary" 
-              size="lg" 
-              className="opacity-0 group-hover:opacity-100 transform group-hover:scale-100 scale-75 transition-all duration-300"
-              onClick={handleExplore}
-            >
-              <Eye className="mr-2" />
-              Explore
-            </Button>
+            <div className="flex flex-col gap-2">
+              <Button 
+                variant="secondary" 
+                size="lg" 
+                className="opacity-0 group-hover:opacity-100 transform group-hover:scale-100 scale-75 transition-all duration-300"
+                onClick={handleExplore}
+              >
+                <Eye className="mr-2" />
+                Explore
+              </Button>
+              
+              {showBuyButton && !soldAt && price > 0 && (
+                <Button 
+                  variant="default" 
+                  size="lg" 
+                  className="opacity-0 group-hover:opacity-100 transform group-hover:scale-100 scale-75 transition-all duration-300"
+                  onClick={handleBuy}
+                >
+                  <ShoppingCart className="mr-2" />
+                  Buy Now
+                </Button>
+              )}
+            </div>
           </div>
           <div className="absolute top-2 right-2">
             <Badge variant={soldAt ? "destructive" : "secondary"}>

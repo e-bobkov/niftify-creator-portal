@@ -1,11 +1,13 @@
 
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuthorById, useAuthorCollections, useAuthorCollectionTokens } from "@/hooks/useAuthor";
 import { useToast } from "@/components/ui/use-toast";
 import { NFTCard } from "@/components/NFTCard";
 import { useEffect } from "react";
+import { Separator } from "@/components/ui/separator";
+import { format } from "date-fns";
 
 const AuthorCollection = () => {
   const { authorId, collectionId } = useParams();
@@ -71,25 +73,32 @@ const AuthorCollection = () => {
               <h1 className="text-2xl font-bold mb-2">{collection.name}</h1>
               <p className="text-muted-foreground mb-4">{collection.description}</p>
               
-              <div className="flex flex-wrap gap-4 text-sm">
+              <Separator className="my-4" />
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Created:</span>{' '}
-                  {new Date(collection.created_at).toLocaleDateString()}
+                  <div className="text-muted-foreground mb-1">Created</div>
+                  <div className="font-medium">
+                    {format(new Date(collection.created_at), 'PP')}
+                  </div>
                 </div>
+                
                 <div>
-                  <span className="text-muted-foreground">Items:</span>{' '}
-                  {tokens?.length || 0}
+                  <div className="text-muted-foreground mb-1">Items</div>
+                  <div className="font-medium">{tokens?.length || 0}</div>
                 </div>
+                
                 {collection.contract_address && (
                   <div>
-                    <span className="text-muted-foreground">Contract:</span>{' '}
+                    <div className="text-muted-foreground mb-1">Contract</div>
                     <a 
                       href={`https://polygonscan.com/address/${collection.contract_address}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary hover:underline"
+                      className="flex items-center gap-1 text-primary hover:underline font-medium"
                     >
                       {collection.contract_address.slice(0, 6)}...{collection.contract_address.slice(-4)}
+                      <ExternalLink className="w-3 h-3" />
                     </a>
                   </div>
                 )}
@@ -117,6 +126,7 @@ const AuthorCollection = () => {
                 image={token.metadata?.image || "/placeholder.svg"}
                 price={token.price || 0}
                 soldAt={token.sold_at}
+                showBuyButton={!token.sold_at}
                 onExplore={() => {
                   // Проверяем, что id существует, прежде чем использовать его
                   if (token.id !== undefined) {

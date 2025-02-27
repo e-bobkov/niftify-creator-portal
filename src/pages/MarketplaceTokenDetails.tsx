@@ -1,6 +1,6 @@
 
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar, User } from "lucide-react";
+import { ArrowLeft, Share2, FileText, Hash, Package, Link as LinkIcon, Calendar, User, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { useMarketplaceTokenDetails } from "@/hooks/useMarketplace";
@@ -54,8 +54,16 @@ const MarketplaceTokenDetails = () => {
 
   const handleContractClick = () => {
     if (tokenDetails.address) {
-      window.open(`https://polygonscan.com/address/${tokenDetails.address}`, '_blank');
+      window.open(`https://polygonscan.com/nft/${tokenDetails.address}/${tokenDetails.token_id}`, '_blank');
     }
+  };
+
+  const handleBuy = () => {
+    // Placeholder for future buy functionality
+    toast({
+      title: "Purchase initiated",
+      description: `You are about to purchase ${tokenDetails.metadata?.name || `Token #${tokenDetails.token_id}`}`,
+    });
   };
 
   const truncateAddress = (address: string) => {
@@ -172,8 +180,14 @@ const MarketplaceTokenDetails = () => {
                 Sold on {format(new Date(tokenDetails.sold_at), 'PP')}
               </div>
             ) : tokenDetails.price ? (
-              <div className="flex items-center gap-2 text-lg font-semibold">
-                <span>${tokenDetails.price.toFixed(2)}</span>
+              <div className="flex items-center justify-between">
+                <div className="text-lg font-semibold">
+                  <span>${tokenDetails.price.toFixed(2)}</span>
+                </div>
+                <Button onClick={handleBuy} className="flex items-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Buy Now
+                </Button>
               </div>
             ) : null}
           </div>
