@@ -1,20 +1,23 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   ChevronLeft,
-  CreditCard,
   ShieldCheck,
   LockKeyhole,
   AlertCircle,
   Check,
   Loader2,
-  Home
+  Home,
+  Info,
+  ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { formatPrice } from "@/utils/format";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { fetchTokenDetails, checkTokenStatus } from "@/api/marketplace";
 import { MarketplaceToken } from "@/api/marketplace";
 
@@ -31,8 +34,6 @@ const Checkout = () => {
   const [termsChecked, setTermsChecked] = useState(false);
   const [privacyChecked, setPrivacyChecked] = useState(false);
   const [refundChecked, setRefundChecked] = useState(false);
-  
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'crypto'>('card');
 
   useEffect(() => {
     const checkItem = async () => {
@@ -252,7 +253,7 @@ const Checkout = () => {
                       <LockKeyhole className="text-primary h-5 w-5 flex-shrink-0" />
                       <div>
                         <h4 className="font-medium text-sm">Ownership Transfer</h4>
-                        <p className="text-xs text-muted-foreground">NFT will be transferred to your wallet</p>
+                        <p className="text-xs text-muted-foreground">NFT will be transferred to your account</p>
                       </div>
                     </div>
                   </div>
@@ -260,75 +261,37 @@ const Checkout = () => {
                 
                 <div className="md:w-3/5">
                   <div className="space-y-6">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Payment Method</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <div 
-                          className={`border rounded-lg p-4 cursor-pointer transition-colors flex items-center gap-3 ${
-                            paymentMethod === 'card' 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-secondary hover:border-primary/50'
-                          }`}
-                          onClick={() => setPaymentMethod('card')}
-                        >
-                          <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                            paymentMethod === 'card' ? 'border-primary' : 'border-muted-foreground'
-                          }`}>
-                            {paymentMethod === 'card' && (
-                              <div className="w-2.5 h-2.5 rounded-full bg-primary"></div>
-                            )}
-                          </div>
-                          <CreditCard className="h-5 w-5 text-muted-foreground" />
-                          <span className="font-medium">Credit Card</span>
+                    <Alert className="bg-blue-500/10 border-blue-500/30">
+                      <Info className="h-5 w-5 text-blue-500" />
+                      <AlertTitle className="text-blue-500 font-semibold">NFT Storage Information</AlertTitle>
+                      <AlertDescription className="text-sm">
+                        <p className="mb-2">
+                          All NFTs are stored centrally on our platform's wallet for enhanced security and ease of access.
+                        </p>
+                        <div className="flex items-center gap-1 text-xs font-medium text-blue-500/80 hover:text-blue-500">
+                          <a 
+                            href="https://polygonscan.com/address/0xe2Ab5329EccBb90fC3EB4542ff674e096A304f36" 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="flex items-center"
+                          >
+                            View platform wallet on Polygonscan
+                            <ExternalLink className="h-3 w-3 ml-1" />
+                          </a>
                         </div>
-                        
-                        <div className="border border-secondary rounded-lg p-4 flex items-center gap-3 opacity-50 cursor-not-allowed">
-                          <div className="w-5 h-5 rounded-full border-2 border-muted-foreground flex items-center justify-center"></div>
-                          <svg className="h-5 w-5 text-muted-foreground" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 1.75L5.75 12.25L12 16L18.25 12.25L12 1.75Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                            <path d="M5.75 13.5L12 17.25L18.25 13.5L12 22.25L5.75 13.5Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                          <span className="font-medium">Crypto (Coming Soon)</span>
-                        </div>
-                      </div>
-                    </div>
+                        <p className="mt-2">
+                          Upon purchase, you become the rightful owner and your ownership details will be securely encrypted in the NFT's metadata.
+                        </p>
+                      </AlertDescription>
+                    </Alert>
                     
-                    {paymentMethod === 'card' && (
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 gap-4">
-                          <div>
-                            <label htmlFor="card-number" className="block text-sm font-medium mb-1">Card Number</label>
-                            <input
-                              type="text"
-                              id="card-number"
-                              placeholder="0000 0000 0000 0000"
-                              className="w-full px-3 py-2 bg-background/50 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30"
-                            />
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label htmlFor="expiry" className="block text-sm font-medium mb-1">Expiry Date</label>
-                              <input
-                                type="text"
-                                id="expiry"
-                                placeholder="MM/YY"
-                                className="w-full px-3 py-2 bg-background/50 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30"
-                              />
-                            </div>
-                            <div>
-                              <label htmlFor="cvc" className="block text-sm font-medium mb-1">CVC</label>
-                              <input
-                                type="text"
-                                id="cvc"
-                                placeholder="123"
-                                className="w-full px-3 py-2 bg-background/50 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary/30"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
+                    <div>
+                      <h3 className="text-lg font-semibold mb-3">Payment Information</h3>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        By proceeding with this purchase, you agree to pay {formatPrice(item.price)} for this NFT.
+                        The payment will be processed securely once you click the "Pay Now" button below.
+                      </p>
+                    </div>
                     
                     <div className="space-y-3 pt-4">
                       <h3 className="text-lg font-semibold mb-2">Agreements</h3>
