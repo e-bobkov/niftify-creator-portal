@@ -43,11 +43,7 @@ export async function fetchCollectionTokens(collectionId: string): Promise<Marke
 }
 
 export async function fetchTokenDetails(tokenId: string): Promise<MarketplaceToken> {
-  // Извлекаем числовую часть ID (после последнего дефиса)
-  const parts = tokenId.split("-");
-  const numericId = parts[parts.length - 1];
-  
-  const response = await fetch(`${API_URL}/marketlpace/item/${numericId}`);
+  const response = await fetch(`${API_URL}/marketlpace/item/${tokenId}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch token details for token ${tokenId}`);
   }

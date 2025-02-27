@@ -305,7 +305,7 @@ const Marketplace = () => {
                         transition={{ duration: 0.3 }}
                       >
                         <NFTCard
-                          id={token.id ? token.id.toString() : `${token.collection_id}-${token.token_id}`}
+                          id={token.id.toString()}
                           collectionId={token.collection_id}
                           title={token.metadata?.name || `Token #${token.token_id}`}
                           image={token.metadata?.image || "/placeholder.svg"}
