@@ -199,9 +199,9 @@ const Checkout = () => {
                 
                 <div className="md:w-3/5">
                   <div className="space-y-6">
-                    <Alert className="border-blue-500/30 bg-[#1e221e]/[0.29]">
+                    <Alert className="border-[#bcf65550]-500/30 bg-[#bcf65]/[0.29]">
                       <Info className="h-5 w-5 text-blue-500" />
-                      <AlertTitle className="text-blue-500 font-semibold">NFT Storage Information</AlertTitle>
+                      <AlertTitle className="font-semibold text-[#bcf655]">NFT Storage Information</AlertTitle>
                       <AlertDescription className="text-sm">
                         <p className="mb-2">
                           All NFTs are stored centrally on our platform's wallet for enhanced security and ease of access.
