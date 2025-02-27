@@ -2,7 +2,7 @@
 import { useState, memo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "./ui/button";
-import { Menu, LogOut, User, X } from "lucide-react";
+import { Menu, LogOut, User, X, Package } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Logo } from "./Logo";
 
@@ -62,6 +62,14 @@ export const Navbar = memo(() => {
               <div className="flex items-center space-x-1">
                 <NavLink to="/marketplace">Explore</NavLink>
                 <NavLink to="/create">Create</NavLink>
+                {isAuthenticated && (
+                  <NavLink to="/inventory">
+                    <span className="flex items-center">
+                      <Package size={16} className="mr-1.5" />
+                      Inventory
+                    </span>
+                  </NavLink>
+                )}
               </div>
             </div>
 
@@ -102,6 +110,14 @@ export const Navbar = memo(() => {
             <div className="space-y-2">
               <NavLink to="/marketplace" onClick={() => setIsOpen(false)}>Explore</NavLink>
               <NavLink to="/create" onClick={() => setIsOpen(false)}>Create</NavLink>
+              {isAuthenticated && (
+                <NavLink to="/inventory" onClick={() => setIsOpen(false)}>
+                  <span className="flex items-center">
+                    <Package size={16} className="mr-1.5" />
+                    Inventory
+                  </span>
+                </NavLink>
+              )}
             </div>
             
             {isAuthenticated ? (

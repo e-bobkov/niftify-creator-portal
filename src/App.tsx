@@ -28,6 +28,7 @@ import MarketplaceTokenDetails from "@/pages/MarketplaceTokenDetails";
 import Author from "@/pages/Author";
 import AuthorCollection from "@/pages/AuthorCollection";
 import AuthorToken from "@/pages/AuthorToken";
+import Inventory from "@/pages/Inventory";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +59,7 @@ const App = () => (
             <Route path="/intellectual-property" element={<IntellectualProperty />} />
             <Route path="/aml-kyc" element={<AMLKYC />} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
             <Route path="/my-collection/:id" element={<PrivateRoute><Collection /></PrivateRoute>} />
             <Route path="/my-collection/:collectionId/:tokenId" element={<PrivateRoute><TokenDetails /></PrivateRoute>} />
             <Route path="*" element={<NotFound />} />
