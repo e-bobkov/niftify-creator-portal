@@ -117,7 +117,19 @@ const AuthorCollection = () => {
                 image={token.metadata?.image || "/placeholder.svg"}
                 price={token.price || 0}
                 soldAt={token.sold_at}
-                onExplore={() => navigate(`/author/${authorId}/token/${token.id}`)}
+                onExplore={() => {
+                  // Проверяем, что id существует, прежде чем использовать его
+                  if (token.id !== undefined) {
+                    navigate(`/author/${authorId}/token/${token.id}`);
+                  } else {
+                    console.error("Token id is undefined", token);
+                    toast({
+                      title: "Error",
+                      description: "Could not navigate to token details",
+                      variant: "destructive"
+                    });
+                  }
+                }}
               />
             ))}
           </div>
