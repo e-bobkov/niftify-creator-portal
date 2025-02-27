@@ -60,7 +60,7 @@ export const Navbar = memo(() => {
           <div className="hidden md:flex items-center space-x-4 animate-fade-in">
             <div className="bg-secondary/20 rounded-xl p-1 backdrop-blur-sm">
               <div className="flex items-center space-x-1">
-                <NavLink to="/explore">Explore</NavLink>
+                <NavLink to="/marketplace">Explore</NavLink>
                 <NavLink to="/create">Create</NavLink>
               </div>
             </div>
@@ -100,7 +100,7 @@ export const Navbar = memo(() => {
         <div className="md:hidden bg-background/95 backdrop-blur-lg border-b border-border animate-slideUp">
           <div className="container mx-auto px-4 py-4 space-y-4">
             <div className="space-y-2">
-              <NavLink to="/explore" onClick={() => setIsOpen(false)}>Explore</NavLink>
+              <NavLink to="/marketplace" onClick={() => setIsOpen(false)}>Explore</NavLink>
               <NavLink to="/create" onClick={() => setIsOpen(false)}>Create</NavLink>
             </div>
             
