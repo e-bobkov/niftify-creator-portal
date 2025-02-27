@@ -67,54 +67,9 @@ export default {
           "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
-        tilt: {
-          "0%, 50%, 100%": {
-            transform: "rotate(0deg)",
-          },
-          "25%": {
-            transform: "rotate(0.5deg)",
-          },
-          "75%": {
-            transform: "rotate(-0.5deg)",
-          },
-        },
-        pulse: {
-          "0%, 100%": {
-            opacity: "0.6",
-          },
-          "50%": {
-            opacity: "1",
-          },
-        },
-        float: {
-          "0%, 100%": {
-            transform: "translateY(0)",
-          },
-          "50%": {
-            transform: "translateY(-5px)",
-          },
-        },
-        "slide-up": {
-          "0%": {
-            transform: "translateY(20px)",
-            opacity: "0",
-          },
-          "100%": {
-            transform: "translateY(0)",
-            opacity: "1",
-          },
-        },
       },
       animation: {
         fadeIn: "fadeIn 0.3s ease-out",
-        tilt: "tilt 10s infinite linear",
-        pulse: "pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
-        float: "float 6s ease-in-out infinite",
-        "slide-up": "slide-up 0.6s ease-out",
-      },
-      transform: {
-        "rotate-y-3": "rotateY(3deg)",
-        "rotate-x-12": "rotateX(12deg)",
       },
     },
   },
