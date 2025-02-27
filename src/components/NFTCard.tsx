@@ -94,21 +94,21 @@ export const NFTCard = memo(({
     setImageError(true);
   }, []);
 
-  // Изменяем обработчик клика на коллекцию
+  // Изменяем обработчик клика на коллекцию для перехода по пути /author/:partner_id/collections/:collection_id/tokens
   const handleCollectionClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (collectionId) {
-      // Для страницы автора и маркетплейса логика навигации разная
-      if (isMarketplace) {
-        navigate(`/marketplace/collection/${collectionId}`);
-      } else if (authorId) {
-        navigate(`/author/${authorId}/collection/${collectionId}`);
-      } else {
-        navigate(`/collection/${collectionId}`);
-      }
+    
+    if (collectionId && authorId) {
+      navigate(`/author/${authorId}/collections/${collectionId}/tokens`);
+    } else if (collectionId && isMarketplace) {
+      // Для маркетплейса без указания автора
+      navigate(`/marketplace/collection/${collectionId}`);
+    } else if (collectionId) {
+      // Для других случаев
+      navigate(`/collection/${collectionId}`);
     }
-  }, [collectionId, isMarketplace, authorId, navigate]);
+  }, [collectionId, authorId, isMarketplace, navigate]);
 
   // Отдельная функция для клика на автора
   const handleAuthorClick = useCallback((e: React.MouseEvent) => {
