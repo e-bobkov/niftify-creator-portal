@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LockKeyhole } from "lucide-react";
@@ -168,31 +167,28 @@ const Checkout = () => {
     return <NotFoundState />;
   }
 
-  // Normal checkout view
+  // Normal checkout view with single column layout
   return (
     <CheckoutLayout>
-      <div className="flex flex-col md:flex-row gap-5">
-        <div className="md:w-2/5">
-          <NFTPreview item={item} />
+      <div className="space-y-5">
+        {/* NFT Preview at the top */}
+        <NFTPreview item={item} />
+        
+        {/* Collapsible info sections */}
+        <div className="space-y-3">
+          <NFTStorageInfo />
+          <SecurityInfo />
         </div>
         
-        <div className="md:w-3/5">
-          <div className="space-y-4">
-            {/* Collapsible info sections */}
-            <NFTStorageInfo />
-            <SecurityInfo />
-            
-            {/* Checkout form with payment button */}
-            <CheckoutForm 
-              item={item}
-              isAuthenticated={isAuthenticated}
-              user={user}
-              token={token}
-              onSubmit={handlePayment}
-              processing={processing}
-            />
-          </div>
-        </div>
+        {/* Checkout form with payment button */}
+        <CheckoutForm 
+          item={item}
+          isAuthenticated={isAuthenticated}
+          user={user}
+          token={token}
+          onSubmit={handlePayment}
+          processing={processing}
+        />
       </div>
     </CheckoutLayout>
   );
