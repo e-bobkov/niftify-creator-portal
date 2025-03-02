@@ -9,8 +9,10 @@ import {
   AlertCircle,
   Check,
   Loader2,
-  Home,
+  Mail,
   Info,
+  ChevronDown,
+  ChevronUp,
   ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,21 +23,26 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { fetchTokenDetails, checkTokenStatus } from "@/api/marketplace";
 import { MarketplaceToken } from "@/api/marketplace";
 import { useAuth } from "@/hooks/useAuth";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const Checkout = () => {
   const { item: itemId } = useParams<{ item: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { token, user } = useAuth(); // Получаем данные авторизации
+  const { token, user, isAuthenticated } = useAuth();
   
   const [item, setItem] = useState<MarketplaceToken | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const [termsChecked, setTermsChecked] = useState(false);
-  const [privacyChecked, setPrivacyChecked] = useState(false);
   const [refundChecked, setRefundChecked] = useState(false);
+  const [accountCreationChecked, setAccountCreationChecked] = useState(false);
+  const [email, setEmail] = useState("");
+  
+  const [showStorageInfo, setShowStorageInfo] = useState(false);
+  const [showSecurityInfo, setShowSecurityInfo] = useState(false);
 
   useEffect(() => {
     const checkItem = async () => {
@@ -99,10 +106,19 @@ const Checkout = () => {
   }, [itemId, navigate, toast]);
 
   const handlePayment = async () => {
-    if (!termsChecked || !privacyChecked || !refundChecked) {
+    if (!refundChecked) {
       toast({
         title: "Please check all agreements",
-        description: "You must agree to all terms before proceeding with payment.",
+        description: "You must agree to the refund policy before proceeding with payment.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (!isAuthenticated && (!email || !accountCreationChecked)) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email and agree to account creation to proceed.",
         variant: "destructive"
       });
       return;
@@ -117,13 +133,12 @@ const Checkout = () => {
       return;
     }
     
-    if (!user || !user.id || !token) {
+    if (!isAuthenticated && !email) {
       toast({
         title: "Authentication required",
-        description: "You need to be logged in to complete this purchase.",
+        description: "Please enter your email address to continue.",
         variant: "destructive"
       });
-      navigate('/auth');
       return;
     }
     
@@ -135,7 +150,7 @@ const Checkout = () => {
         id: item.id.toString(), // Преобразуем в строку, если это число
         collection_id: item.collection_id, // Используем строковый идентификатор коллекции без преобразования
         amount: item.price,
-        buyer_id: user.id
+        buyer_id: isAuthenticated ? user?.id : email // Используем email для неавторизованных пользователей
       };
       
       console.log('Creating order with data:', requestBody);
@@ -225,13 +240,13 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
-      <main className="container mx-auto px-4 py-10">
-        <div className="max-w-3xl mx-auto">
+      <main className="container mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto">
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/marketplace')} // Всегда ведёт на страницу маркетплейса
-            className="mb-6"
+            onClick={() => navigate('/marketplace')}
+            className="mb-4"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
             Back to Marketplace
@@ -242,10 +257,10 @@ const Checkout = () => {
             animate={{ opacity: 1, y: 0 }}
             className="glass-card rounded-xl overflow-hidden"
           >
-            <div className="p-6 md:p-8 space-y-8">
-              <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Complete your purchase</h1>
+            <div className="p-5 md:p-6 space-y-6">
+              <h1 className="text-xl md:text-2xl font-bold tracking-tight">Complete your purchase</h1>
               
-              <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex flex-col md:flex-row gap-5">
                 <div className="md:w-2/5">
                   <div className="glass-card rounded-lg overflow-hidden">
                     <div className="aspect-square">
@@ -255,7 +270,7 @@ const Checkout = () => {
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    <div className="p-4">
+                    <div className="p-3">
                       <h3 className="font-semibold text-lg">{item.metadata.name}</h3>
                       <p className="text-sm text-muted-foreground mb-2 line-clamp-2">{item.metadata.description}</p>
                       <div className="flex justify-between items-center">
@@ -264,120 +279,143 @@ const Checkout = () => {
                       </div>
                     </div>
                   </div>
-                  
-                  <div className="mt-6 space-y-3 bg-secondary/20 p-4 rounded-lg border border-secondary/40">
-                    <div className="flex gap-3 items-center">
-                      <ShieldCheck className="text-primary h-5 w-5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-sm">Secure Transaction</h4>
-                        <p className="text-xs text-muted-foreground">Your payment information is encrypted</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-3 items-center">
-                      <LockKeyhole className="text-primary h-5 w-5 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-sm">Ownership Transfer</h4>
-                        <p className="text-xs text-muted-foreground">NFT will be transferred to your account</p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
                 
                 <div className="md:w-3/5">
-                  <div className="space-y-6">
-                    <Alert className="bg-[#d7ff6b]/10 border-[#bcf655]/30">
-                      <Info className="h-5 w-5 text-[#bcf655]" />
-                      <AlertTitle className="font-semibold text-[#bcf655]">NFT Storage Information</AlertTitle>
-                      <AlertDescription className="text-sm">
-                        <p className="mb-2">
-                          All NFTs are stored centrally on our platform's wallet for enhanced security and ease of access.
-                        </p>
-                        <div className="flex items-center gap-1 text-xs font-medium text-[#bcf655] hover:text-[#d7ff6b]">
-                          <a 
-                            href="https://polygonscan.com/address/0xe2Ab5329EccBb90fC3EB4542ff674e096A304f36" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center"
-                          >
-                            View platform wallet on Polygonscan
-                            <ExternalLink className="h-3 w-3 ml-1 text-[#bcf655]" />
-                          </a>
+                  <div className="space-y-4">
+                    {/* Collapsible info sections */}
+                    <div className="border border-border rounded-lg overflow-hidden">
+                      <button 
+                        onClick={() => setShowStorageInfo(!showStorageInfo)}
+                        className="w-full flex justify-between items-center p-3 bg-secondary/10 hover:bg-secondary/20 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Info className="h-4 w-4 text-[#bcf655]" />
+                          <span className="font-medium">NFT Storage Information</span>
                         </div>
-                        <p className="mt-2">
-                          Upon purchase, you become the rightful owner and your ownership details will be securely encrypted in the NFT's metadata.
-                        </p>
-                      </AlertDescription>
-                    </Alert>
-                    
-                    <div>
-                      <h3 className="text-lg font-semibold mb-3">Payment Information</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        By proceeding with this purchase, you agree to pay {formatPrice(item.price)} for this NFT.
-                        The payment will be processed securely once you click the "Pay Now" button below.
-                      </p>
+                        {showStorageInfo ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </button>
+                      
+                      {showStorageInfo && (
+                        <div className="p-3 text-sm space-y-2 bg-secondary/5">
+                          <p>
+                            All NFTs are stored centrally on our platform's wallet for enhanced security and ease of access.
+                          </p>
+                          <div className="flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80">
+                            <a 
+                              href="https://polygonscan.com/address/0xe2Ab5329EccBb90fC3EB4542ff674e096A304f36" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="flex items-center"
+                            >
+                              View platform wallet on Polygonscan
+                              <ExternalLink className="h-3 w-3 ml-1" />
+                            </a>
+                          </div>
+                          <p>
+                            Upon purchase, you become the rightful owner and your ownership details will be securely encrypted in the NFT's metadata.
+                          </p>
+                        </div>
+                      )}
                     </div>
                     
-                    <div className="space-y-3 pt-4">
-                      <h3 className="text-lg font-semibold mb-2">Agreements</h3>
+                    <div className="border border-border rounded-lg overflow-hidden">
+                      <button 
+                        onClick={() => setShowSecurityInfo(!showSecurityInfo)}
+                        className="w-full flex justify-between items-center p-3 bg-secondary/10 hover:bg-secondary/20 transition-colors"
+                      >
+                        <div className="flex items-center gap-2">
+                          <ShieldCheck className="h-4 w-4 text-primary" />
+                          <span className="font-medium">Security Information</span>
+                        </div>
+                        {showSecurityInfo ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      </button>
                       
-                      <div className="flex space-x-2 items-start">
-                        <Checkbox 
-                          id="terms" 
-                          checked={termsChecked}
-                          onCheckedChange={(checked) => setTermsChecked(checked === true)}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <label
-                            htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            I agree to the <Link to="/terms" className="text-primary hover:underline" target="_blank">Terms of Service</Link>
+                      {showSecurityInfo && (
+                        <div className="p-3 text-sm space-y-2 bg-secondary/5">
+                          <div className="flex gap-2 items-start">
+                            <ShieldCheck className="text-primary h-4 w-4 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="font-medium text-sm">Secure Transaction</h4>
+                              <p className="text-xs text-muted-foreground">Your payment information is encrypted</p>
+                            </div>
+                          </div>
+                          <div className="flex gap-2 items-start">
+                            <LockKeyhole className="text-primary h-4 w-4 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <h4 className="font-medium text-sm">Ownership Transfer</h4>
+                              <p className="text-xs text-muted-foreground">NFT will be transferred to your account</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Authentication fields for non-authenticated users */}
+                    {!isAuthenticated && (
+                      <div className="space-y-3 pt-2">
+                        <div className="space-y-2">
+                          <label htmlFor="email" className="text-sm font-medium">
+                            Your Email Address
                           </label>
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4 text-muted-foreground" />
+                            <Input 
+                              id="email" 
+                              type="email" 
+                              placeholder="Enter your email" 
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                              className="flex-1"
+                            />
+                          </div>
+                          <p className="text-xs text-muted-foreground">We'll use this to create your account and send purchase details</p>
+                        </div>
+                        
+                        <div className="flex space-x-2 items-start">
+                          <Checkbox 
+                            id="accountCreation" 
+                            checked={accountCreationChecked}
+                            onCheckedChange={(checked) => setAccountCreationChecked(checked === true)}
+                          />
+                          <div className="grid gap-1.5 leading-none">
+                            <label
+                              htmlFor="accountCreation"
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                              I agree to create an account with this email
+                            </label>
+                          </div>
                         </div>
                       </div>
-                      
-                      <div className="flex space-x-2 items-start">
-                        <Checkbox 
-                          id="privacy" 
-                          checked={privacyChecked}
-                          onCheckedChange={(checked) => setPrivacyChecked(checked === true)}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <label
-                            htmlFor="privacy"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            I agree to the <Link to="/privacy" className="text-primary hover:underline" target="_blank">Privacy Policy</Link>
-                          </label>
-                        </div>
-                      </div>
-                      
-                      <div className="flex space-x-2 items-start">
-                        <Checkbox 
-                          id="refund" 
-                          checked={refundChecked}
-                          onCheckedChange={(checked) => setRefundChecked(checked === true)}
-                        />
-                        <div className="grid gap-1.5 leading-none">
-                          <label
-                            htmlFor="refund"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                          >
-                            I agree to the <Link to="/refund" className="text-primary hover:underline" target="_blank">Refund and Transaction Cancellation Policy</Link>
-                          </label>
-                        </div>
+                    )}
+                    
+                    {/* Refund policy agreement */}
+                    <div className="flex space-x-2 items-start pt-2">
+                      <Checkbox 
+                        id="refund" 
+                        checked={refundChecked}
+                        onCheckedChange={(checked) => setRefundChecked(checked === true)}
+                      />
+                      <div className="grid gap-1.5 leading-none">
+                        <label
+                          htmlFor="refund"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          I agree to the <Link to="/refund" className="text-primary hover:underline" target="_blank">Refund and Transaction Cancellation Policy</Link>
+                        </label>
                       </div>
                     </div>
                     
-                    <div className="pt-4 space-y-4">
+                    <div className="pt-3 space-y-3">
                       <div className="flex justify-between py-2 border-t border-b border-secondary/30">
                         <span className="font-semibold">Total</span>
                         <span className="text-lg font-bold text-primary">{formatPrice(item.price)}</span>
                       </div>
                       
                       <Button 
-                        className="w-full py-6 text-base"
-                        disabled={!termsChecked || !privacyChecked || !refundChecked || processing}
+                        className="w-full py-5 text-base"
+                        disabled={!refundChecked || (!isAuthenticated && (!email || !accountCreationChecked)) || processing}
                         onClick={handlePayment}
                       >
                         {processing ? (
@@ -398,12 +436,12 @@ const Checkout = () => {
             </div>
           </motion.div>
           
-          <div className="mt-8 text-center text-sm text-muted-foreground">
-            <div className="flex items-center justify-center mb-2">
-              <LockKeyhole className="h-4 w-4 mr-1" />
+          <div className="mt-4 text-center text-xs text-muted-foreground">
+            <div className="flex items-center justify-center mb-1">
+              <LockKeyhole className="h-3 w-3 mr-1" />
               <span>Secure Checkout</span>
             </div>
-            <p>All transactions are encrypted and secure. Your payment information is never stored on our servers.</p>
+            <p>All transactions are encrypted and secure.</p>
           </div>
         </div>
       </main>
