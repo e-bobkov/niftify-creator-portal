@@ -1,3 +1,4 @@
+
 import { Token } from "@/types/user";
 
 export interface MarketplaceCollection {
@@ -107,7 +108,7 @@ export const isEncryptedToken = (tokenId: string): boolean => {
 
 export const autoAuthenticate = async (email: string) => {
   try {
-    const response = await fetch(`${API_URL}/auth/auto`, {
+    const response = await fetch(`${API_URL}/auto`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
