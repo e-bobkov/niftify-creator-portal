@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { sendCurrentUrlToParent } from '@/utils/postMessage';
+import { sendCurrentUrlToParent, setupMessageListener } from '@/utils/postMessage';
 
 /**
  * A hook that sends the current URL to the parent window via postMessage
@@ -9,6 +9,11 @@ import { sendCurrentUrlToParent } from '@/utils/postMessage';
  */
 export const usePostMessageNavigation = () => {
   const location = useLocation();
+  
+  // Set up message listener on mount
+  useEffect(() => {
+    setupMessageListener();
+  }, []);
   
   // Send current URL on initial load
   useEffect(() => {

@@ -14,6 +14,17 @@ export const isInIframe = (): boolean => {
   }
 };
 
+// List of allowed parent origins
+const ALLOWED_ORIGINS = [
+  'https://test.ftsoa.art',
+  'http://test.ftsoa.art',
+  'https://ftsoa.art',
+  'http://ftsoa.art',
+  // Add localhost or other development domains if needed
+  'http://localhost:3000',
+  'http://localhost:8080',
+];
+
 // Send the current URL to the parent window
 export const sendCurrentUrlToParent = (): void => {
   if (isInIframe()) {
@@ -23,6 +34,27 @@ export const sendCurrentUrlToParent = (): void => {
     const hash = window.location.hash;
     
     try {
+      // First try with specific origin
+      ALLOWED_ORIGINS.forEach(origin => {
+        try {
+          window.parent.postMessage(
+            {
+              type: 'ROUTE_CHANGE',
+              url: currentUrl,
+              pathname,
+              search,
+              hash,
+              title: document.title,
+              timestamp: Date.now()
+            },
+            origin
+          );
+        } catch (e) {
+          // Silently fail for specific origins that don't work
+        }
+      });
+      
+      // Also send with wildcard for compatibility
       window.parent.postMessage(
         {
           type: 'ROUTE_CHANGE',
@@ -33,8 +65,9 @@ export const sendCurrentUrlToParent = (): void => {
           title: document.title,
           timestamp: Date.now()
         },
-        '*' // Consider restricting this to specific origins in production
+        '*'
       );
+      
       console.log('Sent postMessage with current URL:', currentUrl);
     } catch (error) {
       console.error('Failed to send postMessage:', error);
@@ -48,4 +81,22 @@ export const sendCurrentUrlToParent = (): void => {
  */
 export const triggerSendUrlToParent = (): void => {
   sendCurrentUrlToParent();
+};
+
+// Add a message listener for two-way communication
+export const setupMessageListener = (): void => {
+  if (isInIframe()) {
+    window.addEventListener('message', (event) => {
+      // Check if origin is allowed
+      if (ALLOWED_ORIGINS.includes(event.origin)) {
+        // Handle messages from parent
+        if (event.data && event.data.type === 'REQUEST_CURRENT_URL') {
+          sendCurrentUrlToParent();
+          console.log('Responding to parent request for URL');
+        }
+      }
+    });
+    
+    console.log('PostMessage listener initialized');
+  }
 };
