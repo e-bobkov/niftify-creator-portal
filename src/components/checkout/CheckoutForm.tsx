@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Loader2 } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,6 +15,7 @@ interface CheckoutFormProps {
   token: string | null;
   onSubmit: (email?: string) => Promise<void>;
   processing: boolean;
+  prefilledEmail?: string;
 }
 
 export const CheckoutForm = ({ 
@@ -23,11 +24,19 @@ export const CheckoutForm = ({
   user,
   token,
   onSubmit, 
-  processing 
+  processing,
+  prefilledEmail
 }: CheckoutFormProps) => {
   const [email, setEmail] = useState("");
   const [refundChecked, setRefundChecked] = useState(false);
   const [accountCreationChecked, setAccountCreationChecked] = useState(false);
+
+  // Set email from prefilled value if available
+  useEffect(() => {
+    if (prefilledEmail && !isAuthenticated) {
+      setEmail(prefilledEmail);
+    }
+  }, [prefilledEmail, isAuthenticated]);
 
   const handleSubmit = () => {
     onSubmit(isAuthenticated ? undefined : email);

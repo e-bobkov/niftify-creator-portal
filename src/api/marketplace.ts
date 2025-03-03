@@ -24,6 +24,11 @@ export interface MarketplaceToken extends Token {
   chain: string;
 }
 
+export interface VerifyResponse {
+  token: MarketplaceToken;
+  email?: string;
+}
+
 const API_URL = "https://test.ftsoa.art";
 
 export async function fetchMarketplaceCollections(): Promise<MarketplaceCollection[]> {
@@ -81,4 +86,29 @@ export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
     console.error('Error checking token status:', error);
     return false; // В случае ошибки считаем токен недоступным
   }
+};
+
+// New function to verify encrypted data and get token details
+export const verifyEncryptedData = async (encryptedData: string): Promise<VerifyResponse> => {
+  try {
+    // Decode the URL component twice to handle double-encoding that often happens
+    const decodedData = decodeURIComponent(encryptedData);
+    
+    const response = await fetch(`${API_URL}/verify/${encodeURIComponent(decodedData)}`);
+    
+    if (!response.ok) {
+      throw new Error('Failed to verify encrypted data');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error verifying encrypted data:', error);
+    throw new Error('Failed to verify checkout link. Please try again later.');
+  }
+};
+
+// Function to check if a string looks like an encrypted token rather than a numeric ID
+export const isEncryptedToken = (tokenId: string): boolean => {
+  // If it contains a colon or equals sign, it's likely an encrypted token
+  return tokenId.includes(':') || tokenId.includes('=');
 };

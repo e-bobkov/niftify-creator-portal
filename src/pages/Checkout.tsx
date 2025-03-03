@@ -1,8 +1,14 @@
+
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LockKeyhole } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { fetchTokenDetails, checkTokenStatus } from "@/api/marketplace";
+import { 
+  fetchTokenDetails, 
+  checkTokenStatus, 
+  verifyEncryptedData, 
+  isEncryptedToken 
+} from "@/api/marketplace";
 import { MarketplaceToken } from "@/api/marketplace";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -26,6 +32,7 @@ const Checkout = () => {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [prefilledEmail, setPrefilledEmail] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const checkItem = async () => {
@@ -35,6 +42,25 @@ const Checkout = () => {
         setLoading(true);
         setError(null);
         
+        // Check if the item ID is an encrypted token or a regular ID
+        if (isEncryptedToken(itemId)) {
+          // Process encrypted token
+          console.log('Processing encrypted checkout link');
+          const verifyResult = await verifyEncryptedData(itemId);
+          
+          // Set the token data from the verification result
+          setItem(verifyResult.token);
+          
+          // If the response includes an email and user is not authenticated, prefill it
+          if (verifyResult.email && !isAuthenticated) {
+            setPrefilledEmail(verifyResult.email);
+            console.log('Prefilling email from encrypted link:', verifyResult.email);
+          }
+          
+          return;
+        }
+        
+        // Regular token ID flow
         const isAvailable = await checkTokenStatus(itemId);
         
         if (!isAvailable) {
@@ -86,7 +112,7 @@ const Checkout = () => {
     };
     
     checkItem();
-  }, [itemId, navigate, toast]);
+  }, [itemId, navigate, toast, isAuthenticated]);
 
   const handlePayment = async (email?: string) => {
     if (!item) {
@@ -188,6 +214,7 @@ const Checkout = () => {
           token={token}
           onSubmit={handlePayment}
           processing={processing}
+          prefilledEmail={prefilledEmail}
         />
       </div>
     </CheckoutLayout>
