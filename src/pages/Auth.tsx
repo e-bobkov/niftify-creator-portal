@@ -8,6 +8,7 @@ import { AlertCircle, Eye, EyeOff, Lock, Mail, Check, X } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { motion } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
 
 const PasswordRequirement = ({ meets, label }: { meets: boolean; label: string }) => (
   <div className="flex items-center gap-2 text-sm">
@@ -214,6 +215,7 @@ const CubeBackground = () => (
 const Auth = () => {
   const navigate = useNavigate();
   const { login, register } = useAuth();
+  const { toast } = useToast();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -234,8 +236,19 @@ const Auth = () => {
   const authMutation = useMutation({
     mutationFn: async () => {
       if (isLogin) {
-        await login(email, password);
-        navigate("/");
+        try {
+          console.log("Attempting to log in with:", email);
+          await login(email, password);
+          return true;
+        } catch (error) {
+          console.error("Login error:", error);
+          toast({
+            title: "Login failed",
+            description: error instanceof Error ? error.message : "Failed to login. Please check your credentials.",
+            variant: "destructive",
+          });
+          return false;
+        }
       } else {
         if (password !== confirmPassword) {
           throw new Error("Passwords do not match");
@@ -243,6 +256,12 @@ const Auth = () => {
         await register(email, password);
         setIsLogin(true);
         setShowEmailAlert(true);
+        return true;
+      }
+    },
+    onSuccess: (result) => {
+      if (isLogin && result) {
+        navigate("/");
       }
     }
   });
