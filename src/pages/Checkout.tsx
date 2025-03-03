@@ -7,7 +7,8 @@ import {
   fetchTokenDetails, 
   checkTokenStatus, 
   verifyEncryptedData, 
-  isEncryptedToken 
+  isEncryptedToken,
+  autoAuthenticate
 } from "@/api/marketplace";
 import { MarketplaceToken } from "@/api/marketplace";
 import { useAuth } from "@/hooks/useAuth";
@@ -26,13 +27,14 @@ const Checkout = () => {
   const { item: itemId } = useParams<{ item: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { token, user, isAuthenticated } = useAuth();
+  const { token, user, isAuthenticated, login } = useAuth();
   
   const [item, setItem] = useState<MarketplaceToken | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [prefilledEmail, setPrefilledEmail] = useState<string | undefined>(undefined);
+  const [outTradeNo, setOutTradeNo] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     const checkItem = async () => {
@@ -57,6 +59,12 @@ const Checkout = () => {
             if (verifyResult.email && !isAuthenticated) {
               setPrefilledEmail(verifyResult.email);
               console.log('Prefilling email from encrypted link:', verifyResult.email);
+            }
+            
+            // Store out_trade_no if it's provided
+            if (verifyResult.out_trade_no) {
+              setOutTradeNo(verifyResult.out_trade_no);
+              console.log('Received out_trade_no:', verifyResult.out_trade_no);
             }
           } catch (encryptedError) {
             console.error('Error processing encrypted token:', encryptedError);
@@ -138,13 +146,49 @@ const Checkout = () => {
     try {
       setProcessing(true);
       
+      let userToken = token;
+      let userId = user?.id;
+      
+      // If user is not authenticated but we have an email, auto-authenticate them
+      if (!isAuthenticated && email) {
+        try {
+          console.log('Auto-authenticating user with email:', email);
+          const authResult = await autoAuthenticate(email);
+          
+          if (authResult && authResult.session) {
+            // Store the user session
+            userToken = authResult.session.access_token;
+            userId = authResult.session.user.id;
+            
+            console.log('Auto-authentication successful');
+            
+            // Optional: you can update the global auth state if needed
+            // This depends on how your auth state management works
+          }
+        } catch (authError) {
+          console.error('Auto-authentication failed:', authError);
+          toast({
+            title: "Authentication failed",
+            description: "Could not authenticate with the provided email.",
+            variant: "destructive"
+          });
+          setProcessing(false);
+          return;
+        }
+      }
+      
       // Create request body
-      const requestBody = {
+      const requestBody: any = {
         id: item.id.toString(),
         collection_id: item.collection_id,
         amount: item.price,
         buyer_id: isAuthenticated ? user?.id : email
       };
+      
+      // Add out_trade_no if available
+      if (outTradeNo) {
+        requestBody.out_trade_no = outTradeNo;
+      }
       
       console.log('Creating order with data:', requestBody);
       
@@ -153,7 +197,7 @@ const Checkout = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${userToken || token}`
         },
         body: JSON.stringify(requestBody)
       });

@@ -1,4 +1,3 @@
-
 import { Token } from "@/types/user";
 
 export interface MarketplaceCollection {
@@ -27,6 +26,7 @@ export interface MarketplaceToken extends Token {
 export interface VerifyResponse {
   token: MarketplaceToken;
   email?: string;
+  out_trade_no?: string;
 }
 
 const API_URL = "https://test.ftsoa.art";
@@ -63,7 +63,6 @@ export async function fetchAllTokens(): Promise<Record<string, MarketplaceToken[
   return response.json();
 }
 
-// Функция проверки статуса токена (доступен ли для покупки)
 export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
   try {
     const response = await fetch(`${API_URL}/token/status/${tokenId}`);
@@ -74,24 +73,21 @@ export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
     
     const data = await response.json();
     
-    // Проверяем формат ответа - может быть либо булево значение, либо объект со свойством status
     if (typeof data === 'boolean') {
       return data;
     } else if (data && typeof data === 'object' && 'status' in data) {
       return data.status === true;
     }
     
-    return false; // Неизвестный формат ответа считаем как недоступен
+    return false;
   } catch (error) {
     console.error('Error checking token status:', error);
-    return false; // В случае ошибки считаем токен недоступным
+    return false;
   }
 };
 
-// New function to verify encrypted data and get token details
 export const verifyEncryptedData = async (encryptedData: string): Promise<VerifyResponse> => {
   try {
-    // Fix: We should not decode the data ourselves, the backend expects the raw data to be URL encoded
     const response = await fetch(`${API_URL}/verify/${encodeURIComponent(encryptedData)}`);
     
     if (!response.ok) {
@@ -105,8 +101,27 @@ export const verifyEncryptedData = async (encryptedData: string): Promise<Verify
   }
 };
 
-// Function to check if a string looks like an encrypted token rather than a numeric ID
 export const isEncryptedToken = (tokenId: string): boolean => {
-  // If it contains a colon or equals sign, it's likely an encrypted token
   return tokenId.includes(':') || tokenId.includes('=');
+};
+
+export const autoAuthenticate = async (email: string) => {
+  try {
+    const response = await fetch(`${API_URL}/auth/auto`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ email })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Auto-authentication failed');
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Auto-authentication error:', error);
+    throw new Error('Failed to authenticate. Please try again later.');
+  }
 };
