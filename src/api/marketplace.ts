@@ -1,4 +1,3 @@
-
 import { Token } from "@/types/user";
 
 export interface MarketplaceCollection {
@@ -28,6 +27,21 @@ export interface VerifyResponse {
   token: MarketplaceToken;
   email?: string;
   out_trade_no?: string;
+}
+
+export interface AutoAuthResponse {
+  message: string;
+  session: {
+    access_token: string;
+    token_type: string;
+    expires_in: number;
+    expires_at: number;
+    refresh_token: string;
+    user: {
+      id: string;
+      // ... other user properties
+    }
+  }
 }
 
 const API_URL = "https://test.ftsoa.art";
@@ -106,7 +120,7 @@ export const isEncryptedToken = (tokenId: string): boolean => {
   return tokenId.includes(':') || tokenId.includes('=');
 };
 
-export const autoAuthenticate = async (email: string) => {
+export const autoAuthenticate = async (email: string): Promise<AutoAuthResponse> => {
   try {
     const response = await fetch(`${API_URL}/auto`, {
       method: 'POST',

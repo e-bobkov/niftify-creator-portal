@@ -160,10 +160,12 @@ const Checkout = () => {
             userToken = authResult.session.access_token;
             userId = authResult.session.user.id;
             
-            console.log('Auto-authentication successful');
+            console.log('Auto-authentication successful, user ID:', userId);
             
             // Optional: you can update the global auth state if needed
-            // This depends on how your auth state management works
+            if (login) {
+              login(authResult.session.access_token, authResult.session.user);
+            }
           }
         } catch (authError) {
           console.error('Auto-authentication failed:', authError);
@@ -182,7 +184,7 @@ const Checkout = () => {
         id: item.id.toString(),
         collection_id: item.collection_id,
         amount: item.price,
-        buyer_id: isAuthenticated ? user?.id : email
+        buyer_id: userId // Using the userId from authenticated user or auto-authentication
       };
       
       // Add out_trade_no if available
