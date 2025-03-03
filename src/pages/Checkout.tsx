@@ -45,16 +45,27 @@ const Checkout = () => {
         // Check if the item ID is an encrypted token or a regular ID
         if (isEncryptedToken(itemId)) {
           // Process encrypted token
-          console.log('Processing encrypted checkout link');
-          const verifyResult = await verifyEncryptedData(itemId);
+          console.log('Processing encrypted checkout link:', itemId);
           
-          // Set the token data from the verification result
-          setItem(verifyResult.token);
-          
-          // If the response includes an email and user is not authenticated, prefill it
-          if (verifyResult.email && !isAuthenticated) {
-            setPrefilledEmail(verifyResult.email);
-            console.log('Prefilling email from encrypted link:', verifyResult.email);
+          try {
+            const verifyResult = await verifyEncryptedData(itemId);
+            
+            // Set the token data from the verification result
+            setItem(verifyResult.token);
+            
+            // If the response includes an email and user is not authenticated, prefill it
+            if (verifyResult.email && !isAuthenticated) {
+              setPrefilledEmail(verifyResult.email);
+              console.log('Prefilling email from encrypted link:', verifyResult.email);
+            }
+          } catch (encryptedError) {
+            console.error('Error processing encrypted token:', encryptedError);
+            setError('Invalid or expired checkout link. Please try again with a valid link.');
+            toast({
+              title: "Invalid link",
+              description: "This checkout link is invalid or has expired.",
+              variant: "destructive"
+            });
           }
           
           return;

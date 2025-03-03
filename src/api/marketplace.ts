@@ -66,7 +66,7 @@ export async function fetchAllTokens(): Promise<Record<string, MarketplaceToken[
 // Функция проверки статуса токена (доступен ли для покупки)
 export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
   try {
-    const response = await fetch(`https://test.ftsoa.art/token/status/${tokenId}`);
+    const response = await fetch(`${API_URL}/token/status/${tokenId}`);
     
     if (!response.ok) {
       throw new Error('Failed to check token status');
@@ -91,10 +91,8 @@ export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
 // New function to verify encrypted data and get token details
 export const verifyEncryptedData = async (encryptedData: string): Promise<VerifyResponse> => {
   try {
-    // Decode the URL component twice to handle double-encoding that often happens
-    const decodedData = decodeURIComponent(encryptedData);
-    
-    const response = await fetch(`${API_URL}/verify/${encodeURIComponent(decodedData)}`);
+    // Fix: We should not decode the data ourselves, the backend expects the raw data to be URL encoded
+    const response = await fetch(`${API_URL}/verify/${encodeURIComponent(encryptedData)}`);
     
     if (!response.ok) {
       throw new Error('Failed to verify encrypted data');
