@@ -216,8 +216,17 @@ export function useCheckout() {
         description: "You will be redirected to complete your payment.",
       });
       
+      // Set a flag in localStorage to indicate payment has started
+      // This will be used for cross-tab communication
+      localStorage.setItem('payment_initiated', 'true');
+      
       // Open payment link in new tab
       window.open(data.payment_link, '_blank');
+      
+      // Redirect to inventory after a short delay
+      setTimeout(() => {
+        navigate('/inventory');
+      }, 1500);
       
     } catch (err) {
       console.error('Payment error:', err);
