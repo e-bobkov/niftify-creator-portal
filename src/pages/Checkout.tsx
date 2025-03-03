@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { LockKeyhole } from "lucide-react";
@@ -179,6 +178,18 @@ const Checkout = () => {
         }
       }
       
+      // Ensure we have a userId at this point
+      if (!userId) {
+        console.error('No user ID available for order creation');
+        toast({
+          title: "Authentication error",
+          description: "Could not identify user for purchase. Please try logging in again.",
+          variant: "destructive"
+        });
+        setProcessing(false);
+        return;
+      }
+      
       // Create request body
       const requestBody: any = {
         id: item.id.toString(),
@@ -199,7 +210,7 @@ const Checkout = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${userToken || token}`
+          'Authorization': `Bearer ${userToken}`
         },
         body: JSON.stringify(requestBody)
       });
