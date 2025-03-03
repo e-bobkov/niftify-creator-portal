@@ -18,11 +18,19 @@ export const isInIframe = (): boolean => {
 export const sendCurrentUrlToParent = (): void => {
   if (isInIframe()) {
     const currentUrl = window.location.href;
+    const pathname = window.location.pathname;
+    const search = window.location.search;
+    const hash = window.location.hash;
+    
     try {
       window.parent.postMessage(
         {
           type: 'ROUTE_CHANGE',
           url: currentUrl,
+          pathname,
+          search,
+          hash,
+          title: document.title,
           timestamp: Date.now()
         },
         '*' // Consider restricting this to specific origins in production
@@ -32,4 +40,12 @@ export const sendCurrentUrlToParent = (): void => {
       console.error('Failed to send postMessage:', error);
     }
   }
+};
+
+/**
+ * Manually trigger sending the current URL to the parent
+ * This can be called from anywhere in the application
+ */
+export const triggerSendUrlToParent = (): void => {
+  sendCurrentUrlToParent();
 };
