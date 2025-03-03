@@ -1,4 +1,5 @@
 import { Token } from "@/types/user";
+import { getApiUrl, API_ENDPOINTS } from "@/config/api";
 
 export interface MarketplaceCollection {
   id: string;
@@ -44,10 +45,8 @@ export interface AutoAuthResponse {
   }
 }
 
-const API_URL = "https://test.ftsoa.art";
-
 export async function fetchMarketplaceCollections(): Promise<MarketplaceCollection[]> {
-  const response = await fetch(`${API_URL}/marketlpace/collections`);
+  const response = await fetch(getApiUrl(API_ENDPOINTS.MARKETPLACE.COLLECTIONS));
   if (!response.ok) {
     throw new Error("Failed to fetch collections");
   }
@@ -55,7 +54,7 @@ export async function fetchMarketplaceCollections(): Promise<MarketplaceCollecti
 }
 
 export async function fetchCollectionTokens(collectionId: string): Promise<MarketplaceToken[]> {
-  const response = await fetch(`${API_URL}/marketlpace/tokens/${collectionId}`);
+  const response = await fetch(getApiUrl(`${API_ENDPOINTS.MARKETPLACE.TOKENS}/${collectionId}`));
   if (!response.ok) {
     throw new Error(`Failed to fetch tokens for collection ${collectionId}`);
   }
@@ -63,7 +62,7 @@ export async function fetchCollectionTokens(collectionId: string): Promise<Marke
 }
 
 export async function fetchTokenDetails(tokenId: string): Promise<MarketplaceToken> {
-  const response = await fetch(`${API_URL}/marketlpace/item/${tokenId}`);
+  const response = await fetch(getApiUrl(`${API_ENDPOINTS.MARKETPLACE.ITEM}/${tokenId}`));
   if (!response.ok) {
     throw new Error(`Failed to fetch token details for token ${tokenId}`);
   }
@@ -71,7 +70,7 @@ export async function fetchTokenDetails(tokenId: string): Promise<MarketplaceTok
 }
 
 export async function fetchAllTokens(): Promise<Record<string, MarketplaceToken[]>> {
-  const response = await fetch(`${API_URL}/marketlpace/all-tokens`);
+  const response = await fetch(getApiUrl(API_ENDPOINTS.MARKETPLACE.ALL_TOKENS));
   if (!response.ok) {
     throw new Error("Failed to fetch all tokens");
   }
@@ -80,7 +79,7 @@ export async function fetchAllTokens(): Promise<Record<string, MarketplaceToken[
 
 export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
   try {
-    const response = await fetch(`${API_URL}/token/status/${tokenId}`);
+    const response = await fetch(getApiUrl(`${API_ENDPOINTS.TOKEN.STATUS}/${tokenId}`));
     
     if (!response.ok) {
       throw new Error('Failed to check token status');
@@ -103,7 +102,7 @@ export const checkTokenStatus = async (tokenId: string): Promise<boolean> => {
 
 export const verifyEncryptedData = async (encryptedData: string): Promise<VerifyResponse> => {
   try {
-    const response = await fetch(`${API_URL}/verify/${encodeURIComponent(encryptedData)}`);
+    const response = await fetch(getApiUrl(`${API_ENDPOINTS.VERIFY}/${encodeURIComponent(encryptedData)}`));
     
     if (!response.ok) {
       throw new Error('Failed to verify encrypted data');
@@ -122,7 +121,7 @@ export const isEncryptedToken = (tokenId: string): boolean => {
 
 export const autoAuthenticate = async (email: string): Promise<AutoAuthResponse> => {
   try {
-    const response = await fetch(`${API_URL}/auto`, {
+    const response = await fetch(getApiUrl(API_ENDPOINTS.AUTH.AUTO), {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

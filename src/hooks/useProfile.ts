@@ -1,7 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { UserProfile } from "@/types/user";
+import { getApiUrl, API_ENDPOINTS } from "@/config/api";
 
 interface ApiProfile {
   profile: {
@@ -24,7 +24,7 @@ export const useProfile = () => {
   return useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      const response = await fetch('https://test.ftsoa.art/profile/', {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.PROFILE.MAIN), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'application/json',

@@ -11,6 +11,7 @@ import {
   autoAuthenticate,
   MarketplaceToken
 } from "@/api/marketplace";
+import { getApiUrl, API_ENDPOINTS } from "@/config/api";
 
 export function useCheckout() {
   const navigate = useNavigate();
@@ -148,7 +149,8 @@ export function useCheckout() {
             
             // Optional: you can update the global auth state if needed
             if (login) {
-              login(authResult.session.access_token, authResult.session.user);
+              // Fix the parameter types here
+              login(email, authResult.session.access_token);
             }
           }
         } catch (authError) {
@@ -191,7 +193,7 @@ export function useCheckout() {
       console.log('Creating order with data:', requestBody);
       
       // Send request to create order
-      const response = await fetch('https://test.ftsoa.art/order/create', {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.ORDER.CREATE), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

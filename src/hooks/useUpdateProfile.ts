@@ -1,7 +1,7 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { useToast } from "./use-toast";
+import { getApiUrl, API_ENDPOINTS } from "@/config/api";
 
 interface ProfileUpdateData {
   bio: string;
@@ -20,7 +20,7 @@ export const useUpdateProfile = () => {
 
   return useMutation({
     mutationFn: async (updateData: ProfileUpdateData) => {
-      const response = await fetch('https://test.ftsoa.art/profile/', {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.PROFILE.MAIN), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -1,7 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "./useAuth";
 import { Token } from "@/types/user";
+import { getApiUrl, API_ENDPOINTS } from "@/config/api";
 
 interface SaleData extends Token {
   purchased_at: string | null;
@@ -22,7 +22,7 @@ export const useSalesData = () => {
   return useQuery({
     queryKey: ['sales'],
     queryFn: async () => {
-      const response = await fetch('https://test.ftsoa.art/profile/sales', {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.PROFILE.SALES), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -41,7 +41,6 @@ export const useSalesData = () => {
       const data = await response.json();
       const sales = data.sales as SaleData[];
 
-      // Загрузка metadata для каждой продажи, если есть metadata_url
       const salesWithMetadata = await Promise.all(
         sales.map(async (sale) => {
           if (sale.metadata_url && !sale.metadata) {
@@ -76,7 +75,7 @@ export const usePurchasesData = () => {
   return useQuery({
     queryKey: ['purchases'],
     queryFn: async () => {
-      const response = await fetch('https://test.ftsoa.art/profile/purchases', {
+      const response = await fetch(getApiUrl(API_ENDPOINTS.PROFILE.PURCHASES), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -95,7 +94,6 @@ export const usePurchasesData = () => {
       const data = await response.json();
       const purchases = data.purchases as SaleData[];
 
-      // Загрузка metadata для каждой покупки, если есть metadata_url
       const purchasesWithMetadata = await Promise.all(
         purchases.map(async (purchase) => {
           if (purchase.metadata_url && !purchase.metadata) {

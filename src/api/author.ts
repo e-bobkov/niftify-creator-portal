@@ -1,10 +1,9 @@
 
 import { Author, AuthorSocial, Collection, Token } from "@/types/user";
-
-const API_URL = "https://test.ftsoa.art";
+import { getApiUrl, API_ENDPOINTS } from "@/config/api";
 
 export async function fetchAuthorByTokenId(tokenId: number): Promise<Author> {
-  const response = await fetch(`${API_URL}/author/by-token/${tokenId}`);
+  const response = await fetch(getApiUrl(`${API_ENDPOINTS.AUTHOR.BY_TOKEN}/${tokenId}`));
   if (!response.ok) {
     throw new Error(`Failed to fetch author for token ${tokenId}`);
   }
@@ -12,7 +11,7 @@ export async function fetchAuthorByTokenId(tokenId: number): Promise<Author> {
 }
 
 export async function fetchAuthorById(authorId: string): Promise<Author> {
-  const response = await fetch(`${API_URL}/author/${authorId}`);
+  const response = await fetch(getApiUrl(`${API_ENDPOINTS.AUTHOR.MAIN}/${authorId}`));
   if (!response.ok) {
     throw new Error(`Failed to fetch author ${authorId}`);
   }
@@ -20,7 +19,7 @@ export async function fetchAuthorById(authorId: string): Promise<Author> {
 }
 
 export async function fetchAuthorSocials(authorId: string): Promise<AuthorSocial[]> {
-  const response = await fetch(`${API_URL}/author/${authorId}/social`);
+  const response = await fetch(getApiUrl(`${API_ENDPOINTS.AUTHOR.MAIN}/${authorId}${API_ENDPOINTS.AUTHOR.SOCIAL}`));
   if (!response.ok) {
     throw new Error(`Failed to fetch socials for author ${authorId}`);
   }
@@ -28,7 +27,7 @@ export async function fetchAuthorSocials(authorId: string): Promise<AuthorSocial
 }
 
 export async function fetchAuthorCollections(authorId: string): Promise<Collection[]> {
-  const response = await fetch(`${API_URL}/author/${authorId}/collections`);
+  const response = await fetch(getApiUrl(`${API_ENDPOINTS.AUTHOR.MAIN}/${authorId}${API_ENDPOINTS.AUTHOR.COLLECTIONS}`));
   if (!response.ok) {
     throw new Error(`Failed to fetch collections for author ${authorId}`);
   }
@@ -36,7 +35,7 @@ export async function fetchAuthorCollections(authorId: string): Promise<Collecti
 }
 
 export async function fetchAuthorCollectionTokens(authorId: string, collectionId: string): Promise<Token[]> {
-  const response = await fetch(`${API_URL}/author/${authorId}/collections/${collectionId}/tokens`);
+  const response = await fetch(getApiUrl(`${API_ENDPOINTS.AUTHOR.MAIN}/${authorId}${API_ENDPOINTS.AUTHOR.COLLECTIONS}/${collectionId}/tokens`));
   if (!response.ok) {
     throw new Error(`Failed to fetch tokens for collection ${collectionId} of author ${authorId}`);
   }

@@ -1,7 +1,7 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useToast } from "@/hooks/use-toast";
+import { API_BASE_URL, API_ENDPOINTS, getApiUrl } from "@/config/api";
 
 interface AuthState {
   user: any | null;
@@ -24,8 +24,9 @@ export const useAuth = create<AuthState>()(
         console.log('Login Request Body:', requestBody);
 
         try {
-          console.log('Sending login request to:', 'https://test.ftsoa.art/login');
-          const response = await fetch('https://test.ftsoa.art/login', {
+          const loginUrl = getApiUrl(API_ENDPOINTS.AUTH.LOGIN);
+          console.log('Sending login request to:', loginUrl);
+          const response = await fetch(loginUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -76,8 +77,9 @@ export const useAuth = create<AuthState>()(
         console.log('Register Request Body:', requestBody);
 
         try {
-          console.log('Sending register request to:', 'https://test.ftsoa.art/register');
-          const response = await fetch('https://test.ftsoa.art/register', {
+          const registerUrl = getApiUrl(API_ENDPOINTS.AUTH.REGISTER);
+          console.log('Sending register request to:', registerUrl);
+          const response = await fetch(registerUrl, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
