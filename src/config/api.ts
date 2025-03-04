@@ -50,6 +50,11 @@ export const API_ENDPOINTS = {
   
   // Verification endpoint
   VERIFY: "/verify",
+  
+  // Collections endpoints
+  COLLECTIONS: {
+    TOP: "/collections/top",
+  },
 };
 
 // Helper function to build full API URLs

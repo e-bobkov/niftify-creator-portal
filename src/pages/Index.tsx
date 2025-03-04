@@ -1,4 +1,3 @@
-
 import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -122,7 +121,8 @@ const Index = () => {
   const navigate = useNavigate();
   const {
     data: topCollection,
-    isLoading
+    isLoading,
+    isError
   } = useQuery<TopCollectionResponse>({
     queryKey: ['top-collection'],
     queryFn: async () => {
@@ -189,19 +189,8 @@ const Index = () => {
             </div>
           </div>
 
-          {isLoading ? <div className="glass-card rounded-lg p-8 animate-pulse">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="aspect-square bg-primary/10 rounded-lg" />
-                <div className="space-y-4">
-                  <div className="h-8 bg-primary/10 rounded w-3/4" />
-                  <div className="h-20 bg-primary/10 rounded" />
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-16 bg-primary/10 rounded" />
-                    <div className="h-16 bg-primary/10 rounded" />
-                  </div>
-                </div>
-              </div>
-            </div> : topCollection ? <div className="space-y-8">
+          {!isError && topCollection && (
+            <div className="space-y-8">
               <h2 className="text-4xl sm:text-6xl md:text-7xl lg:text-[8rem] font-bold text-center leading-none tracking-tighter transition-all duration-300">
                 <span className="text-muted-foreground">#</span>
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/50">
@@ -220,7 +209,8 @@ const Index = () => {
                 </div>
               </div>
               <HotCollection collection={topCollection.collection} soldCount={topCollection.sold_count} />
-            </div> : null}
+            </div>
+          )}
 
           <div className="relative">
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 rounded-3xl" />
