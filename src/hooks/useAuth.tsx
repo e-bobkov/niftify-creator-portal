@@ -75,7 +75,7 @@ export const useAuth = create<AuthState>()(
       },
 
       register: async (email: string, password: string) => {
-        const requestBody = `{"email":"${email}","password":"${password}"}`;
+        const requestBody = JSON.stringify({ email, password });
         console.log('Register Request Body:', requestBody);
 
         try {
@@ -120,7 +120,7 @@ export const useAuth = create<AuthState>()(
         localStorage.removeItem('auth-storage');
       },
       
-      // New method to directly set auth data (used by auto-authentication)
+      // Method to directly set auth data (used by auto-authentication)
       setAuthData: (user: any, token: string) => {
         set({
           user,

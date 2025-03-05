@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +9,8 @@ import { PixelBackground } from "@/components/PixelBackground";
 import Footer from "@/components/Footer";
 import { usePostMessageNavigation } from "@/hooks/usePostMessageNavigation";
 import Index from "./pages/Index";
-import Auth from "./pages/Auth";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import Create from "./pages/Create";
 import NotFound from "./pages/NotFound";
@@ -38,7 +40,7 @@ const AppRoutes = () => {
   
   return (
     <Routes>
-      {/* Маршрут чекаута без навбара и футера */}
+      {/* Checkout route without navbar and footer */}
       <Route path="/checkout/:item" element={
         <div className="min-h-screen flex flex-col">
           <PixelBackground />
@@ -53,7 +55,8 @@ const AppRoutes = () => {
           <Navbar />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/create" element={<Create />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/marketplace/:tokenId" element={<MarketplaceTokenDetails />} />
