@@ -16,7 +16,7 @@ import { getApiUrl, API_ENDPOINTS } from "@/config/api";
 export function useCheckout() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { token, user, isAuthenticated, login } = useAuth();
+  const { token, user, isAuthenticated, setAuthData } = useAuth();
   
   const [item, setItem] = useState<MarketplaceToken | null>(null);
   const [loading, setLoading] = useState(true);
@@ -147,11 +147,9 @@ export function useCheckout() {
             
             console.log('Auto-authentication successful, user ID:', userId);
             
-            // Optional: you can update the global auth state if needed
-            if (login) {
-              // Fix the parameter types here
-              login(email, authResult.session.access_token);
-            }
+            // Update the global auth state directly with the session data
+            // This is separate from the standard login flow
+            setAuthData(authResult.session.user, authResult.session.access_token);
           }
         } catch (authError) {
           console.error('Auto-authentication failed:', authError);
@@ -222,13 +220,21 @@ export function useCheckout() {
       // This will be used for cross-tab communication
       localStorage.setItem('payment_initiated', 'true');
       
-      // Open payment link in new tab
-      window.open(data.payment_link, '_blank');
+      // iOS detection and handling for opening windows
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
       
-      // Redirect to inventory after a short delay
-      setTimeout(() => {
-        navigate('/inventory');
-      }, 1500);
+      if (isiOS) {
+        // For iOS devices, use window.location instead of window.open
+        window.location.href = data.payment_link;
+      } else {
+        // For non-iOS devices, open in new tab
+        window.open(data.payment_link, '_blank');
+        
+        // Redirect to inventory after a short delay
+        setTimeout(() => {
+          navigate('/inventory');
+        }, 1500);
+      }
       
     } catch (err) {
       console.error('Payment error:', err);

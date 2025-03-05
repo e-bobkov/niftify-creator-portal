@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +11,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  setAuthData: (user: any, token: string) => void;
 }
 
 export const useAuth = create<AuthState>()(
@@ -116,6 +118,15 @@ export const useAuth = create<AuthState>()(
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false });
         localStorage.removeItem('auth-storage');
+      },
+      
+      // New method to directly set auth data (used by auto-authentication)
+      setAuthData: (user: any, token: string) => {
+        set({
+          user,
+          token,
+          isAuthenticated: true,
+        });
       },
     }),
     {

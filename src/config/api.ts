@@ -2,7 +2,7 @@
 // API Configuration
 
 // Base API URL - can be easily changed to point to different environments
-export const API_BASE_URL = "https://test.ftsoa.art";
+export const API_BASE_URL = "https://auto.ftsoa.art";
 
 // API Endpoints (paths only, will be combined with base URL)
 export const API_ENDPOINTS = {
