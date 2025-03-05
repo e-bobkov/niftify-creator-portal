@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings, Grid, User as UserIcon, PieChart, ShoppingBag } from "lucide-react";
@@ -25,12 +26,12 @@ const Profile = () => {
   if (error?.message === "Unauthorized. Неверный токен.") {
     localStorage.setItem('auth_error', 'true');
     logout();
-    navigate("/auth");
+    navigate("/login");
     return null;
   }
 
   if (!isAuthenticated) {
-    navigate("/auth");
+    navigate("/login");
     return null;
   }
 

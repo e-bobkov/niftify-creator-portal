@@ -73,6 +73,7 @@ const Register = () => {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [showEmailAlert, setShowEmailAlert] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState({ email: "", password: "", confirmPassword: "" });
 
   // Password validation criteria
@@ -217,7 +218,11 @@ const Register = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Mail 
+                    className={`absolute left-3 top-2.5 h-5 w-5 ${
+                      focusedField === 'email' ? 'text-primary' : 'text-muted-foreground'
+                    } transition-colors duration-200`}
+                  />
                   <Input
                     type="email"
                     placeholder="Email"
@@ -225,6 +230,8 @@ const Register = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 transition-all duration-300 focus:scale-[1.02]"
                     autoComplete="email"
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
                 {validationErrors.email && <FormErrorMessage message={validationErrors.email} />}
@@ -232,7 +239,11 @@ const Register = () => {
 
               <div className="space-y-2">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Lock 
+                    className={`absolute left-3 top-2.5 h-5 w-5 ${
+                      focusedField === 'password' ? 'text-primary' : 'text-muted-foreground'
+                    } transition-colors duration-200`}
+                  />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
@@ -240,16 +251,20 @@ const Register = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 transition-all duration-300 focus:scale-[1.02]"
                     autoComplete="new-password"
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5"
+                    className={`absolute right-3 top-2.5 transition-colors duration-200 ${
+                      focusedField === 'password' ? 'text-primary' : 'text-muted-foreground'
+                    }`}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-muted-foreground" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-5 w-5 text-muted-foreground" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>
@@ -258,7 +273,11 @@ const Register = () => {
 
               <div className="space-y-2">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Lock 
+                    className={`absolute left-3 top-2.5 h-5 w-5 ${
+                      focusedField === 'confirmPassword' ? 'text-primary' : 'text-muted-foreground'
+                    } transition-colors duration-200`}
+                  />
                   <Input
                     type={showConfirmPassword ? "text" : "password"}
                     placeholder="Confirm Password"
@@ -266,16 +285,20 @@ const Register = () => {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     className="pl-10 pr-10 transition-all duration-300 focus:scale-[1.02]"
                     autoComplete="new-password"
+                    onFocus={() => setFocusedField('confirmPassword')}
+                    onBlur={() => setFocusedField(null)}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-2.5"
+                    className={`absolute right-3 top-2.5 transition-colors duration-200 ${
+                      focusedField === 'confirmPassword' ? 'text-primary' : 'text-muted-foreground'
+                    }`}
                   >
                     {showConfirmPassword ? (
-                      <EyeOff className="h-5 w-5 text-muted-foreground" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-5 w-5 text-muted-foreground" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>

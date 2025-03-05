@@ -48,7 +48,7 @@ export const Navbar = memo(() => {
 
   const handleLogout = () => {
     logout();
-    navigate("/auth");
+    navigate("/login");
   };
 
   return (
@@ -84,7 +84,7 @@ export const Navbar = memo(() => {
               </div>
             ) : (
               <NavButton
-                onClick={() => navigate("/auth")}
+                onClick={() => navigate("/login")}
                 icon={User}
               >
                 Sign In
@@ -141,7 +141,7 @@ export const Navbar = memo(() => {
             ) : (
               <NavButton
                 onClick={() => {
-                  navigate("/auth");
+                  navigate("/login");
                   setIsOpen(false);
                 }}
                 icon={User}

@@ -48,13 +48,6 @@ const CubeBackground = () => (
   </div>
 );
 
-// Sample login credentials for demonstration
-const sampleCredentials = [
-  { email: "user@example.com", password: "Password123!" },
-  { email: "demo@example.com", password: "Demo2023$" },
-  { email: "test@example.com", password: "Test1234#" }
-];
-
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,6 +56,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showAuthError, setShowAuthError] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState({ email: "", password: "" });
 
   // Get the "from" location if available or default to homepage
@@ -107,11 +101,6 @@ const Login = () => {
     }
   });
 
-  const handleSampleCredentials = (credentials: { email: string, password: string }) => {
-    setEmail(credentials.email);
-    setPassword(credentials.password);
-  };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setShowAuthError(false);
@@ -151,7 +140,11 @@ const Login = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <div className="relative">
-                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Mail 
+                    className={`absolute left-3 top-2.5 h-5 w-5 ${
+                      focusedField === 'email' ? 'text-primary' : 'text-muted-foreground'
+                    } transition-colors duration-200`}
+                  />
                   <Input
                     type="email"
                     placeholder="Email"
@@ -159,6 +152,8 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10 transition-all duration-300 focus:scale-[1.02]"
                     autoComplete="email"
+                    onFocus={() => setFocusedField('email')}
+                    onBlur={() => setFocusedField(null)}
                   />
                 </div>
                 {validationErrors.email && <FormErrorMessage message={validationErrors.email} />}
@@ -166,7 +161,11 @@ const Login = () => {
 
               <div className="space-y-2">
                 <div className="relative">
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                  <Lock 
+                    className={`absolute left-3 top-2.5 h-5 w-5 ${
+                      focusedField === 'password' ? 'text-primary' : 'text-muted-foreground'
+                    } transition-colors duration-200`} 
+                  />
                   <Input
                     type={showPassword ? "text" : "password"}
                     placeholder="Password"
@@ -174,16 +173,20 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     className="pl-10 pr-10 transition-all duration-300 focus:scale-[1.02]"
                     autoComplete="current-password"
+                    onFocus={() => setFocusedField('password')}
+                    onBlur={() => setFocusedField(null)}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5"
+                    className={`absolute right-3 top-2.5 transition-colors duration-200 ${
+                      focusedField === 'password' ? 'text-primary' : 'text-muted-foreground'
+                    }`}
                   >
                     {showPassword ? (
-                      <EyeOff className="h-5 w-5 text-muted-foreground" />
+                      <EyeOff className="h-5 w-5" />
                     ) : (
-                      <Eye className="h-5 w-5 text-muted-foreground" />
+                      <Eye className="h-5 w-5" />
                     )}
                   </button>
                 </div>
@@ -198,29 +201,6 @@ const Login = () => {
                 {loginMutation.isPending ? "Signing in..." : "Sign In"}
               </Button>
             </form>
-
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-muted"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">or try with sample credentials</span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-2">
-              {sampleCredentials.map((cred, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  type="button"
-                  className="text-xs"
-                  onClick={() => handleSampleCredentials(cred)}
-                >
-                  {cred.email}
-                </Button>
-              ))}
-            </div>
           </CardContent>
           <CardFooter className="flex flex-col space-y-2">
             <div className="text-center w-full">
