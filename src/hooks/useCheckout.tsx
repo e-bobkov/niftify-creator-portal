@@ -12,6 +12,7 @@ import {
   MarketplaceToken
 } from "@/api/marketplace";
 import { getApiUrl, API_ENDPOINTS } from "@/config/api";
+import { isInIframe, sendPaymentLinkToParent } from "@/utils/postMessage";
 
 export function useCheckout() {
   const navigate = useNavigate();
@@ -217,20 +218,42 @@ export function useCheckout() {
       });
       
       // Set a flag in localStorage to indicate payment has started
-      // This will be used for cross-tab communication
       localStorage.setItem('payment_initiated', 'true');
       
-      // iOS detection and handling for opening windows
-      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+      const paymentLink = data.payment_link;
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
       
-      if (isiOS) {
-        // For iOS devices, use window.location instead of window.open
-        window.location.href = data.payment_link;
-      } else {
-        // For non-iOS devices, open in new tab
-        window.open(data.payment_link, '_blank');
+      // Check if we're in an iframe
+      if (isInIframe()) {
+        console.log('Opening payment in iframe context, attempting postMessage...');
         
-        // Redirect to inventory after a short delay
+        // First, try to send the link to the parent window via postMessage
+        const sentToParent = sendPaymentLinkToParent(paymentLink);
+        
+        if (!sentToParent) {
+          // If sending to parent failed, fallback to direct opening
+          if (isIOS) {
+            // For iOS devices, use window.location instead of window.open
+            window.location.href = paymentLink;
+          } else {
+            // For non-iOS devices, open in new tab
+            window.open(paymentLink, '_blank');
+          }
+        }
+      } else {
+        // Regular window (not in iframe) behavior
+        if (isIOS) {
+          // For iOS devices, use window.location instead of window.open
+          window.location.href = paymentLink;
+        } else {
+          // For non-iOS devices, open in new tab
+          window.open(paymentLink, '_blank');
+        }
+      }
+      
+      // Redirect to inventory after a short delay
+      // Only do this if we're not directly navigating away (iOS case)
+      if (!isIOS || isInIframe()) {
         setTimeout(() => {
           navigate('/inventory');
         }, 1500);

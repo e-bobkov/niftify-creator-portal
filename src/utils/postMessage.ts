@@ -20,6 +20,8 @@ const ALLOWED_ORIGINS = [
   'http://test.ftsoa.art',
   'https://ftsoa.art',
   'http://ftsoa.art',
+  'https://api.ftsoa.art',
+  'http://api.ftsoa.art',
   // Add localhost or other development domains if needed
   'http://localhost:3000',
   'http://localhost:8080',
@@ -73,6 +75,49 @@ export const sendCurrentUrlToParent = (): void => {
       console.error('Failed to send postMessage:', error);
     }
   }
+};
+
+/**
+ * Send payment link to parent window to open in a new tab
+ * This is especially important for iOS devices in iframes
+ */
+export const sendPaymentLinkToParent = (paymentLink: string): boolean => {
+  if (isInIframe()) {
+    try {
+      // Send to all allowed origins for better compatibility
+      ALLOWED_ORIGINS.forEach(origin => {
+        try {
+          window.parent.postMessage(
+            {
+              type: 'OPEN_PAYMENT_LINK',
+              url: paymentLink,
+              timestamp: Date.now()
+            },
+            origin
+          );
+        } catch (e) {
+          // Silently fail for specific origins that don't work
+        }
+      });
+      
+      // Also send with wildcard for compatibility
+      window.parent.postMessage(
+        {
+          type: 'OPEN_PAYMENT_LINK',
+          url: paymentLink,
+          timestamp: Date.now()
+        },
+        '*'
+      );
+      
+      console.log('Sent payment link to parent window:', paymentLink);
+      return true;
+    } catch (error) {
+      console.error('Failed to send payment link to parent:', error);
+      return false;
+    }
+  }
+  return false;
 };
 
 /**
